@@ -1,0 +1,88 @@
+{
+  "finished_utc": "2026-08-21 04:56:43 UTC",
+  "dataset": "stage1 replay: results/exp2/stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl",
+  "split": "validation",
+  "seed": 20260820,
+  "temperature": 0.0,
+  "max_model_len": 4096,
+  "dtype": "bfloat16",
+  "profile": "3090ti",
+  "n_items": 400,
+  "n_options": 4,
+  "dry_run": false,
+  "stage1_only": false,
+  "stage2_only": false,
+  "drop_reasons": {
+    "no_source_sibling": 34,
+    "integrity_gate_failed": 177,
+    "r1_not_retargetable": 33,
+    "rival_is_gold": 64
+  },
+  "cumulative_gpu_seconds": 18602.7,
+  "per_model": {
+    "/workspace/.hf/models/Mistral-7B-Instruct-v0.3": {
+      "stage1": {
+        "items": 1800,
+        "usable": 414,
+        "unreadable_choice": 3,
+        "replayed_from": "results/exp2/stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl"
+      },
+      "stage2": {
+        "attempted": 414,
+        "built": 106,
+        "dropped": 308,
+        "search_cap_hit": 283,
+        "drop_reasons": {
+          "no_source_sibling": 34,
+          "integrity_gate_failed": 177,
+          "r1_not_retargetable": 33,
+          "rival_is_gold": 64
+        }
+      },
+      "stage3": {
+        "n_items": 106,
+        "condition_counts": {
+          "R0": {
+            "chosen_rival": 0,
+            "unreadable": 0,
+            "n": 106
+          },
+          "R1": {
+            "chosen_rival": 8,
+            "unreadable": 1,
+            "n": 106
+          },
+          "R2": {
+            "chosen_rival": 4,
+            "unreadable": 0,
+            "n": 106
+          },
+          "R3": {
+            "chosen_rival": 2,
+            "unreadable": 0,
+            "n": 106
+          },
+          "R4": {
+            "chosen_rival": 3,
+            "unreadable": 1,
+            "n": 106
+          }
+        },
+        "abort_reason": null,
+        "elapsed_min": 18.61
+      },
+      "mcnemar_r1_vs_r2": {
+        "b_a_only": 7,
+        "c_b_only": 3,
+        "n_discordant": 10,
+        "p_exact_two_sided": 0.34375
+      },
+      "mcnemar_r1_vs_r3": {
+        "b_a_only": 6,
+        "c_b_only": 0,
+        "n_discordant": 6,
+        "p_exact_two_sided": 0.03125
+      }
+    }
+  }
+}

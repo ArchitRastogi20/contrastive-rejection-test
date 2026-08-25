@@ -1,0 +1,399 @@
+{
+  "rescored_utc": "2026-08-20 15:02:47 UTC",
+  "source_summary": "pilot_summary.json",
+  "note": "same responses, current extractor; no generation was run",
+  "records_whose_rejections_changed": 26,
+  "gate_threshold": 15,
+  "best_usable_count": 12,
+  "per_run_before": {
+    "Qwen/Qwen2.5-7B-Instruct|spontaneous": {
+      "items": 40,
+      "unreadable_choice": 8,
+      "with_rejection": 5,
+      "specific": 5,
+      "specific_and_true": 5,
+      "usable": 4
+    },
+    "Qwen/Qwen2.5-7B-Instruct|elicited": {
+      "items": 40,
+      "unreadable_choice": 0,
+      "with_rejection": 29,
+      "specific": 28,
+      "specific_and_true": 23,
+      "usable": 13
+    },
+    "NousResearch/Meta-Llama-3.1-8B-Instruct|spontaneous": {
+      "items": 40,
+      "unreadable_choice": 0,
+      "with_rejection": 7,
+      "specific": 7,
+      "specific_and_true": 4,
+      "usable": 2
+    },
+    "NousResearch/Meta-Llama-3.1-8B-Instruct|elicited": {
+      "items": 40,
+      "unreadable_choice": 0,
+      "with_rejection": 31,
+      "specific": 29,
+      "specific_and_true": 21,
+      "usable": 12
+    },
+    "mistralai/Mistral-7B-Instruct-v0.3|spontaneous": {
+      "items": 40,
+      "unreadable_choice": 0,
+      "with_rejection": 13,
+      "specific": 12,
+      "specific_and_true": 10,
+      "usable": 8
+    },
+    "mistralai/Mistral-7B-Instruct-v0.3|elicited": {
+      "items": 40,
+      "unreadable_choice": 0,
+      "with_rejection": 27,
+      "specific": 25,
+      "specific_and_true": 16,
+      "usable": 10
+    }
+  },
+  "per_run_after": {
+    "mistralai/Mistral-7B-Instruct-v0.3|elicited": {
+      "items": 40,
+      "with_rejection": 27,
+      "specific": 23,
+      "specific_and_true": 14,
+      "usable": 10
+    },
+    "mistralai/Mistral-7B-Instruct-v0.3|spontaneous": {
+      "items": 40,
+      "with_rejection": 13,
+      "specific": 10,
+      "specific_and_true": 7,
+      "usable": 5
+    },
+    "NousResearch/Meta-Llama-3.1-8B-Instruct|elicited": {
+      "items": 40,
+      "with_rejection": 31,
+      "specific": 23,
+      "specific_and_true": 16,
+      "usable": 10
+    },
+    "NousResearch/Meta-Llama-3.1-8B-Instruct|spontaneous": {
+      "items": 40,
+      "with_rejection": 7,
+      "specific": 6,
+      "specific_and_true": 3,
+      "usable": 2
+    },
+    "Qwen/Qwen2.5-7B-Instruct|elicited": {
+      "items": 40,
+      "with_rejection": 29,
+      "specific": 20,
+      "specific_and_true": 15,
+      "usable": 12
+    },
+    "Qwen/Qwen2.5-7B-Instruct|spontaneous": {
+      "items": 40,
+      "unreadable_choice": 8,
+      "with_rejection": 5,
+      "specific": 3,
+      "specific_and_true": 3,
+      "usable": 3
+    }
+  },
+  "changed_records": [
+    {
+      "item_id": "61a46987092f11ebbdaeac1f6bf848b6",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "arm": "elicited",
+      "before": [
+        "('The Castle of Fu Manchu', 'date', False)"
+      ],
+      "after": [
+        "('The Castle of Fu Manchu', None, False)"
+      ]
+    },
+    {
+      "item_id": "5bec3cd408a711ebbd7fac1f6bf848b6",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "arm": "elicited",
+      "before": [
+        "('Jeannette: The Childhood of Joan of Arc', 'child', False)"
+      ],
+      "after": [
+        "('Jeannette: The Childhood of Joan of Arc', 'director', False)"
+      ]
+    },
+    {
+      "item_id": "7c490349090311ebbdadac1f6bf848b6",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "arm": "elicited",
+      "before": [
+        "('Rakka (film)', 'date', False)"
+      ],
+      "after": [
+        "('Rakka (film)', None, False)"
+      ]
+    },
+    {
+      "item_id": "3f857208086c11ebbd61ac1f6bf848b6",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "arm": "spontaneous",
+      "before": [
+        "(\"Ke\u00efta! l'H\u00e9ritage du griot\", 'director', False)",
+        "('The Raven (2006 film)', 'date', True)"
+      ],
+      "after": [
+        "(\"Ke\u00efta! l'H\u00e9ritage du griot\", 'director', False)",
+        "('The Raven (2006 film)', None, False)"
+      ]
+    },
+    {
+      "item_id": "1a114c5e088f11ebbd71ac1f6bf848b6",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "arm": "spontaneous",
+      "before": [
+        "('Tchan Fou-li', 'date', True)"
+      ],
+      "after": [
+        "('Tchan Fou-li', None, False)"
+      ]
+    },
+    {
+      "item_id": "cf06000e094611ebbdaeac1f6bf848b6",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "arm": "spontaneous",
+      "before": [
+        "('Rain or Shine Elasto Painters all-time roster', 'date', True)"
+      ],
+      "after": [
+        "('Rain or Shine Elasto Painters all-time roster', None, False)"
+      ]
+    },
+    {
+      "item_id": "61a46987092f11ebbdaeac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('The Castle of Fu Manchu', 'date', False)"
+      ],
+      "after": [
+        "('The Castle of Fu Manchu', None, False)"
+      ]
+    },
+    {
+      "item_id": "1d890623088711ebbd6dac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Ben Palmer', 'date', False)"
+      ],
+      "after": [
+        "('Ben Palmer', None, False)"
+      ]
+    },
+    {
+      "item_id": "ae331827088b11ebbd6fac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('The Parts You Lose', 'child', True)"
+      ],
+      "after": [
+        "('The Parts You Lose', 'child', False)"
+      ]
+    },
+    {
+      "item_id": "7c490349090311ebbdadac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('The Wonderful World of Captain Kuhio', 'date', False)"
+      ],
+      "after": [
+        "('The Wonderful World of Captain Kuhio', None, False)"
+      ]
+    },
+    {
+      "item_id": "f7c4fdf2087611ebbd67ac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('When Were You Born', 'date_of_birth', False)"
+      ],
+      "after": [
+        "('When Were You Born', 'director', False)"
+      ]
+    },
+    {
+      "item_id": "a9f9985a09a211ebbdb0ac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "(\"Missin' You (It Will Break My Heart)\", None, False)",
+        "('Break My Heart (Estelle song)', 'child', True)"
+      ],
+      "after": [
+        "(\"Missin' You (It Will Break My Heart)\", None, False)",
+        "('Break My Heart (Estelle song)', None, False)"
+      ]
+    },
+    {
+      "item_id": "d6074911090011ebbdadac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Fort Apache (film)', 'date', False)"
+      ],
+      "after": [
+        "('Fort Apache (film)', None, False)"
+      ]
+    },
+    {
+      "item_id": "f7c153ce092e11ebbdaeac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Eyes of the World', 'date', False)"
+      ],
+      "after": [
+        "('Eyes of the World', None, False)"
+      ]
+    },
+    {
+      "item_id": "0323cdea090d11ebbdadac1f6bf848b6",
+      "model": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+      "arm": "spontaneous",
+      "before": [
+        "('Hawks Nest', 'date', False)"
+      ],
+      "after": [
+        "('Hawks Nest', None, False)"
+      ]
+    },
+    {
+      "item_id": "645c9a5a08c311ebbd8dac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Once a Gentleman', 'date', False)",
+        "('Once a Gentleman', 'director', False)"
+      ],
+      "after": [
+        "('Once a Gentleman', 'director', False)",
+        "('Once a Gentleman', None, False)"
+      ]
+    },
+    {
+      "item_id": "d8c36503097411ebbdb0ac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Moment of Danger', 'date', False)"
+      ],
+      "after": [
+        "('Moment of Danger', None, False)"
+      ]
+    },
+    {
+      "item_id": "7c490349090311ebbdadac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Placer sangriento', 'date', False)"
+      ],
+      "after": [
+        "('Placer sangriento', None, False)"
+      ]
+    },
+    {
+      "item_id": "d6074911090011ebbdadac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Fort Apache (film)', 'date', False)"
+      ],
+      "after": [
+        "('Fort Apache (film)', None, False)"
+      ]
+    },
+    {
+      "item_id": "146b7443086611ebbd5eac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Michael Lennox', 'date', False)",
+        "('Michael Lennox', None, False)"
+      ],
+      "after": [
+        "('Michael Lennox', None, False)"
+      ]
+    },
+    {
+      "item_id": "0323cdea090d11ebbdadac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Hawks Nest', 'date', False)"
+      ],
+      "after": [
+        "('Hawks Nest', None, False)"
+      ]
+    },
+    {
+      "item_id": "f7c153ce092e11ebbdaeac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Eyes of the World', 'date', False)"
+      ],
+      "after": [
+        "('Eyes of the World', None, False)"
+      ]
+    },
+    {
+      "item_id": "0f44750808e411ebbda4ac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Lee Mantle', 'date', False)"
+      ],
+      "after": [
+        "('Lee Mantle', None, False)"
+      ]
+    },
+    {
+      "item_id": "cf06000e094611ebbdaeac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "elicited",
+      "before": [
+        "('Rain or Shine Elasto Painters all-time roster', 'date', True)"
+      ],
+      "after": [
+        "('Rain or Shine Elasto Painters all-time roster', None, False)"
+      ]
+    },
+    {
+      "item_id": "146b7443086611ebbd5eac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "spontaneous",
+      "before": [
+        "('Michael Lennox', 'date', False)"
+      ],
+      "after": [
+        "('Michael Lennox', None, False)"
+      ]
+    },
+    {
+      "item_id": "cf06000e094611ebbdaeac1f6bf848b6",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "arm": "spontaneous",
+      "before": [
+        "('Rain or Shine Elasto Painters all-time roster', 'date', True)"
+      ],
+      "after": [
+        "('Rain or Shine Elasto Painters all-time roster', None, False)"
+      ]
+    }
+  ],
+  "gate_passed": false
+}

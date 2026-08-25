@@ -1,0 +1,67 @@
+2026-08-20 19:22:20 UTC INFO    started 2026-08-20 19:22:19 UTC on Windows-11-10.0.26200-SP0
+2026-08-20 19:22:20 UTC INFO    loading framolfese/2WikiMultihopQA [validation], scanning 16000 records
+2026-08-20 19:22:31 UTC INFO    TensorFlow version 2.19.0 available.
+2026-08-20 19:22:35 UTC WARNING could not load framolfese/2WikiMultihopQA: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:22:35 UTC WARNING could not load framolfese/2WikiMultihopQA at refs/convert/parquet: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:22:35 UTC WARNING Using the latest cached version of the dataset since voidful/2WikiMultihopQA couldn't be found on the Hugging Face Hub (offline mode is enabled).
+2026-08-20 19:22:35 UTC WARNING Found the latest cached dataset configuration 'default' at %USERPROFILE%\.cache\huggingface\datasets\voidful___2_wiki_multihop_qa\default\0.0.0\16852fde9d85cba158cf7e6517e7a3f9415a28c0 (last modified on Sat Aug 15 22:09:14 2026).
+2026-08-20 19:22:59 UTC WARNING loaded voidful/2WikiMultihopQA instead of framolfese/2WikiMultihopQA
+2026-08-20 19:23:00 UTC INFO    built 400 items from 12576 records
+2026-08-20 19:23:08 UTC INFO    longest prompt about 1789 tokens; max_model_len=4096 (floor 2048, cap 8192)
+2026-08-20 19:23:08 UTC INFO    replaying stage 1 from results\exp\stage1___workspace___hf__models__Qwen2_5-7B-Instruct.jsonl for model(s) ['/workspace/.hf/models/Qwen2.5-7B-Instruct']
+2026-08-20 19:23:08 UTC WARNING could not load framolfese/2WikiMultihopQA: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:23:08 UTC WARNING could not load framolfese/2WikiMultihopQA at refs/convert/parquet: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:23:08 UTC WARNING Using the latest cached version of the dataset since voidful/2WikiMultihopQA couldn't be found on the Hugging Face Hub (offline mode is enabled).
+2026-08-20 19:23:08 UTC WARNING Found the latest cached dataset configuration 'default' at %USERPROFILE%\.cache\huggingface\datasets\voidful___2_wiki_multihop_qa\default\0.0.0\16852fde9d85cba158cf7e6517e7a3f9415a28c0 (last modified on Sat Aug 15 22:09:14 2026).
+2026-08-20 19:23:21 UTC WARNING loaded voidful/2WikiMultihopQA instead of framolfese/2WikiMultihopQA
+2026-08-20 19:23:21 UTC INFO    /workspace/.hf/models/Qwen2.5-7B-Instruct stage1: {"items": 400, "usable": 88, "unreadable_choice": 12, "replayed_from": "results\\exp\\stage1___workspace___hf__models__Qwen2_5-7B-Instruct.jsonl"}
+2026-08-20 19:23:34 UTC INFO    /workspace/.hf/models/Qwen2.5-7B-Instruct stage2: {"attempted": 88, "built": 22, "dropped": 66, "search_cap_hit": 53}
+2026-08-20 19:23:34 UTC INFO    /workspace/.hf/models/Qwen2.5-7B-Instruct: --stage2-only, stopping after stage 2 (22 item(s) kept, no backend loaded)
+2026-08-20 19:23:34 UTC INFO    wrote results\exp_rebuild_r4\experiment_summary.json
+2026-08-20 19:23:39 UTC INFO    started 2026-08-20 19:23:37 UTC on Windows-11-10.0.26200-SP0
+2026-08-20 19:23:39 UTC INFO    loading framolfese/2WikiMultihopQA [validation], scanning 16000 records
+2026-08-20 19:23:52 UTC INFO    TensorFlow version 2.19.0 available.
+2026-08-20 19:23:55 UTC WARNING could not load framolfese/2WikiMultihopQA: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:23:55 UTC WARNING could not load framolfese/2WikiMultihopQA at refs/convert/parquet: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:23:55 UTC WARNING Using the latest cached version of the dataset since voidful/2WikiMultihopQA couldn't be found on the Hugging Face Hub (offline mode is enabled).
+2026-08-20 19:23:55 UTC WARNING Found the latest cached dataset configuration 'default' at %USERPROFILE%\.cache\huggingface\datasets\voidful___2_wiki_multihop_qa\default\0.0.0\16852fde9d85cba158cf7e6517e7a3f9415a28c0 (last modified on Sat Aug 15 22:09:14 2026).
+2026-08-20 19:24:44 UTC INFO    started 2026-08-20 19:24:43 UTC on Windows-11-10.0.26200-SP0
+2026-08-20 19:24:44 UTC INFO    loading framolfese/2WikiMultihopQA [validation], scanning 16000 records
+2026-08-20 19:24:55 UTC INFO    TensorFlow version 2.19.0 available.
+2026-08-20 19:24:59 UTC WARNING could not load framolfese/2WikiMultihopQA: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:24:59 UTC WARNING could not load framolfese/2WikiMultihopQA at refs/convert/parquet: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:24:59 UTC WARNING Using the latest cached version of the dataset since voidful/2WikiMultihopQA couldn't be found on the Hugging Face Hub (offline mode is enabled).
+2026-08-20 19:24:59 UTC WARNING Found the latest cached dataset configuration 'default' at %USERPROFILE%\.cache\huggingface\datasets\voidful___2_wiki_multihop_qa\default\0.0.0\16852fde9d85cba158cf7e6517e7a3f9415a28c0 (last modified on Sat Aug 15 22:09:14 2026).
+2026-08-20 19:25:22 UTC WARNING loaded voidful/2WikiMultihopQA instead of framolfese/2WikiMultihopQA
+2026-08-20 19:25:22 UTC INFO    built 400 items from 12576 records
+2026-08-20 19:25:31 UTC INFO    longest prompt about 1789 tokens; max_model_len=4096 (floor 2048, cap 8192)
+2026-08-20 19:25:31 UTC INFO    replaying stage 1 from results\exp\stage1___workspace___hf__models__Llama-3_1-8B-Instruct.jsonl for model(s) ['/workspace/.hf/models/Llama-3.1-8B-Instruct']
+2026-08-20 19:25:31 UTC WARNING could not load framolfese/2WikiMultihopQA: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:25:31 UTC WARNING could not load framolfese/2WikiMultihopQA at refs/convert/parquet: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:25:31 UTC WARNING Using the latest cached version of the dataset since voidful/2WikiMultihopQA couldn't be found on the Hugging Face Hub (offline mode is enabled).
+2026-08-20 19:25:31 UTC WARNING Found the latest cached dataset configuration 'default' at %USERPROFILE%\.cache\huggingface\datasets\voidful___2_wiki_multihop_qa\default\0.0.0\16852fde9d85cba158cf7e6517e7a3f9415a28c0 (last modified on Sat Aug 15 22:09:14 2026).
+2026-08-20 19:25:44 UTC WARNING loaded voidful/2WikiMultihopQA instead of framolfese/2WikiMultihopQA
+2026-08-20 19:25:45 UTC INFO    /workspace/.hf/models/Llama-3.1-8B-Instruct stage1: {"items": 400, "usable": 101, "unreadable_choice": 0, "replayed_from": "results\\exp\\stage1___workspace___hf__models__Llama-3_1-8B-Instruct.jsonl"}
+2026-08-20 19:25:57 UTC INFO    /workspace/.hf/models/Llama-3.1-8B-Instruct stage2: {"attempted": 101, "built": 17, "dropped": 84, "search_cap_hit": 56}
+2026-08-20 19:25:57 UTC INFO    /workspace/.hf/models/Llama-3.1-8B-Instruct: --stage2-only, stopping after stage 2 (17 item(s) kept, no backend loaded)
+2026-08-20 19:25:57 UTC INFO    wrote results\exp_rebuild_r4\experiment_summary.json
+2026-08-20 19:26:17 UTC INFO    started 2026-08-20 19:26:16 UTC on Windows-11-10.0.26200-SP0
+2026-08-20 19:26:17 UTC INFO    loading framolfese/2WikiMultihopQA [validation], scanning 16000 records
+2026-08-20 19:26:29 UTC INFO    TensorFlow version 2.19.0 available.
+2026-08-20 19:26:33 UTC WARNING could not load framolfese/2WikiMultihopQA: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:26:33 UTC WARNING could not load framolfese/2WikiMultihopQA at refs/convert/parquet: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:26:33 UTC WARNING Using the latest cached version of the dataset since voidful/2WikiMultihopQA couldn't be found on the Hugging Face Hub (offline mode is enabled).
+2026-08-20 19:26:33 UTC WARNING Found the latest cached dataset configuration 'default' at %USERPROFILE%\.cache\huggingface\datasets\voidful___2_wiki_multihop_qa\default\0.0.0\16852fde9d85cba158cf7e6517e7a3f9415a28c0 (last modified on Sat Aug 15 22:09:14 2026).
+2026-08-20 19:26:56 UTC WARNING loaded voidful/2WikiMultihopQA instead of framolfese/2WikiMultihopQA
+2026-08-20 19:26:56 UTC INFO    built 400 items from 12576 records
+2026-08-20 19:27:03 UTC INFO    longest prompt about 1789 tokens; max_model_len=4096 (floor 2048, cap 8192)
+2026-08-20 19:27:03 UTC INFO    replaying stage 1 from results\exp\stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl for model(s) ['/workspace/.hf/models/Mistral-7B-Instruct-v0.3']
+2026-08-20 19:27:03 UTC WARNING could not load framolfese/2WikiMultihopQA: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:27:03 UTC WARNING could not load framolfese/2WikiMultihopQA at refs/convert/parquet: Couldn't reach 'framolfese/2WikiMultihopQA' on the Hub (OfflineModeIsEnabled)
+2026-08-20 19:27:03 UTC WARNING Using the latest cached version of the dataset since voidful/2WikiMultihopQA couldn't be found on the Hugging Face Hub (offline mode is enabled).
+2026-08-20 19:27:03 UTC WARNING Found the latest cached dataset configuration 'default' at %USERPROFILE%\.cache\huggingface\datasets\voidful___2_wiki_multihop_qa\default\0.0.0\16852fde9d85cba158cf7e6517e7a3f9415a28c0 (last modified on Sat Aug 15 22:09:14 2026).
+2026-08-20 19:27:14 UTC WARNING loaded voidful/2WikiMultihopQA instead of framolfese/2WikiMultihopQA
+2026-08-20 19:27:15 UTC INFO    /workspace/.hf/models/Mistral-7B-Instruct-v0.3 stage1: {"items": 400, "usable": 82, "unreadable_choice": 0, "replayed_from": "results\\exp\\stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl"}
+2026-08-20 19:27:28 UTC INFO    /workspace/.hf/models/Mistral-7B-Instruct-v0.3 stage2: {"attempted": 82, "built": 17, "dropped": 65, "search_cap_hit": 53}
+2026-08-20 19:27:28 UTC INFO    /workspace/.hf/models/Mistral-7B-Instruct-v0.3: --stage2-only, stopping after stage 2 (17 item(s) kept, no backend loaded)
+2026-08-20 19:27:28 UTC INFO    wrote results\exp_rebuild_r4\experiment_summary.json

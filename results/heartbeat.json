@@ -1,0 +1,12 @@
+{
+  "label": "Mistral-7B-Instruct-v0.3/elicited",
+  "done": 40,
+  "total": 40,
+  "elapsed_min": 1.4,
+  "seconds_per_item": 2.11,
+  "vram_peak_pct": 87.2,
+  "vram_strikes": 0,
+  "eta_utc": "2026-08-20 14:48:30 UTC (in 0.0 min)",
+  "updated_utc": "2026-08-20 14:48:30 UTC",
+  "abort_reason": null
+}

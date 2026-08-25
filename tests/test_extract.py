@@ -1,0 +1,189 @@
+"""Tests for pilot.extract: sentence splitting, rejection/attribute extraction, and choice parsing."""
+
+from pilot.data import Entity, Item
+from pilot.extract import (
+    analyse,
+    complaint_is_true,
+    find_attribute,
+    find_negation,
+    is_usable,
+    parse_choice,
+    source_of_repair,
+    split_sentences,
+)
+
+
+def make_item() -> Item:
+    return Item(
+        item_id="t1",
+        question="Who directed the film Blue River?",
+        answer="Anna Kowalska",
+        gold_title="Anna Kowalska",
+        options=[
+            Entity("Anna Kowalska", ["She was born in 1970.", "She directed Blue River."]),
+            Entity("Bruno Kowalski", ["Bruno Kowalski is a cinematographer."]),
+            Entity("Clara Novak", ["Her mother was Maria Novak."]),
+        ],
+    )
+
+
+# ---------------------------------------------------------------- sentence splitting
+
+
+def test_split_does_not_break_on_abbreviations():
+    text = "The answer is Dr. Anna Kowalska. She directed it."
+    assert split_sentences(text) == [
+        "The answer is Dr. Anna Kowalska.",
+        "She directed it.",
+    ]
+
+
+def test_split_handles_initials_and_newlines():
+    out = split_sentences("Answer: A) J. R. Smith.\nHe directed it.")
+    assert out == ["Answer: A) J. R. Smith.", "He directed it."]
+
+
+# --------------------------------------------------------------------- reading a choice
+
+
+def test_choice_from_named_title():
+    assert parse_choice("Answer: A) Anna Kowalska.\nShe directed it.", make_item()) == "A"
+
+
+def test_choice_from_bare_letter():
+    assert parse_choice("The answer is B.\nIt matches.", make_item()) == "B"
+
+
+def test_choice_from_option_phrasing():
+    assert parse_choice("Option C is correct.", make_item()) == "C"
+
+
+def test_choice_unreadable_is_none():
+    assert parse_choice("It is hard to say from these profiles.", make_item()) is None
+
+
+# ------------------------------------------------------------------------- attributes
+
+
+def test_attribute_and_negation_cues():
+    assert find_attribute("his profile never gives a date of birth")[0] == "date_of_birth"
+    assert find_attribute("no mention of his mother")[0] == "mother"
+    assert find_attribute("this one is simply less relevant")[0] is None
+    assert find_negation("his profile never gives a date") == "never"
+    assert find_negation("this profile matches the question") is None
+
+
+def test_two_letter_cue_needs_a_boundary():
+    # "b." must not fire inside an ordinary word such as "Bob." or "club."
+    assert find_attribute("he was a member of the club.")[0] is None
+
+
+# ------------------------------------------------------------------- whole-response read
+
+
+def test_specific_rejection_is_found_and_scored():
+    item = make_item()
+    text = (
+        "Answer: A) Anna Kowalska.\n"
+        "Anna Kowalska directed the film. "
+        "It is not Bruno Kowalski, because his profile never gives a date of birth."
+    )
+    a = analyse(text, item)
+    assert a.choice == "A"
+    assert len(a.rejections) == 1
+
+    rej = a.rejections[0]
+    assert rej.title == "Bruno Kowalski"
+    assert rej.attribute == "date_of_birth"
+    # the complaint is true: Bruno's profile has no birth information
+    assert complaint_is_true(item, rej) is True
+    # and it is repairable from released text: Anna's profile carries a birth date
+    assert source_of_repair(item, rej).title == "Anna Kowalska"
+    assert is_usable(item, rej) is True
+
+
+def test_vague_rejection_is_not_usable():
+    item = make_item()
+    text = "Answer: A) Anna Kowalska.\nBruno Kowalski is not relevant here."
+    rej = analyse(text, item).rejections[0]
+    assert rej.attribute is None
+    assert rej.is_specific is False
+    assert is_usable(item, rej) is False
+
+
+def test_rejection_of_the_chosen_option_is_not_counted():
+    item = make_item()
+    text = "Answer: B) Bruno Kowalski.\nBruno Kowalski is not a director, but he is the closest."
+    assert analyse(text, item).rejections == []
+
+
+def test_false_complaint_is_flagged():
+    item = make_item()
+    # Clara's profile does mention a mother, so this complaint is wrong
+    text = "Answer: A) Anna Kowalska.\nClara Novak's profile never names her mother."
+    rej = analyse(text, item).rejections[0]
+    assert rej.attribute == "mother"
+    assert complaint_is_true(item, rej) is False
+    assert is_usable(item, rej) is False
+
+
+def test_surname_alone_identifies_an_option():
+    item = make_item()
+    text = "Answer: A) Anna Kowalska.\nNovak lacks any mention of directing."
+    rej = analyse(text, item).rejections[0]
+    assert rej.title == "Clara Novak"
+    assert rej.matched_by == "token"
+
+
+# ------------------------------------- the three defects the first pilot run exposed
+
+
+def test_a_bare_date_complaint_is_not_repairable():
+    """"No date is given" names nothing anyone can supply -- which date?
+
+    This bucket existed in the first run, fired on 23 rejections, and was wrong at both ends:
+    it counted as specific, and its presence check looked for the literal word "date" in the
+    profile, which a Wikipedia sentence never contains even when it states one.
+    """
+    assert find_attribute("no date is given for this candidate")[0] is None
+    assert find_attribute("the year is not stated anywhere")[0] is None
+    # naming *which* date still works
+    assert find_attribute("no date of birth is given")[0] == "date_of_birth"
+
+
+def test_born_without_a_date_is_not_a_date_of_birth():
+    from pilot.extract import attribute_in_profile
+
+    assert attribute_in_profile("She was born in 1970 in Krakow.", "date_of_birth") is True
+    assert attribute_in_profile("She was born in Krakow.", "date_of_birth") is False
+    assert attribute_in_profile("He died in March 1994.", "date_of_death") is True
+    assert attribute_in_profile("He died in Milan.", "date_of_death") is False
+    # a non-dated attribute is unaffected by the date requirement
+    assert attribute_in_profile("Her mother was Maria.", "mother") is True
+
+
+def test_a_candidate_name_cannot_supply_the_attribute_cue():
+    from pilot.extract import strip_titles
+
+    titles = ["Robert Bresson", "When Were You Born", "Charles Saunders (director)"]
+    # "Bres-son" supplied "son", "When Were You Born" supplied "born", and the parenthetical
+    # supplied "director" in the first run: ten rejections were misclassified
+    assert find_attribute("Robert Bresson is not relevant")[0] == "child"
+    assert find_attribute(strip_titles("Robert Bresson is not relevant", titles))[0] is None
+    assert find_attribute(strip_titles("When Were You Born lacks detail", titles))[0] is None
+
+
+def test_sources_contain_no_stray_control_characters():
+    """A patch once wrote a literal backspace where the regex needed a word boundary.
+
+    The pattern still compiled, matched nothing, and silently zeroed a whole measurement. Cheap
+    to check for, invisible to read for.
+    """
+    import glob
+
+    offenders = []
+    for path in glob.glob("pilot/*.py") + glob.glob("tests/*.py"):
+        for i, byte in enumerate(open(path, "rb").read()):
+            if byte < 9 or byte in (11, 12) or 14 <= byte < 32:
+                offenders.append((path, i, byte))
+    assert offenders == []

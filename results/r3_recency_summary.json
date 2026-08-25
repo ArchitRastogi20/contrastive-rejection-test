@@ -1,0 +1,146 @@
+{
+  "consistency_warnings": [],
+  "exp_dir": "results\\exp",
+  "generated_utc": "2026-08-20 18:53:33 UTC",
+  "items_considered": 54,
+  "items_derived": 54,
+  "items_unavailable": [],
+  "per_model": {
+    "Llama-3.1-8B-Instruct": {
+      "R0": {
+        "chose_edited_option": 0,
+        "chose_other": 18,
+        "n": 18,
+        "rate": 0.0,
+        "target_role": "r3_edited_option",
+        "unreadable": 0
+      },
+      "R1": {
+        "chose_edited_option": 3,
+        "chose_other": 15,
+        "n": 18,
+        "rate": 0.16666666666666666,
+        "target_role": "rival_option",
+        "unreadable": 0
+      },
+      "R2": {
+        "chose_edited_option": 2,
+        "chose_other": 16,
+        "n": 18,
+        "rate": 0.1111111111111111,
+        "target_role": "rival_option",
+        "unreadable": 0
+      },
+      "R3": {
+        "chose_edited_option": 3,
+        "chose_other": 15,
+        "n": 18,
+        "rate": 0.16666666666666666,
+        "target_role": "r3_edited_option",
+        "unreadable": 0
+      }
+    },
+    "Mistral-7B-Instruct-v0.3": {
+      "R0": {
+        "chose_edited_option": 0,
+        "chose_other": 17,
+        "n": 17,
+        "rate": 0.0,
+        "target_role": "r3_edited_option",
+        "unreadable": 0
+      },
+      "R1": {
+        "chose_edited_option": 0,
+        "chose_other": 17,
+        "n": 17,
+        "rate": 0.0,
+        "target_role": "rival_option",
+        "unreadable": 0
+      },
+      "R2": {
+        "chose_edited_option": 0,
+        "chose_other": 17,
+        "n": 17,
+        "rate": 0.0,
+        "target_role": "rival_option",
+        "unreadable": 0
+      },
+      "R3": {
+        "chose_edited_option": 1,
+        "chose_other": 16,
+        "n": 17,
+        "rate": 0.058823529411764705,
+        "target_role": "r3_edited_option",
+        "unreadable": 0
+      }
+    },
+    "Qwen2.5-7B-Instruct": {
+      "R0": {
+        "chose_edited_option": 0,
+        "chose_other": 19,
+        "n": 19,
+        "rate": 0.0,
+        "target_role": "r3_edited_option",
+        "unreadable": 0
+      },
+      "R1": {
+        "chose_edited_option": 4,
+        "chose_other": 15,
+        "n": 19,
+        "rate": 0.21052631578947367,
+        "target_role": "rival_option",
+        "unreadable": 0
+      },
+      "R2": {
+        "chose_edited_option": 1,
+        "chose_other": 17,
+        "n": 19,
+        "rate": 0.05263157894736842,
+        "target_role": "rival_option",
+        "unreadable": 1
+      },
+      "R3": {
+        "chose_edited_option": 5,
+        "chose_other": 14,
+        "n": 19,
+        "rate": 0.2631578947368421,
+        "target_role": "r3_edited_option",
+        "unreadable": 0
+      }
+    }
+  },
+  "pooled": {
+    "R0": {
+      "chose_edited_option": 0,
+      "chose_other": 54,
+      "n": 54,
+      "rate": 0.0,
+      "target_role": "r3_edited_option",
+      "unreadable": 0
+    },
+    "R1": {
+      "chose_edited_option": 7,
+      "chose_other": 47,
+      "n": 54,
+      "rate": 0.12962962962962962,
+      "target_role": "rival_option",
+      "unreadable": 0
+    },
+    "R2": {
+      "chose_edited_option": 3,
+      "chose_other": 50,
+      "n": 54,
+      "rate": 0.05555555555555555,
+      "target_role": "rival_option",
+      "unreadable": 1
+    },
+    "R3": {
+      "chose_edited_option": 9,
+      "chose_other": 45,
+      "n": 54,
+      "rate": 0.16666666666666666,
+      "target_role": "r3_edited_option",
+      "unreadable": 0
+    }
+  }
+}

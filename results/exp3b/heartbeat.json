@@ -1,0 +1,12 @@
+{
+  "label": "__workspace___hf__models__DeepSeek-R1-Distill-Qwen-14B-AWQ/stage3",
+  "done": 850,
+  "total": 850,
+  "elapsed_min": 38.28,
+  "seconds_per_item": 2.7,
+  "vram_peak_pct": 81.4,
+  "vram_strikes": 0,
+  "eta_utc": "2026-08-22 00:11:54 UTC (in 0.0 min)",
+  "updated_utc": "2026-08-22 00:11:54 UTC",
+  "abort_reason": null
+}

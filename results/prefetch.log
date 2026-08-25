@@ -1,0 +1,5 @@
+2026-08-20 14:16:04 UTC prefetch starting
+2026-08-20 14:22:04 UTC OK       Qwen/Qwen2.5-7B-Instruct
+2026-08-20 14:22:11 UTC OK       mistralai/Mistral-7B-Instruct-v0.3
+2026-08-20 14:23:44 UTC OK       meta-llama/Llama-3.1-8B-Instruct
+2026-08-20 14:23:44 UTC prefetch finished, 0 of 3 targets unavailable

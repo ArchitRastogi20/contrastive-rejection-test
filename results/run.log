@@ -1,0 +1,130 @@
+2026-08-20 14:25:25 UTC INFO    started 2026-08-20 14:25:25 UTC on Linux-6.8.0-57-generic-x86_64-with-glibc2.35
+2026-08-20 14:25:25 UTC INFO    loading framolfese/2WikiMultihopQA [validation], scanning 3 records
+2026-08-20 14:25:52 UTC INFO    started 2026-08-20 14:25:52 UTC on Linux-6.8.0-57-generic-x86_64-with-glibc2.35
+2026-08-20 14:25:52 UTC INFO    loading framolfese/2WikiMultihopQA [validation], scanning 1600 records
+2026-08-20 14:26:09 UTC INFO    built 40 items from 1600 records
+2026-08-20 14:26:09 UTC INFO    longest prompt about 1674 tokens; max_model_len=4096 (floor 2048, cap 8192)
+2026-08-20 14:26:09 UTC INFO    detected 23.5 GiB of VRAM, capability (8, 6) -> the 3090ti roster
+2026-08-20 14:28:33 UTC INFO    Qwen/Qwen2.5-7B-Instruct loaded: bfloat16, max_model_len=4096, mem target 0.85, eager=False, VRAM now 79.9%
+2026-08-20 14:28:33 UTC INFO    Qwen/Qwen2.5-7B-Instruct ready via the vllm backend
+2026-08-20 14:28:41 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 5/40 done, 1.7s/item, elapsed 0.1 min, VRAM peak 80.7%, ETA 2026-08-20 14:29:41 UTC (in 1.0 min)
+2026-08-20 14:28:49 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 10/40 done, 1.6s/item, elapsed 0.3 min, VRAM peak 81.1%, ETA 2026-08-20 14:29:37 UTC (in 0.8 min)
+2026-08-20 14:28:56 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 15/40 done, 1.6s/item, elapsed 0.4 min, VRAM peak 81.1%, ETA 2026-08-20 14:29:36 UTC (in 0.7 min)
+2026-08-20 14:29:04 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 20/40 done, 1.5s/item, elapsed 0.5 min, VRAM peak 81.1%, ETA 2026-08-20 14:29:35 UTC (in 0.5 min)
+2026-08-20 14:29:11 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 25/40 done, 1.6s/item, elapsed 0.6 min, VRAM peak 81.1%, ETA 2026-08-20 14:29:35 UTC (in 0.4 min)
+2026-08-20 14:29:18 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 30/40 done, 1.5s/item, elapsed 0.8 min, VRAM peak 81.1%, ETA 2026-08-20 14:29:33 UTC (in 0.3 min)
+2026-08-20 14:29:26 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 35/40 done, 1.5s/item, elapsed 0.9 min, VRAM peak 81.1%, ETA 2026-08-20 14:29:33 UTC (in 0.1 min)
+2026-08-20 14:29:32 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 40/40 done, 1.5s/item, elapsed 1.0 min, VRAM peak 81.1%, ETA 2026-08-20 14:29:32 UTC (in 0.0 min)
+2026-08-20 14:29:32 UTC INFO    GPU ledger: +59.5s for Qwen2.5-7B-Instruct/spontaneous, cumulative 59.5s (0.02 h, 0.1% of the 20 h allowance)
+2026-08-20 14:29:32 UTC INFO    Qwen/Qwen2.5-7B-Instruct / spontaneous: {"items": 40, "unreadable_choice": 8, "with_rejection": 5, "specific": 5, "specific_and_true": 5, "usable": 4, "abort_reason": null, "elapsed_min": 0.99, "seconds_per_item": 1.49, "vram_peak_pct": 81.1, "requested_model": "Qwen/Qwen2.5-7B-Instruct"}
+2026-08-20 14:29:44 UTC INFO    Qwen2.5-7B-Instruct/elicited: 5/40 done, 2.4s/item, elapsed 0.2 min, VRAM peak 81.1%, ETA 2026-08-20 14:31:07 UTC (in 1.4 min)
+2026-08-20 14:29:55 UTC INFO    Qwen2.5-7B-Instruct/elicited: 10/40 done, 2.3s/item, elapsed 0.4 min, VRAM peak 81.5%, ETA 2026-08-20 14:31:04 UTC (in 1.2 min)
+2026-08-20 14:30:08 UTC INFO    Qwen2.5-7B-Instruct/elicited: 15/40 done, 2.4s/item, elapsed 0.6 min, VRAM peak 81.5%, ETA 2026-08-20 14:31:07 UTC (in 1.0 min)
+2026-08-20 14:30:19 UTC INFO    Qwen2.5-7B-Instruct/elicited: 20/40 done, 2.4s/item, elapsed 0.8 min, VRAM peak 81.5%, ETA 2026-08-20 14:31:06 UTC (in 0.8 min)
+2026-08-20 14:30:30 UTC INFO    Qwen2.5-7B-Instruct/elicited: 25/40 done, 2.3s/item, elapsed 1.0 min, VRAM peak 81.5%, ETA 2026-08-20 14:31:05 UTC (in 0.6 min)
+2026-08-20 14:30:42 UTC INFO    Qwen2.5-7B-Instruct/elicited: 30/40 done, 2.3s/item, elapsed 1.2 min, VRAM peak 81.5%, ETA 2026-08-20 14:31:06 UTC (in 0.4 min)
+2026-08-20 14:30:54 UTC INFO    Qwen2.5-7B-Instruct/elicited: 35/40 done, 2.3s/item, elapsed 1.4 min, VRAM peak 81.5%, ETA 2026-08-20 14:31:05 UTC (in 0.2 min)
+2026-08-20 14:31:05 UTC INFO    Qwen2.5-7B-Instruct/elicited: 40/40 done, 2.3s/item, elapsed 1.5 min, VRAM peak 81.5%, ETA 2026-08-20 14:31:05 UTC (in 0.0 min)
+2026-08-20 14:31:05 UTC INFO    GPU ledger: +92.4s for Qwen2.5-7B-Instruct/elicited, cumulative 151.9s (0.04 h, 0.2% of the 20 h allowance)
+2026-08-20 14:31:05 UTC INFO    Qwen/Qwen2.5-7B-Instruct / elicited: {"items": 40, "unreadable_choice": 0, "with_rejection": 29, "specific": 28, "specific_and_true": 23, "usable": 13, "abort_reason": null, "elapsed_min": 1.54, "seconds_per_item": 2.31, "vram_peak_pct": 81.5, "requested_model": "Qwen/Qwen2.5-7B-Instruct"}
+2026-08-20 14:31:05 UTC WARNING meta-llama/Llama-3.1-8B-Instruct under vllm: could not load meta-llama/Llama-3.1-8B-Instruct under vllm: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a870fa9-2702ceff05405f482dfa91fa;6cea3d81-e19b-42a9-8a4e-5d2e581139c7)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-08-20 14:31:05 UTC WARNING meta-llama/Llama-3.1-8B-Instruct under transformers: could not load meta-llama/Llama-3.1-8B-Instruct under transformers: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a870fa9-76b4c8a92097f04c395abda6;97f1e268-8eae-4efc-bef7-8d28e60c7541)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-08-20 14:31:05 UTC WARNING falling back to the ungated mirror NousResearch/Meta-Llama-3.1-8B-Instruct for meta-llama/Llama-3.1-8B-Instruct
+2026-08-20 14:31:10 UTC WARNING NousResearch/Meta-Llama-3.1-8B-Instruct under vllm: could not load NousResearch/Meta-Llama-3.1-8B-Instruct under vllm: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 0 has a total capacity of 23.55 GiB of which 9.12 MiB is free. Including non-PyTorch memory, this process has 23.52 GiB memory in use. Of the allocated memory 22.99 GiB is allocated by PyTorch, with 42.53 MiB allocated in private pools (e.g., CUDA Graphs), and 76.71 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+2026-08-20 14:32:33 UTC INFO    started 2026-08-20 14:32:33 UTC on Linux-6.8.0-57-generic-x86_64-with-glibc2.35
+2026-08-20 14:32:33 UTC INFO    loading framolfese/2WikiMultihopQA [validation], scanning 1600 records
+2026-08-20 14:32:53 UTC INFO    built 40 items from 1600 records
+2026-08-20 14:32:53 UTC INFO    longest prompt about 1674 tokens; max_model_len=4096 (floor 2048, cap 8192)
+2026-08-20 14:32:53 UTC INFO    detected 23.5 GiB of VRAM, capability (8, 6) -> the 3090ti roster
+2026-08-20 14:33:20 UTC INFO    Qwen/Qwen2.5-7B-Instruct loaded: bfloat16, max_model_len=4096, mem target 0.85, eager=False, VRAM now 79.9%
+2026-08-20 14:33:20 UTC INFO    Qwen/Qwen2.5-7B-Instruct ready via the vllm backend
+2026-08-20 14:33:28 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 5/40 done, 1.7s/item, elapsed 0.1 min, VRAM peak 80.7%, ETA 2026-08-20 14:34:28 UTC (in 1.0 min)
+2026-08-20 14:33:36 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 10/40 done, 1.6s/item, elapsed 0.3 min, VRAM peak 81.1%, ETA 2026-08-20 14:34:24 UTC (in 0.8 min)
+2026-08-20 14:33:44 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 15/40 done, 1.6s/item, elapsed 0.4 min, VRAM peak 81.1%, ETA 2026-08-20 14:34:23 UTC (in 0.7 min)
+2026-08-20 14:33:51 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 20/40 done, 1.6s/item, elapsed 0.5 min, VRAM peak 81.1%, ETA 2026-08-20 14:34:22 UTC (in 0.5 min)
+2026-08-20 14:33:59 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 25/40 done, 1.6s/item, elapsed 0.6 min, VRAM peak 81.1%, ETA 2026-08-20 14:34:22 UTC (in 0.4 min)
+2026-08-20 14:34:05 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 30/40 done, 1.5s/item, elapsed 0.8 min, VRAM peak 81.1%, ETA 2026-08-20 14:34:20 UTC (in 0.3 min)
+2026-08-20 14:34:13 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 35/40 done, 1.5s/item, elapsed 0.9 min, VRAM peak 81.1%, ETA 2026-08-20 14:34:20 UTC (in 0.1 min)
+2026-08-20 14:34:19 UTC INFO    Qwen2.5-7B-Instruct/spontaneous: 40/40 done, 1.5s/item, elapsed 1.0 min, VRAM peak 81.1%, ETA 2026-08-20 14:34:19 UTC (in 0.0 min)
+2026-08-20 14:34:19 UTC INFO    GPU ledger: +59.7s for Qwen2.5-7B-Instruct/spontaneous, cumulative 59.7s (0.02 h, 0.1% of the 20 h allowance)
+2026-08-20 14:34:19 UTC INFO    Qwen/Qwen2.5-7B-Instruct / spontaneous: {"items": 40, "unreadable_choice": 8, "with_rejection": 5, "specific": 5, "specific_and_true": 5, "usable": 4, "abort_reason": null, "elapsed_min": 1.0, "seconds_per_item": 1.49, "vram_peak_pct": 81.1, "requested_model": "Qwen/Qwen2.5-7B-Instruct"}
+2026-08-20 14:34:31 UTC INFO    Qwen2.5-7B-Instruct/elicited: 5/40 done, 2.4s/item, elapsed 0.2 min, VRAM peak 81.1%, ETA 2026-08-20 14:35:55 UTC (in 1.4 min)
+2026-08-20 14:34:42 UTC INFO    Qwen2.5-7B-Instruct/elicited: 10/40 done, 2.3s/item, elapsed 0.4 min, VRAM peak 81.5%, ETA 2026-08-20 14:35:51 UTC (in 1.1 min)
+2026-08-20 14:34:55 UTC INFO    Qwen2.5-7B-Instruct/elicited: 15/40 done, 2.4s/item, elapsed 0.6 min, VRAM peak 81.5%, ETA 2026-08-20 14:35:54 UTC (in 1.0 min)
+2026-08-20 14:35:07 UTC INFO    Qwen2.5-7B-Instruct/elicited: 20/40 done, 2.4s/item, elapsed 0.8 min, VRAM peak 81.5%, ETA 2026-08-20 14:35:54 UTC (in 0.8 min)
+2026-08-20 14:35:18 UTC INFO    Qwen2.5-7B-Instruct/elicited: 25/40 done, 2.3s/item, elapsed 1.0 min, VRAM peak 81.5%, ETA 2026-08-20 14:35:53 UTC (in 0.6 min)
+2026-08-20 14:35:30 UTC INFO    Qwen2.5-7B-Instruct/elicited: 30/40 done, 2.3s/item, elapsed 1.2 min, VRAM peak 81.5%, ETA 2026-08-20 14:35:53 UTC (in 0.4 min)
+2026-08-20 14:35:41 UTC INFO    Qwen2.5-7B-Instruct/elicited: 35/40 done, 2.3s/item, elapsed 1.4 min, VRAM peak 81.5%, ETA 2026-08-20 14:35:53 UTC (in 0.2 min)
+2026-08-20 14:35:52 UTC INFO    Qwen2.5-7B-Instruct/elicited: 40/40 done, 2.3s/item, elapsed 1.5 min, VRAM peak 81.5%, ETA 2026-08-20 14:35:52 UTC (in 0.0 min)
+2026-08-20 14:35:52 UTC INFO    GPU ledger: +92.6s for Qwen2.5-7B-Instruct/elicited, cumulative 152.3s (0.04 h, 0.2% of the 20 h allowance)
+2026-08-20 14:35:52 UTC INFO    Qwen/Qwen2.5-7B-Instruct / elicited: {"items": 40, "unreadable_choice": 0, "with_rejection": 29, "specific": 28, "specific_and_true": 23, "usable": 13, "abort_reason": null, "elapsed_min": 1.54, "seconds_per_item": 2.32, "vram_peak_pct": 81.5, "requested_model": "Qwen/Qwen2.5-7B-Instruct"}
+2026-08-20 14:35:53 UTC WARNING meta-llama/Llama-3.1-8B-Instruct under vllm: could not load meta-llama/Llama-3.1-8B-Instruct under vllm: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a8710c9-1c36059a2c87e67c425cd0b2;9fd6c1fb-c7d1-4859-b8d8-1510dfd0a3fe)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-08-20 14:35:53 UTC WARNING meta-llama/Llama-3.1-8B-Instruct under transformers: could not load meta-llama/Llama-3.1-8B-Instruct under transformers: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a8710c9-1ac1603331828f6740b31a79;df8688af-6041-4e54-9d95-09a91ddeb3c3)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.
+2026-08-20 14:35:53 UTC WARNING falling back to the ungated mirror NousResearch/Meta-Llama-3.1-8B-Instruct for meta-llama/Llama-3.1-8B-Instruct
+2026-08-20 14:37:39 UTC INFO    NousResearch/Meta-Llama-3.1-8B-Instruct loaded: bfloat16, max_model_len=4096, mem target 0.85, eager=False, VRAM now 81.4%
+2026-08-20 14:37:39 UTC WARNING running NousResearch/Meta-Llama-3.1-8B-Instruct in place of meta-llama/Llama-3.1-8B-Instruct -- recorded in every result row
+2026-08-20 14:37:39 UTC INFO    NousResearch/Meta-Llama-3.1-8B-Instruct ready via the vllm backend
+2026-08-20 14:37:46 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 5/40 done, 1.3s/item, elapsed 0.1 min, VRAM peak 82.0%, ETA 2026-08-20 14:38:32 UTC (in 0.8 min)
+2026-08-20 14:37:52 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 10/40 done, 1.2s/item, elapsed 0.2 min, VRAM peak 82.3%, ETA 2026-08-20 14:38:28 UTC (in 0.6 min)
+2026-08-20 14:37:58 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 15/40 done, 1.2s/item, elapsed 0.3 min, VRAM peak 82.3%, ETA 2026-08-20 14:38:29 UTC (in 0.5 min)
+2026-08-20 14:38:04 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 20/40 done, 1.3s/item, elapsed 0.4 min, VRAM peak 82.3%, ETA 2026-08-20 14:38:29 UTC (in 0.4 min)
+2026-08-20 14:38:12 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 25/40 done, 1.3s/item, elapsed 0.6 min, VRAM peak 82.3%, ETA 2026-08-20 14:38:32 UTC (in 0.3 min)
+2026-08-20 14:38:19 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 30/40 done, 1.3s/item, elapsed 0.7 min, VRAM peak 82.3%, ETA 2026-08-20 14:38:32 UTC (in 0.2 min)
+2026-08-20 14:38:25 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 35/40 done, 1.3s/item, elapsed 0.8 min, VRAM peak 82.3%, ETA 2026-08-20 14:38:32 UTC (in 0.1 min)
+2026-08-20 14:38:31 UTC INFO    Meta-Llama-3.1-8B-Instruct/spontaneous: 40/40 done, 1.3s/item, elapsed 0.9 min, VRAM peak 82.3%, ETA 2026-08-20 14:38:31 UTC (in 0.0 min)
+2026-08-20 14:38:31 UTC INFO    GPU ledger: +51.5s for Meta-Llama-3.1-8B-Instruct/spontaneous, cumulative 203.8s (0.06 h, 0.3% of the 20 h allowance)
+2026-08-20 14:38:31 UTC INFO    NousResearch/Meta-Llama-3.1-8B-Instruct / spontaneous: {"items": 40, "unreadable_choice": 0, "with_rejection": 7, "specific": 7, "specific_and_true": 4, "usable": 2, "abort_reason": null, "elapsed_min": 0.86, "seconds_per_item": 1.29, "vram_peak_pct": 82.3, "requested_model": "meta-llama/Llama-3.1-8B-Instruct"}
+2026-08-20 14:38:44 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 5/40 done, 2.7s/item, elapsed 0.2 min, VRAM peak 82.3%, ETA 2026-08-20 14:40:18 UTC (in 1.6 min)
+2026-08-20 14:38:55 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 10/40 done, 2.4s/item, elapsed 0.4 min, VRAM peak 82.3%, ETA 2026-08-20 14:40:08 UTC (in 1.2 min)
+2026-08-20 14:39:04 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 15/40 done, 2.2s/item, elapsed 0.6 min, VRAM peak 82.3%, ETA 2026-08-20 14:40:00 UTC (in 0.9 min)
+2026-08-20 14:39:17 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 20/40 done, 2.3s/item, elapsed 0.8 min, VRAM peak 82.3%, ETA 2026-08-20 14:40:03 UTC (in 0.8 min)
+2026-08-20 14:39:26 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 25/40 done, 2.2s/item, elapsed 0.9 min, VRAM peak 82.3%, ETA 2026-08-20 14:39:58 UTC (in 0.5 min)
+2026-08-20 14:39:38 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 30/40 done, 2.2s/item, elapsed 1.1 min, VRAM peak 82.3%, ETA 2026-08-20 14:40:00 UTC (in 0.4 min)
+2026-08-20 14:39:49 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 35/40 done, 2.2s/item, elapsed 1.3 min, VRAM peak 82.3%, ETA 2026-08-20 14:40:00 UTC (in 0.2 min)
+2026-08-20 14:39:59 UTC INFO    Meta-Llama-3.1-8B-Instruct/elicited: 40/40 done, 2.2s/item, elapsed 1.5 min, VRAM peak 82.3%, ETA 2026-08-20 14:39:59 UTC (in 0.0 min)
+2026-08-20 14:39:59 UTC INFO    GPU ledger: +88.6s for Meta-Llama-3.1-8B-Instruct/elicited, cumulative 292.4s (0.08 h, 0.4% of the 20 h allowance)
+2026-08-20 14:39:59 UTC INFO    NousResearch/Meta-Llama-3.1-8B-Instruct / elicited: {"items": 40, "unreadable_choice": 0, "with_rejection": 31, "specific": 29, "specific_and_true": 21, "usable": 12, "abort_reason": null, "elapsed_min": 1.48, "seconds_per_item": 2.21, "vram_peak_pct": 82.3, "requested_model": "meta-llama/Llama-3.1-8B-Instruct"}
+2026-08-20 14:45:56 UTC INFO    mistralai/Mistral-7B-Instruct-v0.3 loaded: bfloat16, max_model_len=4096, mem target 0.85, eager=False, VRAM now 85.9%
+2026-08-20 14:45:56 UTC INFO    mistralai/Mistral-7B-Instruct-v0.3 ready via the vllm backend
+2026-08-20 14:46:05 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 5/40 done, 1.8s/item, elapsed 0.2 min, VRAM peak 86.6%, ETA 2026-08-20 14:47:10 UTC (in 1.1 min)
+2026-08-20 14:46:15 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 10/40 done, 1.9s/item, elapsed 0.3 min, VRAM peak 86.9%, ETA 2026-08-20 14:47:11 UTC (in 0.9 min)
+2026-08-20 14:46:25 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 15/40 done, 1.9s/item, elapsed 0.5 min, VRAM peak 86.9%, ETA 2026-08-20 14:47:12 UTC (in 0.8 min)
+2026-08-20 14:46:34 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 20/40 done, 1.9s/item, elapsed 0.6 min, VRAM peak 86.9%, ETA 2026-08-20 14:47:11 UTC (in 0.6 min)
+2026-08-20 14:46:42 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 25/40 done, 1.9s/item, elapsed 0.8 min, VRAM peak 86.9%, ETA 2026-08-20 14:47:10 UTC (in 0.5 min)
+2026-08-20 14:46:51 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 30/40 done, 1.8s/item, elapsed 0.9 min, VRAM peak 86.9%, ETA 2026-08-20 14:47:10 UTC (in 0.3 min)
+2026-08-20 14:46:59 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 35/40 done, 1.8s/item, elapsed 1.0 min, VRAM peak 86.9%, ETA 2026-08-20 14:47:08 UTC (in 0.1 min)
+2026-08-20 14:47:06 UTC INFO    Mistral-7B-Instruct-v0.3/spontaneous: 40/40 done, 1.7s/item, elapsed 1.2 min, VRAM peak 86.9%, ETA 2026-08-20 14:47:06 UTC (in 0.0 min)
+2026-08-20 14:47:06 UTC INFO    GPU ledger: +69.8s for Mistral-7B-Instruct-v0.3/spontaneous, cumulative 362.2s (0.10 h, 0.5% of the 20 h allowance)
+2026-08-20 14:47:06 UTC INFO    mistralai/Mistral-7B-Instruct-v0.3 / spontaneous: {"items": 40, "unreadable_choice": 0, "with_rejection": 13, "specific": 12, "specific_and_true": 10, "usable": 8, "abort_reason": null, "elapsed_min": 1.16, "seconds_per_item": 1.75, "vram_peak_pct": 86.9, "requested_model": "mistralai/Mistral-7B-Instruct-v0.3"}
+2026-08-20 14:47:17 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 5/40 done, 2.2s/item, elapsed 0.2 min, VRAM peak 86.9%, ETA 2026-08-20 14:48:35 UTC (in 1.3 min)
+2026-08-20 14:47:27 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 10/40 done, 2.1s/item, elapsed 0.3 min, VRAM peak 87.2%, ETA 2026-08-20 14:48:29 UTC (in 1.0 min)
+2026-08-20 14:47:37 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 15/40 done, 2.1s/item, elapsed 0.5 min, VRAM peak 87.2%, ETA 2026-08-20 14:48:28 UTC (in 0.9 min)
+2026-08-20 14:47:48 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 20/40 done, 2.1s/item, elapsed 0.7 min, VRAM peak 87.2%, ETA 2026-08-20 14:48:30 UTC (in 0.7 min)
+2026-08-20 14:47:58 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 25/40 done, 2.1s/item, elapsed 0.9 min, VRAM peak 87.2%, ETA 2026-08-20 14:48:29 UTC (in 0.5 min)
+2026-08-20 14:48:09 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 30/40 done, 2.1s/item, elapsed 1.0 min, VRAM peak 87.2%, ETA 2026-08-20 14:48:30 UTC (in 0.3 min)
+2026-08-20 14:48:19 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 35/40 done, 2.1s/item, elapsed 1.2 min, VRAM peak 87.2%, ETA 2026-08-20 14:48:30 UTC (in 0.2 min)
+2026-08-20 14:48:30 UTC INFO    Mistral-7B-Instruct-v0.3/elicited: 40/40 done, 2.1s/item, elapsed 1.4 min, VRAM peak 87.2%, ETA 2026-08-20 14:48:30 UTC (in 0.0 min)
+2026-08-20 14:48:30 UTC INFO    GPU ledger: +84.3s for Mistral-7B-Instruct-v0.3/elicited, cumulative 446.5s (0.12 h, 0.6% of the 20 h allowance)
+2026-08-20 14:48:30 UTC INFO    mistralai/Mistral-7B-Instruct-v0.3 / elicited: {"items": 40, "unreadable_choice": 0, "with_rejection": 27, "specific": 25, "specific_and_true": 16, "usable": 10, "abort_reason": null, "elapsed_min": 1.4, "seconds_per_item": 2.11, "vram_peak_pct": 87.2, "requested_model": "mistralai/Mistral-7B-Instruct-v0.3"}
+2026-08-20 14:48:31 UTC INFO    gate: best usable 13 of 40 items, threshold 15 -> FAIL
+2026-08-20 14:48:31 UTC INFO    wrote results/pilot_summary.json

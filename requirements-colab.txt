@@ -1,0 +1,19 @@
+# Colab T4 (compute capability 7.5, 16 GB). Deliberately NOT the main environment's pinned set.
+#
+# requirements.txt pins vllm 0.6.3.post1 and transformers 4.46.3 to protect a specific torch
+# build in a specific image. Colab is a different image with its own torch, so reusing those pins would
+# fight the platform for no benefit: the pilot is 240 short generations, which plain
+# transformers handles in under half an hour.
+#
+# Run the pilot with --backend transformers on Colab. vLLM is installable there but takes ten
+# minutes, replaces Colab's torch, and needs float16 plus eager mode on a T4 anyway -- all cost,
+# no measurement changed.
+#
+# Most of these are already present in a Colab runtime; the file exists so the environment is
+# stated rather than assumed.
+
+transformers>=4.46
+accelerate>=0.30      # required by device_map="auto"
+datasets>=2.20
+huggingface_hub>=0.24
+pytest>=8

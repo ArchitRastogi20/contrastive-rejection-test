@@ -1,0 +1,12 @@
+{
+  "label": "__workspace___hf__models__Llama-3_1-8B-Instruct/stage3",
+  "done": 1180,
+  "total": 1180,
+  "elapsed_min": 21.97,
+  "seconds_per_item": 1.12,
+  "vram_peak_pct": 84.7,
+  "vram_strikes": 0,
+  "eta_utc": "2026-08-21 18:08:06 UTC (in 0.0 min)",
+  "updated_utc": "2026-08-21 18:08:06 UTC",
+  "abort_reason": null
+}

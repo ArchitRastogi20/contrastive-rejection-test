@@ -1,0 +1,83 @@
+{
+  "finished_utc": "2026-08-20 18:09:06 UTC",
+  "dataset": "stage1 replay: results/exp/stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl",
+  "split": "validation",
+  "seed": 20260820,
+  "temperature": 0.0,
+  "max_model_len": 4096,
+  "dtype": "bfloat16",
+  "profile": "3090ti",
+  "n_items": 400,
+  "n_options": 4,
+  "dry_run": false,
+  "stage1_only": false,
+  "drop_reasons": {
+    "no_source_sibling": 8,
+    "integrity_gate_failed": 16,
+    "r1_not_retargetable": 14,
+    "r2_not_retargetable": 17,
+    "rival_is_gold": 10
+  },
+  "cumulative_gpu_seconds": 3565.0,
+  "per_model": {
+    "/workspace/.hf/models/Mistral-7B-Instruct-v0.3": {
+      "stage1": {
+        "items": 400,
+        "usable": 82,
+        "unreadable_choice": 0,
+        "replayed_from": "results/exp/stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl"
+      },
+      "stage2": {
+        "attempted": 82,
+        "built": 17,
+        "dropped": 65,
+        "drop_reasons": {
+          "no_source_sibling": 8,
+          "integrity_gate_failed": 16,
+          "r1_not_retargetable": 14,
+          "r2_not_retargetable": 17,
+          "rival_is_gold": 10
+        }
+      },
+      "stage3": {
+        "n_items": 17,
+        "condition_counts": {
+          "R0": {
+            "chosen_rival": 0,
+            "unreadable": 0,
+            "n": 17
+          },
+          "R1": {
+            "chosen_rival": 0,
+            "unreadable": 0,
+            "n": 17
+          },
+          "R2": {
+            "chosen_rival": 0,
+            "unreadable": 0,
+            "n": 17
+          },
+          "R3": {
+            "chosen_rival": 0,
+            "unreadable": 0,
+            "n": 17
+          }
+        },
+        "abort_reason": null,
+        "elapsed_min": 2.42
+      },
+      "mcnemar_r1_vs_r2": {
+        "b_a_only": 0,
+        "c_b_only": 0,
+        "n_discordant": 0,
+        "p_exact_two_sided": 1.0
+      },
+      "mcnemar_r1_vs_r3": {
+        "b_a_only": 0,
+        "c_b_only": 0,
+        "n_discordant": 0,
+        "p_exact_two_sided": 1.0
+      }
+    }
+  }
+}

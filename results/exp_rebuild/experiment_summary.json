@@ -1,0 +1,44 @@
+{
+  "finished_utc": "2026-08-20 18:46:52 UTC",
+  "dataset": "stage1 replay: results\\exp\\stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl",
+  "split": "validation",
+  "seed": 20260820,
+  "temperature": 0.0,
+  "max_model_len": 4096,
+  "dtype": "float16",
+  "profile": "3090ti",
+  "n_items": 400,
+  "n_options": 4,
+  "dry_run": false,
+  "stage1_only": false,
+  "stage2_only": true,
+  "drop_reasons": {
+    "no_source_sibling": 8,
+    "r1_not_retargetable": 11,
+    "integrity_gate_failed": 11,
+    "rival_is_gold": 10
+  },
+  "cumulative_gpu_seconds": 3565.0,
+  "per_model": {
+    "/workspace/.hf/models/Mistral-7B-Instruct-v0.3": {
+      "stage1": {
+        "items": 400,
+        "usable": 82,
+        "unreadable_choice": 0,
+        "replayed_from": "results\\exp\\stage1___workspace___hf__models__Mistral-7B-Instruct-v0_3.jsonl"
+      },
+      "stage2": {
+        "attempted": 82,
+        "built": 42,
+        "dropped": 40,
+        "search_cap_hit": 53,
+        "drop_reasons": {
+          "no_source_sibling": 8,
+          "r1_not_retargetable": 11,
+          "integrity_gate_failed": 11,
+          "rival_is_gold": 10
+        }
+      }
+    }
+  }
+}

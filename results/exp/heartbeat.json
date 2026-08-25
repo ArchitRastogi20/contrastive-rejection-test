@@ -1,0 +1,12 @@
+{
+  "label": "__workspace___hf__models__Mistral-7B-Instruct-v0_3/stage3",
+  "done": 68,
+  "total": 68,
+  "elapsed_min": 2.42,
+  "seconds_per_item": 2.14,
+  "vram_peak_pct": 86.3,
+  "vram_strikes": 0,
+  "eta_utc": "2026-08-20 18:09:06 UTC (in 0.0 min)",
+  "updated_utc": "2026-08-20 18:09:06 UTC",
+  "abort_reason": null
+}

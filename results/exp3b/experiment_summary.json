@@ -1,0 +1,372 @@
+{
+  "finished_utc": "2026-08-22 00:11:54 UTC",
+  "dataset": "framolfese/2WikiMultihopQA",
+  "split": "validation",
+  "seed": 20260820,
+  "temperature": 0.0,
+  "max_model_len": 4096,
+  "dtype": "bfloat16",
+  "profile": "3090ti",
+  "n_items": 1200,
+  "n_options": 4,
+  "dry_run": false,
+  "stage1_only": false,
+  "stage2_only": false,
+  "drop_reasons": {
+    "unreadable_choice": 21,
+    "no_source_sibling": 21,
+    "r1_not_retargetable": 9,
+    "integrity_gate_failed": 107,
+    "rival_is_gold": 18
+  },
+  "cumulative_gpu_seconds": 40582.3,
+  "continuous_pooled": {
+    "delta_p_edited": {
+      "R1_vs_R2": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R1-R2",
+        "measure": "delta_p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      },
+      "R3_vs_R4": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R3-R4",
+        "measure": "delta_p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      },
+      "R1_vs_R3": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R1-R3",
+        "measure": "delta_p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      },
+      "R2_vs_R4": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R2-R4",
+        "measure": "delta_p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      }
+    },
+    "p_edited_raw": {
+      "R1_vs_R2": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R1-R2",
+        "measure": "p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      },
+      "R3_vs_R4": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R3-R4",
+        "measure": "p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      },
+      "R1_vs_R3": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R1-R3",
+        "measure": "p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      },
+      "R2_vs_R4": {
+        "mean": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n": 0,
+        "seed": 20260820,
+        "n_resamples": 10000,
+        "contrast": "R2-R4",
+        "measure": "p_edited",
+        "n_pairs_total": 85,
+        "n_pairs_complete": 0,
+        "n_excluded_incomplete_condition": 85,
+        "n_excluded_incomplete_r0": 0,
+        "n_excluded_other": 0
+      }
+    }
+  },
+  "r0_baseline_by_target_pooled": {
+    "rival_target_R1_R2": {
+      "n": 0,
+      "mean": null,
+      "min": null,
+      "max": null
+    },
+    "third_option_target_R3_R4": {
+      "n": 0,
+      "mean": null,
+      "min": null,
+      "max": null
+    }
+  },
+  "per_model": {
+    "/workspace/.hf/models/DeepSeek-R1-Distill-Qwen-14B-AWQ": {
+      "stage1": {
+        "items": 1200,
+        "unreadable_choice": 94,
+        "usable": 261,
+        "abort_reason": null,
+        "elapsed_min": 104.18,
+        "vram_peak_pct": 81.4
+      },
+      "stage2": {
+        "attempted": 261,
+        "built": 85,
+        "dropped": 176,
+        "search_cap_hit": 192,
+        "drop_reasons": {
+          "unreadable_choice": 21,
+          "no_source_sibling": 21,
+          "r1_not_retargetable": 9,
+          "integrity_gate_failed": 107,
+          "rival_is_gold": 18
+        }
+      },
+      "stage3": {
+        "n_items": 85,
+        "condition_counts": {
+          "R0": {
+            "chosen_rival": 0,
+            "unreadable": 0,
+            "n": 85
+          },
+          "R1": {
+            "chosen_rival": 4,
+            "unreadable": 3,
+            "n": 85
+          },
+          "R2": {
+            "chosen_rival": 3,
+            "unreadable": 3,
+            "n": 85
+          },
+          "R3": {
+            "chosen_rival": 0,
+            "unreadable": 2,
+            "n": 85
+          },
+          "R4": {
+            "chosen_rival": 0,
+            "unreadable": 3,
+            "n": 85
+          }
+        },
+        "abort_reason": null,
+        "elapsed_min": 38.28
+      },
+      "mcnemar_r1_vs_r2": {
+        "b_a_only": 2,
+        "c_b_only": 1,
+        "n_discordant": 3,
+        "p_exact_two_sided": 1.0
+      },
+      "mcnemar_r1_vs_r3": {
+        "b_a_only": 3,
+        "c_b_only": 0,
+        "n_discordant": 3,
+        "p_exact_two_sided": 0.25
+      },
+      "continuous": {
+        "delta_p_edited": {
+          "R1_vs_R2": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R1-R2",
+            "measure": "delta_p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          },
+          "R3_vs_R4": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R3-R4",
+            "measure": "delta_p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          },
+          "R1_vs_R3": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R1-R3",
+            "measure": "delta_p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          },
+          "R2_vs_R4": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R2-R4",
+            "measure": "delta_p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          }
+        },
+        "p_edited_raw": {
+          "R1_vs_R2": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R1-R2",
+            "measure": "p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          },
+          "R3_vs_R4": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R3-R4",
+            "measure": "p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          },
+          "R1_vs_R3": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R1-R3",
+            "measure": "p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          },
+          "R2_vs_R4": {
+            "mean": null,
+            "ci_low": null,
+            "ci_high": null,
+            "n": 0,
+            "seed": 20260820,
+            "n_resamples": 10000,
+            "contrast": "R2-R4",
+            "measure": "p_edited",
+            "n_pairs_total": 85,
+            "n_pairs_complete": 0,
+            "n_excluded_incomplete_condition": 85,
+            "n_excluded_incomplete_r0": 0,
+            "n_excluded_other": 0
+          }
+        }
+      },
+      "r0_baseline_by_target": {
+        "rival_target_R1_R2": {
+          "n": 0,
+          "mean": null,
+          "min": null,
+          "max": null
+        },
+        "third_option_target_R3_R4": {
+          "n": 0,
+          "mean": null,
+          "min": null,
+          "max": null
+        }
+      }
+    }
+  }
+}

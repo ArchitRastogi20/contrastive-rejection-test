@@ -1,0 +1,25 @@
+# Pinned for the project image: pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+#
+# Every pin here is a lesson from the previous study's ledger, not a preference. Check the
+# environment notes before changing any of them, and install with scripts/setup_env.sh
+# rather than by hand.
+#
+#   vllm 0.6.3.post1  is the LAST release built against torch 2.4.x. Current PyPI vllm needs
+#                     torch>=2.5 and `pip install --dry-run` confirmed it will silently
+#                     replace the image's working torch 2.4.x with a bare torch build.
+#   transformers      must be contemporary with that vllm. vllm 0.6.3.post1 leaves
+#                     transformers unpinned, the resolver takes the newest, and the newest
+#                     refuses to enable its PyTorch backend at all for torch<2.5 -- and
+#                     separately vllm's tokenizer cache calls `all_special_tokens_extended`,
+#                     which newer transformers removed. Tokenizer init crashes.
+#
+# Consequence worth knowing: vllm 0.6.3.post1 predates the Qwen3 architecture, so no Qwen3
+# checkpoint can run on this image. The substitute model in pilot/config.py is a Qwen2.5.
+
+vllm==0.6.3.post1
+transformers==4.46.3
+accelerate>=0.30.0   # device_map="auto" in the transformers fallback needs it
+datasets>=2.20.0
+huggingface_hub>=0.24.0
+pytest>=8.0.0
+psutil>=5.9.0
