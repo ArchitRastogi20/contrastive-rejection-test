@@ -206,7 +206,7 @@ def analyse(exp_dir: Path) -> dict:
         # choice == target here should always agree with stage3's own stored
         # `chosen_is_repaired_rival` flag. A disagreement would mean this module's join key or
         # the run's own field disagree about which record belongs to which item -- worth
-        # surfacing, per CLAUDE.md's rule to verify a resource before building on it.
+        # surfacing rather than silently trusting a stored field that was never re-derived.
         for c in ("R1", "R2"):
             choice = conds[c].get("choice")
             stored = conds[c].get("chosen_is_repaired_rival")

@@ -55,8 +55,7 @@ code/
 │   ├── exp/, exp2/                    two earlier full runs of the repair experiment, superseded but kept
 │   │                                   because the corrections below are only checkable against them
 │   ├── exp3a/, exp3b/, exp3c/         the three parts (A, B, C) of the final run this paper reports
-│   ├── exp_rebuild*/                  intermediate re-derivations kept for the audit trail
-│   └── smoke/                         output of a --dry-run smoke test against a stub model
+│   └── exp_rebuild*/                  intermediate re-derivations kept for the audit trail
 ├── requirements.txt                the 3090 Ti / vLLM environment
 ├── requirements-colab.txt          the T4 fallback environment (plain transformers, no vLLM)
 └── .env.example                    names of the environment variables the code reads; no values
@@ -196,3 +195,7 @@ against roughly 728 pairs needed for 80% power at the measured effect size.
 
 2WikiMultihopQA, validation split, used unmodified as the source of entities, profiles and
 evidence triples.
+
+## License 
+
+MIT

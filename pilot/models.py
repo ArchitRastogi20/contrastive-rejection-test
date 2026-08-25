@@ -66,8 +66,9 @@ class LetterProbRead:
     """One forced-choice probability read, restricted to `candidates` and renormalised.
 
     `raw_logprobs` keeps every candidate's raw logprob (`None` for a candidate that never
-    turned up), so the read can be redone offline without a re-run -- per CLAUDE.md's
-    "raw model output is always kept" convention, extended to this measure. `complete` is
+    turned up), so the read can be redone offline without a re-run -- raw model output is
+    always kept rather than only a derived summary, since re-running the model is expensive
+    and the extraction logic is expected to change. `complete` is
     False the moment one candidate's logprob could not be found (vLLM's top-k did not contain
     it); such a read is excluded from the continuous analysis rather than imputed. `probs` is
     the softmax over whatever candidates *were* found -- informational even when incomplete,
