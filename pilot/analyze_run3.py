@@ -261,8 +261,8 @@ def bootstrap_stat(values: list[float], stat, *, seed: int = SEED,
 def odds_ratio(b: int, c: int) -> dict:
     """Matched-pairs OR = b/c, Wald CI on the log scale, Haldane-Anscombe only when a cell is 0.
 
-    Matches the convention ``INTERACTION_TEST.md`` used, so the released numbers and this
-    script's numbers are comparable rather than merely similar.
+    Matches the convention the committed interaction test used, so the released numbers and
+    this script's numbers are comparable rather than merely similar.
     """
     if b == 0 or c == 0:
         bb, cc = b + 0.5, c + 0.5
@@ -1063,7 +1063,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.self_check:
         return self_check()
 
-    out = args.out or (REPO_ROOT / "code" / "ANALYSIS_RUN3.md")
+    out = args.out or (REPO_ROOT / "code" / "analysis_run3_report.txt")
     report = build_report(args.results)
     out.write_text(report, encoding="utf-8")
     print(f"wrote {out}")

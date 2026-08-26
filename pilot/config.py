@@ -136,8 +136,9 @@ GATE_USABLE_ITEMS = 15  # pre-committed; see the experiment design doc. Do not m
 # Wall-clock budget per model, in minutes. Exceeding it aborts that model and moves on.
 PER_MODEL_BUDGET_MIN = float(os.environ.get("PILOT_MODEL_BUDGET_MIN", "45"))
 
-# Whole-run GPU budget, for the ledger's running total. The project allowance is 20 h.
-PROJECT_GPU_BUDGET_S = 72_000
+# Whole-run GPU budget, for the ledger's running total. The project allowance is 27 h, raised
+# from 20 h on 2026-08-26 (see the project's experiment ledger).
+PROJECT_GPU_BUDGET_S = 97_200
 
 
 def now_utc() -> datetime:

@@ -198,7 +198,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--resamples", type=int, default=RESAMPLES)
     args = parser.parse_args(argv)
     RESAMPLES = args.resamples
-    out = args.out or (REPO_ROOT / "code" / "PROBE_MISSINGNESS_AUDIT.md")
+    out = args.out or (REPO_ROOT / "code" / "probe_missingness_audit_report.txt")
     out.write_text(build_report(args.results), encoding="utf-8")
     print(f"wrote {out}")
     return 0

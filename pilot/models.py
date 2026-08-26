@@ -5,8 +5,10 @@ Gated repositories fall back automatically to an ungated mirror of the same weig
 
 from __future__ import annotations
 
+import inspect
 import logging
 import math
+import re
 from dataclasses import dataclass, field
 from typing import Callable, Sequence
 
@@ -61,6 +63,38 @@ def append_letter_probe(chat: Chat) -> list[dict]:
     return [*head, merged]
 
 
+def render_for_probe(tok, chat: Chat) -> tuple[str, bool]:
+    """Render `chat` for a forced single-token read, choosing how by what `chat` ends in.
+
+    A chat ending in a user turn (today's only probe, `append_letter_probe`'s output) renders
+    exactly as `letter_probs` always has: `add_generation_prompt=True`, a fresh assistant turn
+    opened for the model to fill in. A chat ending in an *assistant* turn -- a prefilled-stem
+    probe variant (see `pilot.probe_variants`) -- is rendered as a continuation of that turn
+    instead (`continue_final_message=True`), so the forced token is the next token *after* the
+    stem, not a new reply to it.
+
+    Returns `(rendered_text, continuation_confirmed)`. `continuation_confirmed` is always True
+    for the user-turn case. For the assistant-turn case it is only True when the rendered text
+    still ends with the stem exactly as given -- some chat templates accept
+    `continue_final_message` without error but still splice in their own turn-boundary tokens
+    after it, which would silently defeat the whole point of prefilling. That is reported here,
+    not assumed away: a caller records it rather than trusting the kwarg was honoured just
+    because it was accepted.
+    """
+    if not chat or chat[-1]["role"] != "assistant":
+        return tok.apply_chat_template(list(chat), tokenize=False, add_generation_prompt=True), True
+
+    stem = chat[-1]["content"]
+    try:
+        text = tok.apply_chat_template(list(chat), tokenize=False, continue_final_message=True)
+    except TypeError as exc:
+        raise ContinuationUnsupported(
+            f"apply_chat_template does not accept continue_final_message on this "
+            f"transformers version: {exc}"
+        ) from exc
+    return text, text.rstrip().endswith(stem.rstrip())
+
+
 @dataclass
 class LetterProbRead:
     """One forced-choice probability read, restricted to `candidates` and renormalised.
@@ -91,6 +125,68 @@ class LetterProbRead:
             "backend": self.backend,
             "detail": dict(self.detail),
         }
+
+
+@dataclass
+class PromptLogprobs:
+    """One prompt's own tokens, and -- for every position but the first -- the log-probability
+    the model assigned to the token that is actually there, conditioned only on the tokens
+    before it. This is the causal-LM reading a forced-choice generation call cannot give: a
+    prompt-level (not next-token) logprob, used here to score how surprising an *inserted*
+    sentence is in the context it was inserted into (see `pilot.surprisal`).
+
+    `token_ids` and `tokens` are kept for every backend, including the stub, so a span of
+    interest inside this prompt can be located positionally (see `find_inserted_span`) without
+    ever re-tokenising by hand. `logprobs[0]` is always `None` -- there is no preceding context
+    for the first token, the same convention vLLM's own `prompt_logprobs` output uses.
+    `complete` is False the moment any position beyond the first has no logprob (a backend that
+    could not or would not supply one there); such a read should be excluded downstream, not
+    imputed, the same discipline `LetterProbRead.complete` already established.
+    """
+
+    token_ids: list
+    tokens: list[str]
+    logprobs: list[float | None]
+    backend: str
+    complete: bool
+    detail: dict = field(default_factory=dict)
+
+    def to_dict(self) -> dict:
+        return {
+            "token_ids": list(self.token_ids),
+            "tokens": list(self.tokens),
+            "logprobs": list(self.logprobs),
+            "backend": self.backend,
+            "complete": self.complete,
+            "detail": dict(self.detail),
+        }
+
+
+class PromptLogprobsUnsupported(RuntimeError):
+    """Raised when a backend cannot supply prompt-level logprobs.
+
+    Whether `vllm==0.6.3.post1`'s `SamplingParams` accepts `prompt_logprobs` at all is not
+    verified anywhere in this repository -- there is no GPU available to check it against a
+    real engine. Rather than assume support, `VLLMBackend.prompt_token_logprobs` probes for it
+    at call time and raises this, with the underlying error attached, the first time it turns
+    out not to work -- a caller (see `pilot.surprisal`) can catch this specifically and fall
+    back to the transformers path (`HFBackend`) instead of crashing the whole run.
+    """
+
+
+class ContinuationUnsupported(RuntimeError):
+    """Raised when a chat ending in an assistant turn cannot be rendered as a continuation.
+
+    `transformers==4.46.3` (this project's pin) accepts `continue_final_message` on
+    `apply_chat_template`, but *accepting the keyword* and *a given model's chat template
+    actually treating it as "keep going from here" rather than restarting with a fresh
+    assistant header* are two different things -- the second is exactly what
+    `pilot.probe_variants` exists to measure, not assume, for a reasoning model whose template
+    may or may not suppress the opening `<think>` block on a prefilled turn. This exception
+    covers only the first, structural failure (an old `transformers` without the keyword at
+    all); the second is reported as data (`PromptLogprobs`/`LetterProbRead` `detail`), never as
+    a crash.
+    """
 
 
 def renormalize_letter_logprobs(raw_logprobs: dict[str, float | None]) -> dict[str, float]:
@@ -157,6 +253,44 @@ def _new_tokens_after(base_ids: Sequence[int], combo_ids: Sequence[int]) -> list
             break
         common += 1
     return list(combo_ids[common:])
+
+
+def find_inserted_span(base_ids: Sequence, edited_ids: Sequence) -> tuple[int, int]:
+    """The `[start, end)` slice of `edited_ids` that `base_ids` does not have -- one contiguous
+    insertion, located by the longest common prefix and the longest common suffix, never by
+    searching for the inserted text itself.
+
+    `_new_tokens_after` above handles the special case of an insertion at the very end (a bare
+    letter appended to a prompt that otherwise stays identical): common prefix, and everything
+    after it is new. An inserted sentence appended to one option's profile is not at the end of
+    the *rendered prompt* unless that option happens to be presented last -- the remaining
+    options and the task instructions that follow it are unchanged and must be recognised as
+    such, which a prefix-only comparison cannot do (it would report everything from the
+    insertion point to the end of the prompt as "new", when almost all of that is the
+    untouched tail). Comparing from both ends at once handles that: the common suffix is
+    computed after the common prefix and is capped so the two regions can never overlap, which
+    is what keeps this correct even when the inserted sentence's own words recur earlier or
+    later in the same profile -- the position of the divergence is what is being found here,
+    never its content, so a recurring word elsewhere cannot be mistaken for part of the
+    insertion.
+
+    Returns `(len(base_ids), len(base_ids))` (an empty span at the point of first difference,
+    which is the prompt's own length when the two sequences are identical) when `edited_ids`
+    inserts nothing relative to `base_ids`.
+    """
+    n_base, n_edited = len(base_ids), len(edited_ids)
+    limit = min(n_base, n_edited)
+
+    prefix = 0
+    while prefix < limit and base_ids[prefix] == edited_ids[prefix]:
+        prefix += 1
+
+    max_suffix = limit - prefix  # never let the suffix region eat into the prefix region
+    suffix = 0
+    while suffix < max_suffix and base_ids[n_base - 1 - suffix] == edited_ids[n_edited - 1 - suffix]:
+        suffix += 1
+
+    return prefix, n_edited - suffix
 
 
 def _token_has_leading_space(piece: str) -> bool:
@@ -249,7 +383,20 @@ class Backend:
     name = "backend"
     kind = "abstract"
 
-    def generate(self, chats: Sequence[Chat]) -> list[str]:
+    def generate(
+        self, chats: Sequence[Chat], *, temperature: float | None = None, seed: int | None = None,
+    ) -> list[str]:
+        """Free-text generation, one reply per chat.
+
+        `temperature`/`seed` default to `None`, meaning "this backend's own greedy
+        configuration" (`config.TEMPERATURE`, `config.SEED`) -- every existing caller, and
+        every committed result, was produced by that exact path, so passing neither must remain
+        byte-identical to what this method did before these two parameters existed. Passing
+        `temperature=0.0` explicitly still takes the greedy (argmax) path, never a sampling path
+        merely parameterised at zero -- those are not the same operation on any backend below,
+        and the difference matters: a sampler at temperature 0 can still branch on its RNG state
+        in ways argmax decoding structurally cannot.
+        """
         raise NotImplementedError
 
     def letter_probs(
@@ -259,8 +406,30 @@ class Backend:
         that item's candidate letters. Additional to `generate`, never a replacement for it."""
         raise NotImplementedError
 
+    def prompt_token_logprobs(self, chats: Sequence[Chat]) -> list[PromptLogprobs]:
+        """Every prompt token's own logprob, conditioned on the tokens before it -- one call per
+        chat, no generation. Used by `pilot.surprisal` to score how surprising an inserted
+        sentence is in the context it was inserted into; not needed by, and never a replacement
+        for, `generate` or `letter_probs`."""
+        raise NotImplementedError
+
     def close(self) -> None:
         pass
+
+
+def _accepts_kwargs(fn: Callable, names: Sequence[str]) -> bool:
+    """Whether `fn` declares every name in `names` as a parameter, or takes `**kwargs` (which
+    accepts anything). Used once, at `StubBackend` construction, to decide whether a
+    caller-supplied responder wants to see `temperature`/`seed` without breaking on a responder
+    that predates those parameters and takes only `(index, chat)`."""
+    try:
+        params = inspect.signature(fn).parameters.values()
+    except (TypeError, ValueError):
+        return False
+    if any(p.kind == inspect.Parameter.VAR_KEYWORD for p in params):
+        return True
+    declared = {p.name for p in params}
+    return all(name in declared for name in names)
 
 
 def _default_stub_letter_logprobs(
@@ -274,6 +443,29 @@ def _default_stub_letter_logprobs(
     return {letter: -0.5 * rank for rank, letter in enumerate(candidates)}
 
 
+_STUB_WORD = re.compile(r"\S+")
+
+
+def _stub_render_text(chat: Chat) -> str:
+    """A deterministic stand-in for `apply_chat_template` -- the stub has no tokenizer, so
+    tokenising the actual rendered text is not available to it. Every turn's content, in order,
+    is enough for `find_inserted_span` to locate an inserted span positionally, which is all
+    the stub's own tests need it for."""
+    return "\n".join(str(turn.get("content", "")) for turn in chat)
+
+
+def _default_stub_prompt_logprobs(index: int, chat: Chat) -> tuple[list[str], list[float | None]]:
+    """Canned prompt-token logprobs used when a `StubBackend` is built without its own
+    `prompt_logprob_responder`: whitespace-split "tokens" from the rendered chat text (a word
+    each -- crude compared to real subword tokenisation, but sufficient to exercise the span
+    finder and the surprisal arithmetic with no GPU), and a logprob of `None` for the first
+    token, then a constant -0.4 nats for every token after it -- deterministic, depends on
+    nothing but `chat` itself."""
+    tokens = _STUB_WORD.findall(_stub_render_text(chat))
+    logprobs: list[float | None] = [None] * min(1, len(tokens)) + [-0.4] * max(0, len(tokens) - 1)
+    return tokens, logprobs
+
+
 class StubBackend(Backend):
     """Returns canned text. Lets the whole pipeline run in a test, with no GPU and no network."""
 
@@ -284,13 +476,39 @@ class StubBackend(Backend):
         responder: Callable[[int, Chat], str],
         name: str = "stub",
         letter_prob_responder: Callable[[int, Chat, Sequence[str]], dict[str, float]] | None = None,
+        prompt_logprob_responder: Callable[[int, Chat], tuple[list, list[float | None]]] | None = None,
     ):
         self.name = name
         self._responder = responder
         self._letter_prob_responder = letter_prob_responder or _default_stub_letter_logprobs
+        self._prompt_logprob_responder = prompt_logprob_responder or _default_stub_prompt_logprobs
+        # Whether `responder` itself wants to see (temperature, seed) -- a sweep's own custom
+        # responder can declare `temperature`/`seed` keyword parameters (or **kwargs) to make
+        # its canned replies genuinely depend on them; every existing responder in this project
+        # (e.g. `run_pilot._StubReplies`, taking only `(index, chat)`) does not, and must keep
+        # working completely unexamined -- inspected once here, not on every call.
+        self._responder_wants_sampling_kwargs = _accepts_kwargs(responder, ("temperature", "seed"))
 
-    def generate(self, chats: Sequence[Chat]) -> list[str]:
-        return [self._responder(i, chat) for i, chat in enumerate(chats)]
+    def generate(
+        self, chats: Sequence[Chat], *, temperature: float | None = None, seed: int | None = None,
+    ) -> list[str]:
+        if temperature is None and seed is None:
+            return [self._responder(i, chat) for i, chat in enumerate(chats)]
+        out: list[str] = []
+        for i, chat in enumerate(chats):
+            if self._responder_wants_sampling_kwargs:
+                out.append(self._responder(i, chat, temperature=temperature, seed=seed))
+                continue
+            # No sampling-aware responder was supplied: still make the reply visibly and
+            # reproducibly depend on (temperature, seed) rather than silently ignore them, so a
+            # `--dry-run` sweep against the default stub responder is a meaningful smoke test of
+            # the plumbing (same call reproduces, a different seed does not) instead of a no-op.
+            # Deterministic in (temperature, seed) alone -- never wall-clock, never call order.
+            eff_temperature = TEMPERATURE if temperature is None else temperature
+            eff_seed = SEED if seed is None else seed
+            base = self._responder(i, chat)
+            out.append(f"{base} [t={eff_temperature:g} seed={eff_seed}]")
+        return out
 
     def letter_probs(
         self, chats: Sequence[Chat], candidates: Sequence[Sequence[str]]
@@ -304,6 +522,18 @@ class StubBackend(Backend):
             reads.append(LetterProbRead(
                 candidates=list(cands), raw_logprobs=raw, probs=probs, complete=complete,
                 backend="stub", detail={},
+            ))
+        return reads
+
+    def prompt_token_logprobs(self, chats: Sequence[Chat]) -> list[PromptLogprobs]:
+        reads = []
+        for i, chat in enumerate(chats):
+            token_ids, logprobs = self._prompt_logprob_responder(i, chat)
+            tokens = [str(t) for t in token_ids]
+            complete = all(lp is not None for lp in logprobs[1:])
+            reads.append(PromptLogprobs(
+                token_ids=list(token_ids), tokens=tokens, logprobs=list(logprobs),
+                backend="stub", complete=complete, detail={},
             ))
         return reads
 
@@ -345,12 +575,34 @@ class VLLMBackend(Backend):
             _enforce_eager(), f"{frac:.1%}" if frac is not None else "unknown",
         )
 
-    def generate(self, chats: Sequence[Chat]) -> list[str]:
+    def generate(
+        self, chats: Sequence[Chat], *, temperature: float | None = None, seed: int | None = None,
+    ) -> list[str]:
         texts = [
             self._tok.apply_chat_template(list(c), tokenize=False, add_generation_prompt=True)
             for c in chats
         ]
-        outs = self._llm.generate(texts, self._params)
+        if temperature is None and seed is None:
+            params = self._params  # the exact pre-existing object: byte-identical to before
+        else:
+            from vllm import SamplingParams
+
+            eff_temperature = TEMPERATURE if temperature is None else temperature
+            eff_seed = SEED if seed is None else seed
+            # vLLM's `SamplingParams.seed` seeds that one *request's* own sampler -- with the
+            # same prompt, the same `seed` reproduces the same sample every time (vLLM's
+            # documented per-request determinism), but it neither reads nor writes any
+            # process-global RNG state and says nothing about any other request's seed. This is
+            # a different seed from the one passed to `LLM(seed=SEED)` at construction above,
+            # which governs weight-loading and CUDA-graph capture order, not sampling. At
+            # `eff_temperature == 0.0` vLLM's sampler takes the greedy (argmax) path internally
+            # regardless of `seed` -- matching this backend's existing zero-temperature
+            # behaviour rather than a temperature-parameterised sampling path that merely
+            # happens to have its randomness suppressed.
+            params = SamplingParams(
+                temperature=eff_temperature, max_tokens=MAX_NEW_TOKENS, seed=eff_seed
+            )
+        outs = self._llm.generate(texts, params)
         return [o.outputs[0].text.strip() for o in outs]
 
     def token_len(self, text: str) -> int:
@@ -361,23 +613,104 @@ class VLLMBackend(Backend):
     ) -> list[LetterProbRead]:
         from vllm import SamplingParams
 
-        texts = [
-            self._tok.apply_chat_template(list(c), tokenize=False, add_generation_prompt=True)
-            for c in chats
-        ]
+        rendered = [render_for_probe(self._tok, list(c)) for c in chats]
+        texts = [t for t, _ok in rendered]
+        confirmed = [ok for _t, ok in rendered]
         params = SamplingParams(
             max_tokens=1, logprobs=LOGPROB_TOPK, temperature=TEMPERATURE, seed=SEED
         )
         outs = self._llm.generate(texts, params)
         reads = []
-        for out, cands in zip(outs, candidates):
+        for out, cands, ok in zip(outs, candidates, confirmed):
             step_logprobs = out.outputs[0].logprobs[0] if out.outputs[0].logprobs else {}
             token_texts = {
                 lp.decoded_token: lp.logprob for lp in step_logprobs.values()
                 if lp.decoded_token is not None
             }
             reads.append(letter_read_from_token_logprobs(
-                token_texts, cands, backend="vllm", detail={"topk": LOGPROB_TOPK},
+                token_texts, cands, backend="vllm",
+                detail={"topk": LOGPROB_TOPK, "continuation_confirmed": ok},
+            ))
+        return reads
+
+    def _probe_prompt_logprobs_support(self) -> None:
+        """Try building a `SamplingParams(prompt_logprobs=...)` once, cache the outcome.
+
+        Whether `vllm==0.6.3.post1` accepts this kwarg at all is not verified anywhere in this
+        repository -- there is no GPU here to check it against a real engine build. This probes
+        rather than assumes: a construction failure is captured once and raised as a clear,
+        catchable `PromptLogprobsUnsupported` on every call, instead of an opaque `TypeError`
+        surfacing from deep inside a batched `generate()` call.
+        """
+        if getattr(self, "_prompt_logprobs_supported", None) is not None:
+            return
+        from vllm import SamplingParams
+
+        try:
+            SamplingParams(max_tokens=1, prompt_logprobs=0, temperature=TEMPERATURE, seed=SEED)
+        except (TypeError, ValueError) as exc:
+            self._prompt_logprobs_supported = False
+            self._prompt_logprobs_error = str(exc)
+        else:
+            self._prompt_logprobs_supported = True
+            self._prompt_logprobs_error = None
+
+    def prompt_token_logprobs(self, chats: Sequence[Chat]) -> list[PromptLogprobs]:
+        """Prompt-level logprobs via `SamplingParams(prompt_logprobs=0)`: no extra top-k over
+        alternatives, just the logprob of the prompt token that is actually there at every
+        position (`None` at position 0, matching vLLM's own convention). Raises
+        `PromptLogprobsUnsupported` -- caught, not crashed on -- the first time either the
+        keyword itself is rejected or an engine that accepted it still returns nothing.
+        """
+        from vllm import SamplingParams
+
+        self._probe_prompt_logprobs_support()
+        if not self._prompt_logprobs_supported:
+            raise PromptLogprobsUnsupported(
+                f"vllm {self.name}: SamplingParams(prompt_logprobs=...) is not accepted by "
+                f"this vllm build: {self._prompt_logprobs_error}"
+            )
+
+        texts = [
+            self._tok.apply_chat_template(list(c), tokenize=False, add_generation_prompt=True)
+            for c in chats
+        ]
+        params = SamplingParams(
+            max_tokens=1, prompt_logprobs=0, temperature=TEMPERATURE, seed=SEED
+        )
+        outs = self._llm.generate(texts, params)
+
+        reads = []
+        for out in outs:
+            prompt_lps = out.prompt_logprobs
+            if prompt_lps is None:
+                raise PromptLogprobsUnsupported(
+                    f"vllm {self.name}: SamplingParams accepted prompt_logprobs but the engine "
+                    "returned none -- this build does not actually populate them"
+                )
+            token_ids = list(out.prompt_token_ids)
+            tokens: list[str] = []
+            logprobs: list[float | None] = []
+            for pos, tid in enumerate(token_ids):
+                entry_map = prompt_lps[pos]
+                if entry_map is None:  # position 0: no preceding context, by convention
+                    tokens.append(self._tok.convert_ids_to_tokens([tid])[0])
+                    logprobs.append(None)
+                    continue
+                entry = entry_map.get(tid)
+                if entry is None:
+                    tokens.append(self._tok.convert_ids_to_tokens([tid])[0])
+                    logprobs.append(None)
+                else:
+                    tokens.append(
+                        entry.decoded_token if entry.decoded_token is not None
+                        else self._tok.convert_ids_to_tokens([tid])[0]
+                    )
+                    logprobs.append(entry.logprob)
+            complete = all(lp is not None for lp in logprobs[1:])
+            reads.append(PromptLogprobs(
+                token_ids=token_ids, tokens=tokens, logprobs=logprobs,
+                backend="vllm", complete=complete, detail={"prompt_logprobs_topk": 0},
             ))
         return reads
 
@@ -443,19 +776,39 @@ class HFBackend(Backend):
             raise ModelUnavailable(f"could not load {name} under transformers: {exc}") from exc
         self._model.eval()
 
-    def generate(self, chats: Sequence[Chat]) -> list[str]:
+    def generate(
+        self, chats: Sequence[Chat], *, temperature: float | None = None, seed: int | None = None,
+    ) -> list[str]:
+        eff_temperature = TEMPERATURE if temperature is None else temperature
         out: list[str] = []
         for chat in chats:
             ids = self._tok.apply_chat_template(
                 list(chat), return_tensors="pt", add_generation_prompt=True
             ).to(self._model.device)
+            gen_kwargs: dict = dict(
+                max_new_tokens=MAX_NEW_TOKENS, pad_token_id=self._tok.eos_token_id,
+            )
+            if eff_temperature > 0.0:
+                # Sampling: `temperature` is only meaningful together with `do_sample=True` --
+                # passing it under greedy decoding is silently ignored by `generate()`, which
+                # would make a bug here invisible rather than loud, so the two are always set
+                # together. Seeded via a per-call `torch.Generator` (never the process-global
+                # RNG), so two calls with the same `seed` reproduce and a different one does not,
+                # without perturbing any other model's or any other call's random state.
+                gen_kwargs["do_sample"] = True
+                gen_kwargs["temperature"] = eff_temperature
+                eff_seed = SEED if seed is None else seed
+                gen_kwargs["generator"] = self._torch.Generator(
+                    device=ids.device
+                ).manual_seed(eff_seed)
+            else:
+                # Greedy (argmax): `temperature==0.0` is not "sampling with the randomness
+                # turned down to nothing" -- it is a structurally different decoding path, and
+                # `do_sample=False` is how transformers spells it. No `temperature` kwarg is
+                # passed here, exactly as before this method took one.
+                gen_kwargs["do_sample"] = False
             with self._torch.no_grad():
-                gen = self._model.generate(
-                    ids,
-                    do_sample=False,
-                    max_new_tokens=MAX_NEW_TOKENS,
-                    pad_token_id=self._tok.eos_token_id,
-                )
+                gen = self._model.generate(ids, **gen_kwargs)
             out.append(self._tok.decode(gen[0, ids.shape[-1]:], skip_special_tokens=True).strip())
         return out
 
@@ -468,9 +821,7 @@ class HFBackend(Backend):
         always has a value and `complete` is always True here (unlike the vLLM top-k path)."""
         reads = []
         for chat, cands in zip(chats, candidates):
-            prompt_text = self._tok.apply_chat_template(
-                list(chat), tokenize=False, add_generation_prompt=True
-            )
+            prompt_text, confirmed = render_for_probe(self._tok, list(chat))
             token_ids, variant = resolve_letter_token_ids(self._tok, prompt_text, cands)
             ids = self._tok(prompt_text, return_tensors="pt", add_special_tokens=False)
             ids = ids.input_ids.to(self._model.device)
@@ -485,8 +836,47 @@ class HFBackend(Backend):
             probs = renormalize_letter_logprobs(raw)
             reads.append(LetterProbRead(
                 candidates=list(cands), raw_logprobs=raw, probs=probs, complete=complete,
-                backend="transformers", detail={"token_variant": variant},
+                backend="transformers",
+                detail={"token_variant": variant, "continuation_confirmed": confirmed},
             ))
+        return reads
+
+    def prompt_token_logprobs(self, chats: Sequence[Chat]) -> list[PromptLogprobs]:
+        """Teacher-forced forward pass over each prompt: no sampling, no top-k. Position `i`'s
+        logprob comes from the distribution the model assigns *after* seeing tokens `0..i-1`
+        (`logits[i-1]`), the standard next-token-prediction reading, applied here to the
+        prompt's own tokens instead of to a generated continuation -- modelled directly on the
+        manual logit read `letter_probs` above already does for a single position.
+        """
+        reads = []
+        for chat in chats:
+            prompt_text = self._tok.apply_chat_template(
+                list(chat), tokenize=False, add_generation_prompt=True
+            )
+            ids = self._tok(prompt_text, return_tensors="pt", add_special_tokens=False)
+            ids = ids.input_ids.to(self._model.device)
+            with self._torch.no_grad():
+                logits = self._model(ids).logits[0]  # (seq_len, vocab)
+            log_probs = self._torch.log_softmax(logits.float(), dim=-1)
+
+            token_ids = ids[0].tolist()
+            tokens = self._tok.convert_ids_to_tokens(token_ids)
+            logprobs: list[float | None] = [None] if token_ids else []
+            for pos in range(1, len(token_ids)):
+                logprobs.append(float(log_probs[pos - 1, token_ids[pos]].item()))
+
+            reads.append(PromptLogprobs(
+                token_ids=token_ids, tokens=tokens, logprobs=logprobs,
+                backend="transformers", complete=True, detail={},
+            ))
+
+            # `logits`/`log_probs` are full-vocab float32 tensors, one pair per call. Left to
+            # the allocator's own pace across hundreds of variable-length prompts they
+            # fragment VRAM upward until the watchdog's 95% ceiling aborts the run (measured on
+            # Part C's longer, 6-option prompts). Freeing them each item keeps peak usage flat.
+            del ids, logits, log_probs
+            if self._torch.cuda.is_available():
+                self._torch.cuda.empty_cache()
         return reads
 
     def close(self) -> None:

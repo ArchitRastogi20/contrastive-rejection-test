@@ -11,6 +11,7 @@ source sentence retargeted onto R3's target.
 from __future__ import annotations
 
 import copy
+import random
 import re
 from dataclasses import dataclass
 
@@ -361,11 +362,77 @@ class RepairDiagnostics:
     r3_candidates_total: int
     r3_candidates_without_attribute: int
     r3_picked_letter: str
+    # Which rule chose `r3_picked_letter` -- see `select_r3_target_index`. Defaulted so every
+    # existing caller (and every existing saved record read back through this dataclass) still
+    # constructs cleanly; every code path in this file that builds a RepairDiagnostics passes
+    # it explicitly, so the default is only ever reached by an old call site, never a live one.
+    r3_strategy: str = "prefer_lacking"
+
+
+# The three ways R3/R4's target can be chosen -- one rule (`build_conditions_with_diagnostics`'s
+# historical default), one true counterfactual, and one that ignores the attribute entirely. See
+# `select_r3_target_index`.
+R3_STRATEGIES = ("prefer_lacking", "prefer_having", "random")
+
+
+def select_r3_target_index(
+    r3_candidate_indices: list[int],
+    r3_indices_without_attribute: list[int],
+    r3_indices_with_attribute: list[int],
+    *,
+    n_options: int,
+    strategy: str = "prefer_lacking",
+    rng: random.Random | None = None,
+) -> int:
+    """Which non-excluded option R3/R4 edits -- a property of the *item*, decided once, before
+    any R1/R2 candidate search runs (see `build_conditions_with_diagnostics`).
+
+    Three named strategies, all deterministic given their inputs:
+
+    - "prefer_lacking" (the default; what every run before this file's E3 extension built
+      with): at `n_options` strictly above `config.PREFER_LACKING_TARGET_ABOVE`, prefer a
+      candidate that already lacks the named attribute -- gate 8 requires exactly that, so this
+      choice tends to satisfy it by construction rather than by the luck of which option was
+      left over. Deterministic tie-break: first in existing option order among those that
+      qualify. Falls back to the first non-excluded candidate at `n_options<=4`, or when no
+      candidate qualifies -- unchanged from every run built before this function existed.
+    - "prefer_having": the true counterfactual arm. Same shape, same threshold, but prefers a
+      candidate that already *carries* the named attribute. Such a target always fails gate 8
+      (`check_integrity` requires the post-edit profile to lack the attribute, and this
+      candidate already has it before any edit is even applied) -- so this strategy is a
+      research instrument for measuring what gate 8's preference excludes, not one expected to
+      build items itself.
+    - "random": uniform over every non-excluded candidate, ignoring the attribute split
+      entirely. This is what decouples "the explanation is not specific to the location it
+      named" from "the explanation named a criterion that applies broadly" -- see
+      `gate8_variant.py`. Requires `rng`; the same `item_id`-seeded `random.Random` always
+      yields the same pick for the same item, and a different item's seed yields an
+      independent one (see `gate8_variant._item_rng`).
+
+    Every strategy is handed the full candidate list and both attribute-split sublists so none
+    of them needs to recompute `attribute_in_profile` itself -- that work already happened once
+    in `build_conditions_with_diagnostics`.
+    """
+    if strategy == "prefer_lacking":
+        if n_options > C.PREFER_LACKING_TARGET_ABOVE and r3_indices_without_attribute:
+            return r3_indices_without_attribute[0]
+        return r3_candidate_indices[0]
+    if strategy == "prefer_having":
+        if n_options > C.PREFER_LACKING_TARGET_ABOVE and r3_indices_with_attribute:
+            return r3_indices_with_attribute[0]
+        return r3_candidate_indices[0]
+    if strategy == "random":
+        if rng is None:
+            raise ValueError("strategy 'random' requires an rng")
+        return rng.choice(r3_candidate_indices)
+    raise ValueError(f"unknown r3 target-selection strategy {strategy!r}; expected one of "
+                      f"{R3_STRATEGIES}")
 
 
 def build_conditions_with_diagnostics(
     item: Item, rejection: Rejection, corpus_index: dict, choice_letter: str | None = None,
-    n_options: int | None = None,
+    n_options: int | None = None, *, r3_strategy: str = "prefer_lacking",
+    r3_rng: random.Random | None = None,
 ) -> tuple[dict[str, Item], RepairDiagnostics]:
     """The five conditions R0-R4, plus the search trail, or raise RepairUnavailable.
 
@@ -410,6 +477,13 @@ def build_conditions_with_diagnostics(
     and the combination is accepted only once R1/R2/R3/R4 together pass every gate. The item is
     dropped only once both searches are genuinely exhausted (or the cap is hit), never on the
     first candidate that happens to fail.
+
+    `r3_strategy`/`r3_rng` select which rule from `select_r3_target_index` performs the target
+    pick described above -- defaulted to "prefer_lacking" with no rng, which is exactly the
+    selection this docstring already describes and is what every caller used before these
+    parameters existed, so an unmodified call site is byte-for-byte unaffected. Pass a different
+    strategy (and, for "random", an `r3_rng`) to build the same R0-R2 conditions against a
+    different R3/R4 target -- see `gate8_variant.py`, which is the only caller that does.
     """
     rival_idx = next(
         (i for i, o in enumerate(item.options) if _norm(o.title) == _norm(rejection.title)), None
@@ -452,19 +526,21 @@ def build_conditions_with_diagnostics(
         )
     ]
 
-    if n_options > C.PREFER_LACKING_TARGET_ABOVE and r3_indices_without_attribute:
-        # Prefer a target that already lacks the named attribute, so gate 8 is satisfied by
-        # construction rather than by luck. Deterministic tie-break: first in existing option
-        # order among those that qualify, the same convention `_repair_source_candidates` and
-        # `_r2_candidate_pool` use elsewhere in this file. Confined to n_options > 4 -- see the
-        # docstring above for why runs 1 and 2 (n_options=4) must not take this branch.
-        r3_idx = r3_indices_without_attribute[0]
-    else:
-        # n_options <= 4 (today's default, and the two committed runs), or no candidate
-        # qualifies: the first available one, exactly as before this preference existed. The
-        # gate is never weakened by this fallback -- it either fires exactly as it does today,
-        # or the search below finds a combination that passes it anyway.
-        r3_idx = r3_candidate_indices[0]
+    # The complementary split -- computed alongside `r3_indices_without_attribute` for exactly
+    # the same reason: "prefer_having" (see `select_r3_target_index`) needs it, and every
+    # strategy's diagnostics should be auditable off the same up-front pass regardless of which
+    # one is actually asked to pick.
+    r3_indices_with_attribute = [
+        i for i in r3_candidate_indices if i not in r3_indices_without_attribute
+    ]
+
+    # Target selection is a property of the item, decided once, up front -- see
+    # `select_r3_target_index` for the three named rules and `r3_strategy`'s docstring above
+    # for why the default reproduces every run built before it existed byte-for-byte.
+    r3_idx = select_r3_target_index(
+        r3_candidate_indices, r3_indices_without_attribute, r3_indices_with_attribute,
+        n_options=n_options, strategy=r3_strategy, rng=r3_rng,
+    )
     r3_title = item.options[r3_idx].title
     r3_candidates_total = len(r3_candidate_indices)
     r3_candidates_without_attribute = len(r3_indices_without_attribute)
@@ -546,6 +622,7 @@ def build_conditions_with_diagnostics(
                     r3_candidates_total=r3_candidates_total,
                     r3_candidates_without_attribute=r3_candidates_without_attribute,
                     r3_picked_letter=chr(ord("A") + r3_idx),
+                    r3_strategy=r3_strategy,
                 )
             last_gate_failures = failures
 
@@ -590,15 +667,18 @@ def build_conditions_with_diagnostics(
 
 def build_conditions(
     item: Item, rejection: Rejection, corpus_index: dict, choice_letter: str | None = None,
-    n_options: int | None = None,
+    n_options: int | None = None, *, r3_strategy: str = "prefer_lacking",
+    r3_rng: random.Random | None = None,
 ) -> dict[str, Item]:
     """The five conditions R0-R4 from the experiment design doc, or raise RepairUnavailable.
 
     A thin wrapper around `build_conditions_with_diagnostics` that drops the search trail, for
-    callers (and the existing tests) that only need the conditions themselves.
+    callers (and the existing tests) that only need the conditions themselves. `r3_strategy`/
+    `r3_rng` are forwarded unchanged -- see that function's docstring.
     """
     conditions, _diagnostics = build_conditions_with_diagnostics(
-        item, rejection, corpus_index, choice_letter, n_options
+        item, rejection, corpus_index, choice_letter, n_options,
+        r3_strategy=r3_strategy, r3_rng=r3_rng,
     )
     return conditions
 

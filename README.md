@@ -31,8 +31,13 @@ code/
 │   ├── rescore.py                    re-scores saved raw responses under a corrected extractor, no GPU
 │   ├── audit_probe_missingness.py    offline audit of letter-probe completion by model/part/condition
 │   ├── analyze_run3.py               offline analyses of run 3 → writes a report outside code/
+│   ├── analyze_round5.py             regenerates round 5's statistics from committed per-item records
+│   ├── surprisal.py                  token-level surprisal of the inserted sentence against its control
+│   ├── probe_variants.py             alternative forced-choice probe prompts, to test completion rate
+│   ├── gate8_variant.py              three target-selection strategies for the R3/R4 edit location
+│   ├── decoding_sweep.py             re-runs generation at non-zero temperature, N samples per item
 │   └── watchdog.py                   progress display, wall-clock budget, VRAM guard, GPU-second ledger
-├── tests/                          176 tests, no GPU, no network, seconds to run
+├── tests/                          346 tests, no GPU, no network, seconds to run
 │   ├── conftest.py                    shared fixtures
 │   ├── fixtures/twowiki_sample.jsonl  a small offline slice of the corpus
 │   └── test_*.py                      test_logprob.py covers models.py's probe, test_pipeline_dryrun.py
@@ -106,7 +111,7 @@ information against duplicating existing information.
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests -q                       # 176 tests, no GPU
+python -m pytest tests -q                       # 346 tests, no GPU
 python -m pilot.run_experiment --self-check     # all eight gates on fixtures
 python -m pilot.run_experiment --dry-run --limit 6 --out-dir /tmp/smoke
 ```
@@ -175,6 +180,34 @@ current claim.
 5. **The pilot's claim that spontaneous complaints are more accurate than elicited ones is
    withdrawn**, having come from comparing against two different denominators. On a common
    denominator the two are 68.4% and 68.2%.
+
+## Additional checks
+
+Five modules extend the analysis beyond the headline numbers above, each run separately from the
+main harness.
+
+**`surprisal.py`** measures token-level negative log-likelihood of the inserted sentence in its
+host paragraph. The relevant insertion is about 1.2 nats/token less surprising than its
+length-matched control, in every model tested — so the control matches the relevant sentence on
+length but not on plausibility, and the content contrasts above identify content and plausibility
+jointly.
+
+**`analyze_round5.py`** regenerates the round-5 statistics from the committed per-item records:
+leave-one-model-out on both measures, between-model heterogeneity, an item-clustered bootstrap,
+per-relation stratification, control-arm provenance, and the fluency conditioning. `--section`
+selects one; `--section all` runs everything.
+
+**`probe_variants.py`** tests whether restructuring the forced-choice probe prompt raises
+completion. Prefilling raises one model's completion from 55.4% to near 100%, but agreement with
+the baseline probe, on the rows where both complete, is only about half.
+
+**`gate8_variant.py`** offers three named target-selection strategies for the R3/R4 edit
+location. The `prefer_having` strategy can never build an item: gate 8 requires the target's
+profile not to contain the named attribute after the control edit, so a target that already
+carries it always fails.
+
+**`decoding_sweep.py`** re-runs generation at non-zero temperature with N samples per item. It
+refuses to run above temperature 0 on a backend without a per-call temperature override.
 
 ## Limitations of the artifact
 

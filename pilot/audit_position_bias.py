@@ -399,13 +399,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--results", default=Path("results"), type=Path,
                      help="the results tree holding exp3a, exp3b, exp3c (default: results)")
     ap.add_argument("--out", default=None, type=Path,
-                     help="where to write the report (default: POSITION_BIAS_AUDIT.md at the "
-                          "tree root)")
+                     help="where to write the report (default: a fixed location at the tree "
+                          "root)")
     args = ap.parse_args(argv)
 
     # Report lands at the tree root; this project keeps its write-ups outside the code tree, so
     # the generated file is moved there afterwards rather than written across trees from here.
-    out = args.out or (REPO_ROOT / "POSITION_BIAS_AUDIT.md")
+    out = args.out or (REPO_ROOT / "position_bias_audit_report.txt")
     report = build_report(args.results)
     out.write_text(report, encoding="utf-8")
     print(f"wrote {out}")
