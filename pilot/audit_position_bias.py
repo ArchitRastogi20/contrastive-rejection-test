@@ -399,11 +399,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--results", default=Path("results"), type=Path,
                      help="the results tree holding exp3a, exp3b, exp3c (default: results)")
     ap.add_argument("--out", default=None, type=Path,
-                     help="where to write the report (default: docs/POSITION_BIAS_AUDIT.md)")
+                     help="where to write the report (default: POSITION_BIAS_AUDIT.md at the "
+                          "tree root)")
     args = ap.parse_args(argv)
 
-    # Write-ups live in docs/, not in the code tree: the released harness ships code only.
-    out = args.out or (REPO_ROOT / "docs" / "POSITION_BIAS_AUDIT.md")
+    # Report lands at the tree root; this project keeps its write-ups outside the code tree, so
+    # the generated file is moved there afterwards rather than written across trees from here.
+    out = args.out or (REPO_ROOT / "POSITION_BIAS_AUDIT.md")
     report = build_report(args.results)
     out.write_text(report, encoding="utf-8")
     print(f"wrote {out}")
