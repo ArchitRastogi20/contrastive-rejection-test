@@ -37,19 +37,33 @@ code/
 │   ├── probe_variants.py             alternative forced-choice probe prompts, to test completion rate
 │   ├── gate8_variant.py              three target-selection strategies for the R3/R4 edit location
 │   ├── decoding_sweep.py             re-runs generation at non-zero temperature, N samples per item
+│   ├── run_necessity.py              entry point: E3, deletes the chosen option's own stated attribute
+│   │                                   (N1) against a length-matched control deletion (N2), N0 unedited
+│   ├── analyze_necessity.py          offline analysis of E3 from the committed `stage_necessity_*.jsonl`,
+│   │                                   no GPU
+│   ├── analyze_relation_stratum.py   splits the R1-R2/R3-R4 content contrasts by whether the model's
+│   │                                   named attribute is itself a parentage relation, to bound a
+│   │                                   template confound between relevance and relation type
 │   └── watchdog.py                   progress display, wall-clock budget, VRAM guard, GPU-second ledger
-├── tests/                          349 tests, no GPU, no network, seconds to run
+├── tests/                          417 tests, no GPU, no network, seconds to run
 │   ├── conftest.py                    shared fixtures
 │   ├── fixtures/twowiki_sample.jsonl  a small offline slice of the corpus
 │   └── test_*.py                      test_logprob.py covers models.py's probe, test_pipeline_dryrun.py
-│                                       covers run_experiment.py's pipeline; the rest are named after the
-│                                       pilot module they test
+│                                       covers run_experiment.py's pipeline; test_round6_support.py covers
+│                                       shared round-6 helpers (selection/reconstruction) that
+│                                       run_necessity.py and probe_variants.py both depend on; the rest
+│                                       are named after the pilot module they test
 ├── figures/
 │   └── make_figures.py               builds the paper's two figures from results/ and the run-3 analysis report
 ├── scripts/
 │   ├── setup_env.sh                   builds the pinned venv
 │   ├── prefetch_models.sh             downloads model weights ahead of a run, so a GPU run isn't
 │   │                                   spent waiting on a download
+│   ├── prefetch_round6.sh             downloads round 6's four weight sets straight to the local
+│   │                                   directories run_necessity.py and probe_variants.py expect
+│   ├── monitor.sh                     external health-check loop for a running job: watches the PID,
+│   │                                   heartbeat.json, nvidia-smi and disk, since the in-process
+│   │                                   watchdog cannot report that its own process has died
 │   └── smoke.sh                       three fast checks (self-check, dry-run, pytest) to run before
 │                                       spending any GPU time
 ├── results/                        run outputs only — JSON / JSONL / CSV / run logs, never prose
@@ -61,7 +75,17 @@ code/
 │   ├── exp/, exp2/                    two earlier full runs of the repair experiment, superseded but kept
 │   │                                   because the corrections below are only checkable against them
 │   ├── exp3a/, exp3b/, exp3c/         the three parts (A, B, C) of the final run this paper reports
-│   └── exp_rebuild*/                  intermediate re-derivations kept for the audit trail
+│   ├── exp_rebuild*/                  intermediate re-derivations kept for the audit trail
+│   ├── stage_necessity_*.jsonl, necessity_summary.json, run_necessity.log
+│   │                                   E3 (necessity), one row per item per N0-N2 condition, produced by
+│   │                                   `run_necessity.py --part A` on the original three-model roster
+│   ├── probe_variants___...DeepSeek-R1-Distill-Qwen-14B-AWQ.jsonl, probe_variants_summary.json,
+│   │   probe_variants.log            the probe-prefill test on the reasoning model, produced by
+│   │                                   `probe_variants.py --part B --models DeepSeek`
+│   └── e1/, e1_pooled/                the fourth-lineage generalisation check (Phi-3.5-mini-instruct,
+│                                       Granite-3.0-8B-Instruct): e1/ holds each model's own stage 1-3,
+│                                       e1_pooled/ the cross-model pooled summary from replaying both
+│                                       models' stage 1 together via `run_experiment.py --from-stage1`
 ├── requirements.txt                the 3090 Ti / vLLM environment
 ├── requirements-colab.txt          the T4 fallback environment (plain transformers, no vLLM)
 └── .env.example                    names of the environment variables the code reads; no values
@@ -112,7 +136,7 @@ information against duplicating existing information.
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests -q                       # 349 tests, no GPU
+python -m pytest tests -q                       # 417 tests, no GPU
 python -m pilot.run_experiment --self-check     # all eight gates on fixtures
 python -m pilot.run_experiment --dry-run --limit 6 --out-dir /tmp/smoke
 ```
@@ -209,7 +233,7 @@ current claim.
 
 ## Additional checks
 
-Five modules extend the analysis beyond the headline numbers above, each run separately from the
+Eight modules extend the analysis beyond the headline numbers above, each run separately from the
 main harness.
 
 **`surprisal.py`** measures token-level negative log-likelihood of the inserted sentence in its
@@ -223,9 +247,51 @@ leave-one-model-out on both measures, between-model heterogeneity, an item-clust
 per-relation stratification, control-arm provenance, and the fluency conditioning. `--section`
 selects one; `--section all` runs everything.
 
+**`analyze_relation_stratum.py`** checks whether the content contrasts (R1 vs R2, R3 vs R4) are
+measuring relevance or picking up a template mismatch instead. The length-matched irrelevant
+sentence (R2, R4) states a parentage relation in most items regardless of what the model actually
+named as missing, so "relevant vs. irrelevant" is, in most items, also "named relation vs.
+parentage relation." Splitting items by whether the model's own named attribute is itself
+parentage separates the two: where it is, the control is relation-matched and any surviving effect
+is attributable to relevance; where it is not, the confound remains. Both strata read from
+`results/exp3a` and `results/exp3c` alone, no new generation.
+
 **`probe_variants.py`** tests whether restructuring the forced-choice probe prompt raises
 completion. Prefilling raises one model's completion from 55.4% to near 100%, but agreement with
-the baseline probe, on the rows where both complete, is only about half.
+the baseline probe, on the rows where both complete, is only about half. On
+DeepSeek-R1-Distill-Qwen-14B-AWQ, a reasoning model whose baseline probe never completes at all
+(0/425 rows, every condition), both prefill variants complete on every row, but agreement with the
+baseline is undefined rather than measured: with zero baseline completions there is no row on
+which to check whether the prefilled read matches what the baseline would have said. What this
+run establishes is completion rising from 0% to 100%, with agreement against the baseline left
+undefined rather than measured; the two prefill variants agree with each other on only 366/425
+rows (86.1%), short of unanimity. Prefilling substitutes a working instrument for this model,
+whose relationship to the baseline's intended reading remains unknown.
+
+**`run_necessity.py` / `analyze_necessity.py`** test necessity rather than sufficiency: instead of
+inserting the named attribute into the rival's profile, delete the sentence stating it from the
+*chosen* option's own profile (condition N1), against a length-matched control deletion from the
+same profile (N2), with N0 an unedited integrity check. On the original three-model roster
+(Llama-3.1-8B-Instruct, Mistral-7B-Instruct-v0.3, Qwen2.5-7B-Instruct; 139 qualifying items, 135
+after excluding 4 Llama items where even N0 flipped under greedy decoding, an anomaly noted but not
+resolved), deleting the named attribute moves the model off its original choice far more often
+than deleting the control sentence: McNemar b=7, c=33 (exact p = 4.2e-05), odds ratio 0.21 [95% CI
+0.09, 0.48]. The direction holds in all three models individually, with Qwen short of conventional
+significance at its smaller discordant-pair count.
+
+**`run_experiment.py --from-stage1`, fourth-lineage check (`results/e1`, `results/e1_pooled`)**
+replicates the content and location contrasts on two model families outside the original roster:
+Phi-3.5-mini-instruct (132 built items) and Granite-3.0-8B-Instruct (54 built items). Five other
+candidate lineages were tried and dropped for five separate, documented incompatibilities with
+this project's pinned vLLM version, chat-template handling or context length, so the roster this
+check actually covers is two independent families rather than the three originally sought, and
+Granite's item count is well under half of Phi's and of any model in the original roster. Pooled
+across both models, both contrasts replicate in direction: content (R1 vs R2) mean Δp +0.052
+[0.019, 0.087], location (R3 vs R4) mean Δp +0.109 [0.067, 0.156]. Read per model rather than
+pooled, the location contrast is clear on Phi-3.5 (+0.147 [0.091, 0.208]) and its interval crosses
+zero on Granite alone (+0.009 [-0.015, 0.034]), a pattern better explained by Granite's much
+smaller n reducing power than by the effect reversing, though the two cannot be distinguished
+further at this item count.
 
 **`gate8_variant.py`** offers three named target-selection strategies for the R3/R4 edit
 location. The `prefer_having` strategy can never build an item: gate 8 requires the target's

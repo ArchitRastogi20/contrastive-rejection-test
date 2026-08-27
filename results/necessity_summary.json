@@ -1,0 +1,217 @@
+{
+  "finished_utc": "2026-08-27 15:12:16 UTC",
+  "part": "A",
+  "dry_run": false,
+  "seed": 20260820,
+  "temperature": 0.0,
+  "models": [
+    "/workspace/.hf/models/Llama-3.1-8B-Instruct",
+    "/workspace/.hf/models/Mistral-7B-Instruct-v0.3",
+    "/workspace/.hf/models/Qwen2.5-7B-Instruct"
+  ],
+  "selection": {
+    "part": "A",
+    "exp_dir": "/workspace/llm4xai_rome/code/results/exp3a",
+    "n_options": 4,
+    "models": {
+      "/workspace/.hf/models/Llama-3.1-8B-Instruct": {
+        "attempted": 2200,
+        "unreadable_choice": 0,
+        "missing_item": 0,
+        "option_order_mismatch": 0,
+        "no_usable_rejection": 1684,
+        "kept": 59,
+        "drop_reasons": {
+          "integrity_gate_failed": 131,
+          "attribute_not_in_chosen_profile": 254,
+          "insufficient_sentences": 70,
+          "no_n2_candidate": 2
+        },
+        "gate_failures": {
+          "gate1": 30,
+          "gate3": 109,
+          "gate5": 21
+        }
+      },
+      "/workspace/.hf/models/Mistral-7B-Instruct-v0.3": {
+        "attempted": 2200,
+        "unreadable_choice": 3,
+        "missing_item": 0,
+        "option_order_mismatch": 0,
+        "no_usable_rejection": 1701,
+        "kept": 64,
+        "drop_reasons": {
+          "attribute_not_in_chosen_profile": 216,
+          "integrity_gate_failed": 155,
+          "insufficient_sentences": 56,
+          "no_n2_candidate": 5
+        },
+        "gate_failures": {
+          "gate1": 34,
+          "gate3": 117,
+          "gate5": 40
+        }
+      },
+      "/workspace/.hf/models/Qwen2.5-7B-Instruct": {
+        "attempted": 2200,
+        "unreadable_choice": 52,
+        "missing_item": 0,
+        "option_order_mismatch": 0,
+        "no_usable_rejection": 1704,
+        "kept": 50,
+        "drop_reasons": {
+          "integrity_gate_failed": 111,
+          "attribute_not_in_chosen_profile": 225,
+          "insufficient_sentences": 56,
+          "no_n2_candidate": 2
+        },
+        "gate_failures": {
+          "gate1": 28,
+          "gate3": 89,
+          "gate5": 16
+        }
+      }
+    }
+  },
+  "resolved_n_options": 4,
+  "cumulative_gpu_seconds": 67307.7,
+  "pooled": {
+    "n_items_total": 139,
+    "n_items_interpretable": 135,
+    "n_items_excluded_n0_uninterpretable": 4,
+    "mcnemar_n1_vs_n2": {
+      "b_a_only": 7,
+      "c_b_only": 33,
+      "n_discordant": 40,
+      "p_exact_two_sided": 4.2277022657799534e-05
+    },
+    "mcnemar_n1_vs_n0": {
+      "b_a_only": 0,
+      "c_b_only": 45,
+      "n_discordant": 45,
+      "p_exact_two_sided": 5.684341886080802e-14
+    }
+  },
+  "per_model": {
+    "/workspace/.hf/models/Llama-3.1-8B-Instruct": {
+      "n_items": 47,
+      "condition_counts": {
+        "N0": {
+          "still_chooses_original": 43,
+          "unreadable": 0,
+          "n": 47
+        },
+        "N1": {
+          "still_chooses_original": 29,
+          "unreadable": 0,
+          "n": 47
+        },
+        "N2": {
+          "still_chooses_original": 39,
+          "unreadable": 0,
+          "n": 47
+        }
+      },
+      "n0_reproduced": 43,
+      "n0_flipped": 4,
+      "abort_reason": null,
+      "elapsed_min": 6.2,
+      "vram_peak_pct": 81.3,
+      "n_items_total": 47,
+      "n_items_interpretable": 43,
+      "n_items_excluded_n0_uninterpretable": 4,
+      "mcnemar_n1_vs_n2": {
+        "b_a_only": 4,
+        "c_b_only": 14,
+        "n_discordant": 18,
+        "p_exact_two_sided": 0.0308837890625
+      },
+      "mcnemar_n1_vs_n0": {
+        "b_a_only": 0,
+        "c_b_only": 16,
+        "n_discordant": 16,
+        "p_exact_two_sided": 3.0517578125e-05
+      }
+    },
+    "/workspace/.hf/models/Mistral-7B-Instruct-v0.3": {
+      "n_items": 52,
+      "condition_counts": {
+        "N0": {
+          "still_chooses_original": 52,
+          "unreadable": 0,
+          "n": 52
+        },
+        "N1": {
+          "still_chooses_original": 38,
+          "unreadable": 0,
+          "n": 52
+        },
+        "N2": {
+          "still_chooses_original": 48,
+          "unreadable": 0,
+          "n": 52
+        }
+      },
+      "n0_reproduced": 52,
+      "n0_flipped": 0,
+      "abort_reason": null,
+      "elapsed_min": 6.86,
+      "vram_peak_pct": 84.4,
+      "n_items_total": 52,
+      "n_items_interpretable": 52,
+      "n_items_excluded_n0_uninterpretable": 0,
+      "mcnemar_n1_vs_n2": {
+        "b_a_only": 1,
+        "c_b_only": 11,
+        "n_discordant": 12,
+        "p_exact_two_sided": 0.00634765625
+      },
+      "mcnemar_n1_vs_n0": {
+        "b_a_only": 0,
+        "c_b_only": 14,
+        "n_discordant": 14,
+        "p_exact_two_sided": 0.0001220703125
+      }
+    },
+    "/workspace/.hf/models/Qwen2.5-7B-Instruct": {
+      "n_items": 40,
+      "condition_counts": {
+        "N0": {
+          "still_chooses_original": 40,
+          "unreadable": 0,
+          "n": 40
+        },
+        "N1": {
+          "still_chooses_original": 24,
+          "unreadable": 1,
+          "n": 40
+        },
+        "N2": {
+          "still_chooses_original": 30,
+          "unreadable": 0,
+          "n": 40
+        }
+      },
+      "n0_reproduced": 40,
+      "n0_flipped": 0,
+      "abort_reason": null,
+      "elapsed_min": 5.94,
+      "vram_peak_pct": 82.0,
+      "n_items_total": 40,
+      "n_items_interpretable": 40,
+      "n_items_excluded_n0_uninterpretable": 0,
+      "mcnemar_n1_vs_n2": {
+        "b_a_only": 2,
+        "c_b_only": 8,
+        "n_discordant": 10,
+        "p_exact_two_sided": 0.109375
+      },
+      "mcnemar_n1_vs_n0": {
+        "b_a_only": 0,
+        "c_b_only": 15,
+        "n_discordant": 15,
+        "p_exact_two_sided": 6.103515625e-05
+      }
+    }
+  }
+}

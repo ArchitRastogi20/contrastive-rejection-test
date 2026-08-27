@@ -1,0 +1,161 @@
+{
+  "finished_utc": "2026-08-27 14:49:06 UTC",
+  "part": "B",
+  "dry_run": false,
+  "seed": 20260820,
+  "models": [
+    "/workspace/.hf/models/DeepSeek-R1-Distill-Qwen-14B-AWQ"
+  ],
+  "reconstruction": {
+    "part": "B",
+    "exp_dir": "/workspace/llm4xai_rome/code/results/exp3b",
+    "n_options": 4,
+    "corpus_n_items": 1200,
+    "models": {
+      "/workspace/.hf/models/DeepSeek-R1-Distill-Qwen-14B-AWQ": {
+        "attempted": 85,
+        "rebuilt": 85,
+        "missing_item": 0,
+        "missing_stage1": 0,
+        "option_order_mismatch": 0,
+        "no_usable_rejection": 0,
+        "repair_unavailable": 0,
+        "r3_target_verification_failed": 0,
+        "n_items_used": 1200,
+        "stage1_source": "local"
+      }
+    }
+  },
+  "variants": {
+    "baseline": "today's probe: append the instruction to the existing user turn, then force one generated token",
+    "prefill_stem": "prefill the assistant turn with 'Answer: ' and force the next token",
+    "prefill_paren": "prefill the assistant turn with 'The correct candidate is (' and force the next token"
+  },
+  "cumulative_gpu_seconds": 66167.1,
+  "per_model": {
+    "/workspace/.hf/models/DeepSeek-R1-Distill-Qwen-14B-AWQ": {
+      "n_items": 85,
+      "n_rows": 1275,
+      "abort_reason": null,
+      "elapsed_min": 4.86,
+      "vram_peak_pct": 80.5,
+      "completion_by_variant": {
+        "baseline": {
+          "n": 425,
+          "complete": 0,
+          "rate": 0.0
+        },
+        "prefill_stem": {
+          "n": 425,
+          "complete": 425,
+          "rate": 1.0
+        },
+        "prefill_paren": {
+          "n": 425,
+          "complete": 425,
+          "rate": 1.0
+        }
+      },
+      "completion_by_condition": {
+        "baseline": {
+          "R0": {
+            "n": 85,
+            "complete": 0,
+            "rate": 0.0
+          },
+          "R1": {
+            "n": 85,
+            "complete": 0,
+            "rate": 0.0
+          },
+          "R2": {
+            "n": 85,
+            "complete": 0,
+            "rate": 0.0
+          },
+          "R3": {
+            "n": 85,
+            "complete": 0,
+            "rate": 0.0
+          },
+          "R4": {
+            "n": 85,
+            "complete": 0,
+            "rate": 0.0
+          }
+        },
+        "prefill_stem": {
+          "R0": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R1": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R2": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R3": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R4": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          }
+        },
+        "prefill_paren": {
+          "R0": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R1": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R2": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R3": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          },
+          "R4": {
+            "n": 85,
+            "complete": 85,
+            "rate": 1.0
+          }
+        }
+      },
+      "agreement": {
+        "baseline_vs_prefill_stem": {
+          "n_both_complete": 0,
+          "n_agree": 0,
+          "rate": null
+        },
+        "baseline_vs_prefill_paren": {
+          "n_both_complete": 0,
+          "n_agree": 0,
+          "rate": null
+        },
+        "prefill_stem_vs_prefill_paren": {
+          "n_both_complete": 425,
+          "n_agree": 366,
+          "rate": 0.8611764705882353
+        }
+      }
+    }
+  }
+}

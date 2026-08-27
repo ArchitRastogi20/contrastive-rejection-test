@@ -1,0 +1,12 @@
+{
+  "label": "__workspace___hf__models__granite-3_0-8b-instruct/stage3",
+  "done": 540,
+  "total": 540,
+  "elapsed_min": 13.42,
+  "seconds_per_item": 1.49,
+  "vram_peak_pct": 87.6,
+  "vram_strikes": 0,
+  "eta_utc": "2026-08-27 19:44:16 UTC (in 0.0 min)",
+  "updated_utc": "2026-08-27 19:44:16 UTC",
+  "abort_reason": null
+}
