@@ -263,7 +263,7 @@ def test_bootstrap_stat_on_no_data_is_all_none():
 
 
 def test_sign_counts_agree_with_median_direction_on_a_skewed_sample():
-    """The scenario the paper's reviewer hypothesis predicts: many small negative moves and one
+    """The scenario the paper's third explanation predicts: many small negative moves and one
     huge positive outlier. The mean is dragged positive by the outlier; the sign count and the
     median both stay negative -- exactly the decomposition this module is built to detect."""
     values = [-0.01, -0.02, -0.01, -0.015, -0.02, 5.0]
@@ -403,10 +403,17 @@ def test_load_part_keys_by_model_then_item_then_condition(tmp_path, monkeypatch)
     part_dir.mkdir()
     PARTS["Y"] = ("exp3y", "test fixture")
     try:
+        # load_part now needs option_titles from this part's own stage 1 (part != "A") for
+        # every (model, item_id) it loads -- see test_load_part_raises_on_missing_titles below
+        # for what happens without this.
+        _write_jsonl(part_dir / "stage1_m1.jsonl",
+                     [{"model": "m1", "item_id": "i1", "option_titles": ["Anna", "Bruno"]}])
+        _write_jsonl(part_dir / "stage1_m2.jsonl",
+                     [{"model": "m2", "item_id": "i1", "option_titles": ["Anna", "Bruno"]}])
         rows = [
-            {"model": "m1", "item_id": "i1", "condition": "R0", "x": 1},
-            {"model": "m1", "item_id": "i1", "condition": "R1", "x": 2},
-            {"model": "m2", "item_id": "i1", "condition": "R0", "x": 3},
+            {"model": "m1", "item_id": "i1", "condition": "R0", "x": 1, "response": "A"},
+            {"model": "m1", "item_id": "i1", "condition": "R1", "x": 2, "response": "A"},
+            {"model": "m2", "item_id": "i1", "condition": "R0", "x": 3, "response": "A"},
         ]
         _write_jsonl(part_dir / "stage3_m1.jsonl",
                      [r for r in rows if r["model"] == "m1"])
@@ -421,6 +428,27 @@ def test_load_part_keys_by_model_then_item_then_condition(tmp_path, monkeypatch)
         assert loaded["m2"]["i1"]["R0"]["x"] == 3
     finally:
         del PARTS["Y"]
+
+
+def test_load_part_raises_on_missing_titles(tmp_path):
+    """A stage-3 row whose (model, item_id) has no stage-1 titles is a coverage hole and must
+    raise, not be silently skipped -- this is the loud-failure task 1 requires."""
+    from pilot.analyze_run3 import PARTS
+
+    part_dir = tmp_path / "exp3z"
+    part_dir.mkdir()
+    PARTS["Z2"] = ("exp3z", "test fixture")
+    try:
+        # no stage1_*.jsonl written at all -- titles map is empty.
+        _write_jsonl(part_dir / "stage3_m1.jsonl",
+                     [{"model": "m1", "item_id": "i1", "condition": "R0", "response": "A"}])
+        try:
+            load_part(tmp_path, "Z2")
+            assert False, "expected a KeyError for the missing stage-1 titles"
+        except KeyError:
+            pass
+    finally:
+        del PARTS["Z2"]
 
 
 # --------------------------------------------------------- discordant / concordant split

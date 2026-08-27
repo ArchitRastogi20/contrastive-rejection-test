@@ -17,8 +17,11 @@ import json
 import math
 import random
 from pathlib import Path
+from types import SimpleNamespace
 
+from . import extract
 from .config import REPO_ROOT
+from .data import Entity
 from .run_experiment import bootstrap_ci_mean_diff, mcnemar
 
 # The seed every bootstrap in this file uses, recorded here once so a reader never has to hunt
@@ -50,17 +53,76 @@ def _rows(path: Path):
                 yield json.loads(line)
 
 
+def _load_option_titles(results: Path, part: str) -> dict[tuple[str, str], list[str]]:
+    """``(model, item_id) -> option_titles`` from that part's own stage-1 records.
+
+    Stage-3 rows carry no option titles, only the fixed ``response`` text choice parsing needs
+    them for. Part B and Part C ran their own stage 1, so their titles live under
+    ``exp3b``/``exp3c``; Part A did not -- ``exp3a/experiment_summary.json`` records ``"dataset":
+    "stage1 replay: results/exp2/..."``, so Part A's titles are read from ``exp2`` instead,
+    which is where its stage-1 files actually are.
+    """
+    directory, _ = PARTS[part]
+    stage1_dir = results / ("exp2" if part == "A" else directory)
+    titles: dict[tuple[str, str], list[str]] = {}
+    for path in sorted(stage1_dir.glob("stage1_*.jsonl")):
+        for row in _rows(path):
+            titles[(row["model"], row["item_id"])] = row["option_titles"]
+    return titles
+
+
+def _recompute_choice_fields(row: dict, option_titles: list[str]) -> None:
+    """Overwrite ``choice``/``chosen_is_edited`` in place, re-derived from the row's own raw
+    ``response`` with the fixed-letter-range parser.
+
+    ``extract.parse_choice``'s two letter regexes used to be hard-capped at ``[A-D]``, so a
+    six-option Part C item could never have a chosen letter of E or F read out of it. That is
+    fixed in ``extract.py`` itself; this re-derives the stage-3 file's ``choice`` (written at
+    run time with the buggy parser) the same way, rather than trusting what is on disk.
+    ``parse_choice`` only reads ``item.options[i].title`` and the option count, so a bare
+    options-only stand-in is enough -- stage-3 rows carry no question/answer/gold_title to build
+    a real ``Item`` from, and ``parse_choice`` never looks at those fields anyway.
+
+    ``edited_letter`` is left untouched: it comes from the edit itself
+    (``run_experiment.run_stage3``'s ``edited_letter_by_condition``), not from parsing free
+    text, so the bug never touched it. ``chosen_is_edited`` is recomputed with the exact same
+    rule ``run_stage3`` used -- ``None`` if either side is unreadable/absent, else the equality.
+    """
+    item_stub = SimpleNamespace(options=[Entity(title=t, sentences=[]) for t in option_titles])
+    choice = extract.parse_choice(row.get("response", ""), item_stub)
+    edited_letter = row.get("edited_letter")
+    row["choice"] = choice
+    row["chosen_is_edited"] = (
+        None if choice is None or edited_letter is None else choice == edited_letter
+    )
+
+
 def load_part(results: Path, part: str) -> dict[str, dict[str, dict[str, dict]]]:
     """``{model: {item_id: {condition: row}}}`` for one part's stage-3 output.
 
     Keyed by model first because every contrast below is reported per model before it is
     pooled: run 2's audit found one model carrying most of a pooled effect, and a pooled-only
     table is exactly what hid that.
+
+    Each row's ``choice``/``chosen_is_edited`` are overwritten here, re-derived from the raw
+    ``response`` (see ``_recompute_choice_fields``), before anything downstream ever sees the
+    row -- so every reader of this dict's output, including ``discrete_outcomes``, gets the
+    corrected value without having to know it was corrected. A stage-3 row whose
+    ``(model, item_id)`` has no stage-1 titles is a coverage hole, not a row to skip silently,
+    so it raises rather than dropping the row.
     """
     directory, _ = PARTS[part]
+    titles = _load_option_titles(results, part)
     out: dict[str, dict[str, dict[str, dict]]] = {}
     for path in sorted((results / directory).glob("stage3_*.jsonl")):
         for row in _rows(path):
+            key = (row["model"], row["item_id"])
+            if key not in titles:
+                raise KeyError(
+                    f"part {part}: no stage-1 option_titles for (model={key[0]!r}, "
+                    f"item_id={key[1]!r}) -- checked {'exp2' if part == 'A' else directory}"
+                )
+            _recompute_choice_fields(row, titles[key])
             out.setdefault(row["model"], {}).setdefault(row["item_id"], {})[row["condition"]] = row
     return out
 
@@ -73,7 +135,12 @@ def short_model(name: str) -> str:
 
 
 def discrete_outcomes(items: dict[str, dict[str, dict]]) -> dict[str, dict[str, bool | None]]:
-    """``chosen_is_edited`` per item per condition, the field ``mcnemar`` already consumes."""
+    """``chosen_is_edited`` per item per condition, the field ``mcnemar`` already consumes.
+
+    By the time a row reaches here, ``load_part`` has already overwritten ``chosen_is_edited``
+    with the value re-derived from the raw response (see ``_recompute_choice_fields``) -- this
+    function itself just reads whatever key is on the row, same as before.
+    """
     return {
         item_id: {c: row.get("chosen_is_edited") for c, row in conds.items()}
         for item_id, conds in items.items()
@@ -744,7 +811,7 @@ def build_report(results: Path) -> str:
                   f"| {_ci_stat(t10_ci)} |")
         w("")
     w("If the sign counts and the medians agree with the argmax direction while the means do")
-    w("not, that discrepancy is the mechanism the reviewer's hypothesis predicted. If they do")
+    w("not, that discrepancy is the mechanism the third explanation predicted. If they do")
     w("not agree either, the disagreement is not explained by mean-vs-median arithmetic and")
     w("that should be said plainly rather than papered over.")
     w("")

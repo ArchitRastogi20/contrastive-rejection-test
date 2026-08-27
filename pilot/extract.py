@@ -7,6 +7,7 @@ publication, and so on).
 
 from __future__ import annotations
 
+import functools
 import re
 from dataclasses import dataclass, field
 
@@ -70,11 +71,28 @@ _ABBREV = (
 )
 
 _SENT_END = re.compile(r"(?<=[.!?])\s+")
-_LETTER_PICK = re.compile(
-    r"\b(?:answer|choice|option|candidate)\b(?:\s+(?:is|would\s+be))?[^A-Za-z0-9]{0,6}([A-D])\b",
-    re.IGNORECASE,
-)
-_BARE_LETTER = re.compile(r"(?:^|[^A-Za-z])([A-D])[).:\]]", re.MULTILINE)
+
+# The letter range is derived from the item's own option count rather than hard-coded, because
+# not every item has four options (Part C's items have six): a fixed A-D range makes a letter
+# past D invisible, and a fixed A-F range would let a 4-option item match a spurious "E" or "F"
+# that was never one of its candidates. `functools.lru_cache` means each option count compiles
+# its pattern once.
+
+
+@functools.lru_cache(maxsize=None)
+def _letter_pick_re(n_options: int) -> re.Pattern[str]:
+    last = chr(ord("A") + n_options - 1)
+    return re.compile(
+        rf"\b(?:answer|choice|option|candidate)\b(?:\s+(?:is|would\s+be))?"
+        rf"[^A-Za-z0-9]{{0,6}}([A-{last}])\b",
+        re.IGNORECASE,
+    )
+
+
+@functools.lru_cache(maxsize=None)
+def _bare_letter_re(n_options: int) -> re.Pattern[str]:
+    last = chr(ord("A") + n_options - 1)
+    return re.compile(rf"(?:^|[^A-Za-z])([A-{last}])[).:\]]", re.MULTILINE)
 
 
 def split_sentences(text: str) -> list[str]:
@@ -124,10 +142,10 @@ def parse_choice(text: str, item: Item) -> str | None:
     if len(named_head) == 1:
         return named_head[0]
 
-    m = _LETTER_PICK.search(text)
+    m = _letter_pick_re(len(item.options)).search(text)
     if m:
         return m.group(1).upper()
-    m = _BARE_LETTER.search(head)
+    m = _bare_letter_re(len(item.options)).search(head)
     if m:
         return m.group(1).upper()
 

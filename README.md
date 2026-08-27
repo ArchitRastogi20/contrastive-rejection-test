@@ -31,13 +31,14 @@ code/
 │   ├── rescore.py                    re-scores saved raw responses under a corrected extractor, no GPU
 │   ├── audit_probe_missingness.py    offline audit of letter-probe completion by model/part/condition
 │   ├── analyze_run3.py               offline analyses of run 3 → writes a report outside code/
+│   ├── reparse_partc.py              re-reads Part C's six-option choices under the corrected parser
 │   ├── analyze_round5.py             regenerates round 5's statistics from committed per-item records
 │   ├── surprisal.py                  token-level surprisal of the inserted sentence against its control
 │   ├── probe_variants.py             alternative forced-choice probe prompts, to test completion rate
 │   ├── gate8_variant.py              three target-selection strategies for the R3/R4 edit location
 │   ├── decoding_sweep.py             re-runs generation at non-zero temperature, N samples per item
 │   └── watchdog.py                   progress display, wall-clock budget, VRAM guard, GPU-second ledger
-├── tests/                          346 tests, no GPU, no network, seconds to run
+├── tests/                          349 tests, no GPU, no network, seconds to run
 │   ├── conftest.py                    shared fixtures
 │   ├── fixtures/twowiki_sample.jsonl  a small offline slice of the corpus
 │   └── test_*.py                      test_logprob.py covers models.py's probe, test_pipeline_dryrun.py
@@ -111,7 +112,7 @@ information against duplicating existing information.
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests -q                       # 346 tests, no GPU
+python -m pytest tests -q                       # 349 tests, no GPU
 python -m pilot.run_experiment --self-check     # all eight gates on fixtures
 python -m pilot.run_experiment --dry-run --limit 6 --out-dir /tmp/smoke
 ```
@@ -149,7 +150,10 @@ Odds ratios for the two content contrasts, with 95% intervals, computed per part
 |---|---|---|
 | A, four options | 2.40 [1.31, 4.38] | 3.22 [1.53, 6.81] |
 | B, four options, fresh roster | 1.75 [0.86, 3.56] | 1.07 [0.52, 2.22] |
-| C, six options | 2.09 [1.27, 3.43] | 4.00 [1.93, 8.30] |
+| C, six options | 2.23 [1.40, 3.54] | 4.22 [2.04, 8.73] |
+
+Part C's two figures are post-correction; see correction 6 below for what they were and why they
+moved. Parts A and B are unaffected by that fix, and no probability-measure number anywhere is.
 
 The interaction between content and location, which asks whether the named location receives more
 of the effect, crosses zero in every part on both measures: continuous +0.0008 [-0.0292, 0.0306],
@@ -169,8 +173,13 @@ current claim.
    mean, a subset restricted to the majority direction, and one part checked without the other.
    Recomputed on all items it is 1.45 and 0.91 for the two parts, neither significant, and a
    dose-response test over 950 items rejects the explanation outright.
-2. **A claim that six options materially changes the location result is withdrawn.** The effect
-   size is the same at four and six options, odds ratio 1.63 against 1.64; the sample grew by 32%.
+2. **A claim that six options materially changes the location result was withdrawn, and the
+   withdrawal is itself now withdrawn.** It rested on the two option counts giving the same
+   location odds ratio, 1.63 against 1.64. Correcting the six-option choice parser (correction 6)
+   takes the six-option figure to 2.29, so the two are no longer equal and the argument built on
+   their equality is gone. What the corrected data show is a six-option location contrast that
+   clears the twelve-test Holm correction while the probability measure's interval on the same
+   contrast still includes zero.
 3. **A GPU cost figure double-counted an earlier run.** The summary field it read was already a
    cumulative total.
 4. **An earlier framing, that the named defect is "not necessary", is withdrawn** as stronger than
@@ -180,6 +189,23 @@ current claim.
 5. **The pilot's claim that spontaneous complaints are more accurate than elicited ones is
    withdrawn**, having come from comparing against two different denominators. On a common
    denominator the two are 68.4% and 68.2%.
+6. **Every discrete Part C figure published before this release was computed with a choice parser
+   that could not read two of Part C's six options.** `extract.parse_choice` matched answer
+   letters with two regexes bounded at `[A-D]`. Parts A and B present four options and are
+   unaffected, proven by re-deriving all 3,505 of their rows and matching the stored value exactly.
+   Part C presents six, so a bare-letter answer of "E" or "F" reached only the entity-title path,
+   which recovers a name and not a lone letter. 155 of Part C's 2,815 stage-3 rows carried no
+   readable choice and 134 of them, 72 "E" and 62 "F", recover under the same two patterns bounded
+   by the item's own option count. The missingness was concentrated on exactly the two letters the
+   pattern could not see. Corrected, Part C's four contrasts move from 48/23, 36/9, 59/36 and
+   37/13 to 58/26, 38/9, 71/31 and 48/11, paired *n* from 495-500 to 551-556. Every contrast keeps
+   its sign and moves further from the null. Two conclusions change: the six-option location
+   contrast R1-R3 now clears Holm correction, at 0.0009 against 0.1409, so six of the twelve
+   discrete tests clear 0.05 rather than five, and Part A's adjusted values move with it because
+   Holm is computed over the whole family; and three of Part C's four contrasts now survive
+   dropping any single model, where one did before. `reparse_partc.py` reproduces the superseded
+   numbers from the stored `choice` field before recomputing, so both are checkable from the
+   released records.
 
 ## Additional checks
 
@@ -205,6 +231,11 @@ the baseline probe, on the rows where both complete, is only about half.
 location. The `prefer_having` strategy can never build an item: gate 8 requires the target's
 profile not to contain the named attribute after the control edit, so a target that already
 carries it always fails.
+
+**`reparse_partc.py`** re-reads every Part C stage-3 response with the corrected,
+option-count-aware parser and recomputes the four matched-pairs contrasts, the twelve-test Holm
+family and the three leave-one-model-out checks. It first reproduces the superseded numbers from
+the stored `choice` field, so the pairing convention is verified before anything is recomputed.
 
 **`decoding_sweep.py`** re-runs generation at non-zero temperature with N samples per item. It
 refuses to run above temperature 0 on a backend without a per-call temperature override.

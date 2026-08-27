@@ -62,6 +62,45 @@ def test_choice_unreadable_is_none():
     assert parse_choice("It is hard to say from these profiles.", make_item()) is None
 
 
+def make_six_option_item() -> Item:
+    """Part C's items present six options (A-F); the letter regexes must scale with the
+    item's own option count rather than the four-option case everywhere else in this file."""
+    return Item(
+        item_id="t2",
+        question="Which film is this?",
+        answer="The Face of Fu Manchu",
+        gold_title="The Face of Fu Manchu",
+        options=[Entity(f"Film {letter}", [f"Film {letter} plot."]) for letter in "ABCDEF"],
+    )
+
+
+def test_choice_from_bare_letter_past_d_on_a_six_option_item():
+    # Regression guard for the bug this project shipped: `parse_choice`'s letter regexes were
+    # hard-capped at [A-D], so a six-option item's model answer of "E" or "F" was invisible --
+    # `choice` came back `None` even though the response plainly named a candidate.
+    assert parse_choice("The answer is E.\nIt fits best.", make_six_option_item()) == "E"
+    assert parse_choice("Option F is correct.", make_six_option_item()) == "F"
+
+
+def make_four_option_item() -> Item:
+    """Parts A and B's shape: four options, A-D."""
+    return Item(
+        item_id="t3",
+        question="Which film is this?",
+        answer="Film D",
+        gold_title="Film D",
+        options=[Entity(f"Film {letter}", [f"Film {letter} plot."]) for letter in "ABCD"],
+    )
+
+
+def test_choice_does_not_match_a_spurious_letter_past_the_item_own_option_count():
+    # The other direction of the same bug class: a four-option item must never match a letter
+    # past D, even if "E" appears in the text for an unrelated reason.
+    item = make_four_option_item()
+    assert parse_choice("Option E is correct.", item) is None
+    assert parse_choice("The answer is D.\nIt matches.", item) == "D"
+
+
 # ------------------------------------------------------------------------- attributes
 
 
