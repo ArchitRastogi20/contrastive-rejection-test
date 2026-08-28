@@ -10,8 +10,14 @@ from pathlib import Path
 
 UTC = timezone.utc
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-CODE_ROOT = REPO_ROOT / "code"
+# CODE_ROOT is the directory that actually contains pilot/ -- this file's grandparent -- which
+# holds regardless of whether that directory is reached as <repo>/code (the working tree) or as
+# the repo root itself (the flat public release, where pilot/ sits directly under the checkout).
+# REPO_ROOT only takes the further step out of a "code" wrapper when one exists, so a script that
+# wants "the tree root, one level outside code/" (see audit_position_bias.py, for one) gets the
+# same directory in both layouts, instead of one that silently does not exist.
+CODE_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = CODE_ROOT.parent if CODE_ROOT.name == "code" else CODE_ROOT
 RESULTS_DIR = CODE_ROOT / "results"
 FIXTURE_DIR = CODE_ROOT / "tests" / "fixtures"
 GPU_LEDGER = RESULTS_DIR / "gpu_ledger.csv"
@@ -139,6 +145,30 @@ PER_MODEL_BUDGET_MIN = float(os.environ.get("PILOT_MODEL_BUDGET_MIN", "45"))
 # Whole-run GPU budget, for the ledger's running total. The project allowance is 27 h, raised
 # from 20 h on 2026-08-26 (see the project's experiment ledger).
 PROJECT_GPU_BUDGET_S = 97_200
+
+# ------------------------------------------------------------------------- results validation
+
+
+def require_stage3_records(results: Path, directories, *, label: str = "results") -> None:
+    """Fail loudly, before any heavy computation, if ``results`` does not exist or none of the
+    named part subdirectories hold a ``stage3_*.jsonl`` file.
+
+    A missing or mistyped ``--results`` directory makes every downstream ``glob`` return zero
+    rows silently rather than raising -- the analysis then computes a null result (0/0, an odds
+    ratio of exactly 1.00, p=1.0000) and reports it as if it were data, and a rate of exactly 0
+    or 1 at every condition is a broken instrument, not a finding, except here the *reproduction
+    attempt itself* would be the broken instrument. Call this first and name what was actually
+    searched.
+    """
+    if not results.is_dir():
+        raise SystemExit(f"{label}: results directory not found: {results}")
+    searched = [Path(results) / d for d in directories]
+    if not any(any(p.glob("stage3_*.jsonl")) for p in searched):
+        listing = ", ".join(str(p) for p in searched)
+        raise SystemExit(
+            f"{label}: no stage3_*.jsonl records found under: {listing} -- refusing to "
+            "compute and report a zero-record result as if it were data"
+        )
 
 
 def now_utc() -> datetime:

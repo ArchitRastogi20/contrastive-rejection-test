@@ -118,13 +118,12 @@ environment notes, and the experiment ledger live outside this release. Nothing 
 about the results; `results/` holds only the machine-readable records those write-ups were
 computed from.
 
-Several scripts' own `--results`/`--out`/`--out-dir` defaults resolve from `pilot/config.py`
-under the assumption that `pilot/` sits three levels under the repository root (as it does in the
-private working tree, at `code/pilot/`). In this flattened release `pilot/` sits two levels under
-the root, so those particular defaults resolve one directory above this repository and will not
-exist on a fresh clone. It costs nothing to sidestep: every command below passes `--results`,
-`--out` or `--out-dir` explicitly, and every one of them was run from a fresh clone's root to
-confirm it.
+Several scripts' own `--results`/`--out`/`--out-dir` defaults resolve from `pilot/config.py`,
+which detects whether `pilot/` sits under a `code/` directory (the private working tree) or
+directly at the repository root (this flattened release) and resolves to the right place either
+way, so the bare commands work unmodified from a fresh clone. The commands below still pass
+`--results`, `--out` or `--out-dir` explicitly anyway, since naming the path makes each example
+self-contained on the page; every one of them was run from a fresh clone's root to confirm it.
 
 ## Environment
 

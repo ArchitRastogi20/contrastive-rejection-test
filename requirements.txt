@@ -23,3 +23,8 @@ datasets>=2.20.0
 huggingface_hub>=0.24.0
 pytest>=8.0.0
 psutil>=5.9.0
+
+# figures/make_figures.py only -- not needed to run the pilot itself. Unpinned beyond a floor:
+# neither is implicated in any of the image's measured failures above.
+matplotlib>=3.8.0
+numpy>=1.26.0

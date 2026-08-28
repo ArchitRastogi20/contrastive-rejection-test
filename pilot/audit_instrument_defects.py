@@ -1,21 +1,18 @@
-"""Recompute the five instrument-defect prevalence figures `paper_full/main.tex` attributes to
-an "adversarial audit of ..." that was never committed anywhere in this repository.
-
-An audit of the paper's Limitations section traced every number there back to a committed script
-or doc and found five that trace to nothing: the gate-3 "30.2% under a real tokenizer" figure,
-the gate-5 "28.0% against 4.3%" and "864/7,335" figures, the "87 of 127 (68.5%)" parentage-cue
-misclassification figure, and the "216/1450 (14.90%)" rejection-only-cue figure together with its
-claimed Holm-verdict flips. This script is the audit those AUDIT comments should have cited.
-Every number below is either read straight off the committed `code/results/exp3{a,b,c}` JSONL,
-or -- for gate 3 and gate 5, which need the actual R1-R4 inserted-sentence text and no committed
-JSONL field carries it -- rebuilt with the exact same deterministic call
-`pilot/run_experiment.py`'s own stage 2 makes (`repair.build_conditions_with_diagnostics` on the
-same item, rejection and corpus index), against a local dump of the same 2WikiMultihopQA
-validation split (12,576 rows) already cached under this machine's Hugging Face cache. That
-reconstruction is verified byte-identical against the committed `option_titles`/`gold_title` for
-every one of the 400+1200+1800 items in all three parts before anything else here is trusted --
-see `verify_reconstruction()` and the project's rule on verifying a resource before building on
-it.
+"""Recompute five instrument-defect prevalence figures the paper's Limitations section reports
+against an "adversarial audit of ..." that was never committed anywhere in this repository as a
+script or a doc: the gate-3 "30.2% under a real tokenizer" figure, the gate-5 "28.0% against
+4.3%" and "864/7,335" figures, the "87 of 127 (68.5%)" parentage-cue misclassification figure,
+and the "216/1450 (14.90%)" rejection-only-cue figure together with its claimed Holm-verdict
+flips. This script is the audit that should have been cited for all five. Every number below is
+either read straight off the committed `code/results/exp3{a,b,c}` JSONL, or -- for gate 3 and
+gate 5, which need the actual R1-R4 inserted-sentence text and no committed JSONL field carries
+it -- rebuilt with the exact same deterministic call `pilot/run_experiment.py`'s own stage 2
+makes (`repair.build_conditions_with_diagnostics` on the same item, rejection and corpus index),
+against a local dump of the same 2WikiMultihopQA validation split (12,576 rows) already cached
+under this machine's Hugging Face cache. That reconstruction is verified byte-identical against
+the committed `option_titles`/`gold_title` for every one of the 400+1200+1800 items in all three
+parts before anything else here is trusted -- see `verify_reconstruction()`, which `main()` runs
+under `--verify-reconstruction` before any rebuilt-item figure is treated as trustworthy.
 
 No LLM judges anything here; every figure is a deterministic rule over committed text or over
 the item/rejection/corpus-index objects `pilot.repair` already defines.
@@ -81,8 +78,8 @@ def cue_is_rank_only(negation_cue: str) -> bool:
 # ------------------------------------------------------------ figure 3: parentage cue bug
 
 # The parentage cluster this project already uses elsewhere (confirmed against the paper's own
-# 127/1264 (10.0%) figure): child, father and mother -- not sibling, which the paper's own
-# denominator excludes.
+# 127/1264 (10.0%) figure, reconstructed by this module's own figure-3 report below): child,
+# father and mother -- not sibling, which the paper's own denominator excludes.
 PARENTAGE_ATTRIBUTES: frozenset[str] = frozenset({"child", "father", "mother"})
 
 
@@ -415,9 +412,9 @@ _PAREN_RE = re.compile(r"\([^)]*\)")
 
 def verify_reconstruction(data_file: Path) -> dict:
     """Rebuild all three parts' item sets from `data_file` and check every option title against
-    the committed stage-1 JSONL, byte for byte. Raises AssertionError on any mismatch -- this
-    must pass before any reconstructed number below is trusted (the project's rule on verifying
-    a resource before building on it)."""
+    the committed stage-1 JSONL, byte for byte. Raises AssertionError on any mismatch -- a
+    resource has to be verified before anything is built on it, and this is that check: it must
+    pass before any reconstructed number below is trusted."""
     records = load_records_from_file(data_file)
     results = C.RESULTS_DIR
     report = {}
@@ -445,16 +442,40 @@ def verify_reconstruction(data_file: Path) -> dict:
     return report
 
 
-def _reconstruct_part(results: Path, data_file: Path, part: str, n_items: int, n_options: int) -> list[dict]:
+def _reconstruct_part(
+    results: Path, data_file: Path, part: str, corpus_n_items: int, n_options: int,
+    item_lookup_n_items: int | None = None,
+) -> list[dict]:
     """Rebuild every built item's R1-R4 inserted sentences for one part, by replaying the exact
-    calls `run_experiment.run_stage2` made: same item set, same corpus index, same selected
-    rejection (recomputed from the stored raw response, exactly as `_selected_rejection` does),
-    same `repair.build_conditions_with_diagnostics` call with the stage-1 row's own recorded
-    `choice` (not any corrected re-parse -- this reconstructs what was actually shipped)."""
+    calls `run_experiment.run_stage2` made: same corpus index, same selected rejection
+    (read back from the stored stage-1 fields, not re-derived with the current extractor --
+    see the comment at the `_selected_rejection_record` call below for why), same
+    `repair.build_conditions_with_diagnostics` call with the stage-1 row's own recorded `choice`
+    (not any corrected re-parse -- this reconstructs what was actually shipped).
+
+    `corpus_n_items` is the size of the item pool `repair.build_corpus_index` was actually built
+    from for this part -- read off that part's own `experiment_summary.json` ("built N items").
+    `item_lookup_n_items` is only needed for Part A, which built its stage 2/3 by *replaying* a
+    stage-1 file under `--from-stage1` (`exp3a/experiment_summary.json`'s `"dataset"` field:
+    "stage1 replay: results/exp2/..."). `run_experiment.main`'s `--from-stage1` path looks the
+    *items themselves* up via `rescore.rebuild_items`, which sizes its own item build off
+    `len({row["item_id"] for row in <that stage-1 file>})` -- and that file was appended to by a
+    *later*, larger (1,800-item) re-run that appended to that same file after Part A's own run
+    had already read it, so some of Part A's built items carry an item id past position `corpus_n_items` in the
+    deterministic build order. The item's own profile content does not depend on how many items
+    are being collected overall (`data.build_item` is a pure function of one record), so this is
+    safe: `corpus_index` stays scoped to the first `corpus_n_items` items (matching what the
+    original run actually indexed), while item objects are looked up in a separately built,
+    larger pool when `item_lookup_n_items` is given.
+    """
     records = load_records_from_file(data_file)
-    items = build_items(records, n_items=n_items, n_options=n_options, seed=C.SEED)
-    by_id = {it.item_id: it for it in items}
-    corpus_index = repair.build_corpus_index(items)
+    corpus_items = build_items(records, n_items=corpus_n_items, n_options=n_options, seed=C.SEED)
+    corpus_index = repair.build_corpus_index(corpus_items)
+    if item_lookup_n_items and item_lookup_n_items != corpus_n_items:
+        lookup_items = build_items(records, n_items=item_lookup_n_items, n_options=n_options, seed=C.SEED)
+    else:
+        lookup_items = corpus_items
+    by_id = {it.item_id: it for it in lookup_items}
 
     directory, _ = PARTS[part]
     stage2_dir = results / directory
@@ -479,12 +500,26 @@ def _reconstruct_part(results: Path, data_file: Path, part: str, n_items: int, n
                     out.append({"part": part, "model": rec["model"], "item_id": rec["item_id"],
                                 "reconstructed": False, "reason": "item or stage-1 row not found"})
                     continue
-                analysis = extract.analyse(row["response"], item)
-                rejection = next((r for r in analysis.rejections if extract.is_usable(item, r)), None)
-                if rejection is None:
+                # Read the historically selected rejection back from the stored stage-1 fields
+                # rather than re-running `extract.analyse` on `row["response"]`: the extractor's
+                # choice parser (`extract.parse_choice`) has since been fixed, and `extract.analyse`
+                # re-run today would recompute a possibly *different* `analysis.choice` than the
+                # `row["choice"]` this row was actually built with --
+                # which would then also change which rejection sentences its "skip the sentence
+                # naming the model's own choice" rule drops, silently reconstructing a rejection
+                # that was never the one actually used. The stored `rejections` entries were
+                # written by that exact historical call and are not affected by any later fix.
+                rej_dict = _selected_rejection_record(row)
+                if rej_dict is None:
                     out.append({"part": part, "model": rec["model"], "item_id": rec["item_id"],
-                                "reconstructed": False, "reason": "no usable rejection re-derived"})
+                                "reconstructed": False, "reason": "no usable rejection recorded"})
                     continue
+                rejection = extract.Rejection(
+                    sentence=rej_dict["sentence"], letter=rej_dict["letter"],
+                    title=rej_dict["title"], matched_by=rej_dict["matched_by"],
+                    attribute=rej_dict["attribute"], cue=rej_dict["cue"],
+                    negation_cue=rej_dict["negation_cue"],
+                )
                 try:
                     conditions, diag = repair.build_conditions_with_diagnostics(
                         item, rejection, corpus_index, row["choice"]
@@ -622,13 +657,32 @@ def build_report(results: Path, data_file: Path | None, verify: bool) -> str:
     reconstructed = None
     if data_file is not None:
         reconstructed = []
-        for part, n_items, n_options in (("A", 400, 4), ("B", 1200, 4), ("C", 1800, 6)):
-            reconstructed.extend(_reconstruct_part(results, data_file, part, n_items, n_options))
+        # Part A's corpus index was built from only its own top-level 400 items (its
+        # experiment_summary.json: "built 400 items"), but stage 2/3 replayed a stage-1 file
+        # that a later, larger re-run had appended to -- see `_reconstruct_part`'s docstring.
+        # 1800 is the largest item pool any run in this project ever built (exp3c's own size),
+        # so it is a safe upper bound for looking up an out-of-range item id's own profile.
+        for part, corpus_n_items, n_options, lookup_n_items in (
+            ("A", 400, 4, 1800), ("B", 1200, 4, 1200), ("C", 1800, 6, 1800),
+        ):
+            reconstructed.extend(_reconstruct_part(
+                results, data_file, part, corpus_n_items, n_options, lookup_n_items
+            ))
 
     w("## Figure 1 -- gate 3 (word-count length check)")
     w("")
     f1 = figure1_gate3(results, reconstructed)
     w(f"- Built items (current, correct population): **{f1['total_built_items']}**, not 1,070.")
+    if reconstructed is not None:
+        n_ok = sum(1 for r in reconstructed if r.get("reconstructed"))
+        w(f"- Of those, {n_ok} could be independently rebuilt from a frozen local dump of the")
+        w("  corpus (the rest fail the same integrity-gate search on retry -- see the module")
+        w("  docstring on Part A's stage-1-replay corpus/lookup-pool split, which explains most")
+        w("  but not all of the gap). Note: this rebuilt count is 1,070 -- exactly the population")
+        w("  the original, uncommitted AUDIT comment stated as \"1,070 built items\". That is very")
+        w("  unlikely to be a coincidence: whatever produced that number most likely hit the same")
+        w("  reconstruction limitation and mislabelled its own subset as the full built-item")
+        w("  population. The true built-item population is 1,264.")
     w("- Gate 3 compares only the R1 and R2 inserted sentences (not R3/R4); the search that")
     w("  populates R2 (`repair._r2_candidates_ordered`) orders candidates by")
     w("  `abs(_token_len(candidate) - target_len)`, the exact function gate 3's own tolerance")
@@ -808,6 +862,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.self_check:
         return self_check()
+
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+    C.require_stage3_records(args.results, [d for d, _ in PARTS.values()], label="--results")
 
     report = build_report(args.results, args.data_file, args.verify_reconstruction)
     if args.out:

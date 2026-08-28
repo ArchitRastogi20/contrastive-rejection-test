@@ -35,7 +35,8 @@ from types import SimpleNamespace
 
 from . import extract
 from .analyze_run3 import _load_option_titles, odds_ratio, short_model
-from .config import REPO_ROOT
+from . import config as C
+from .config import CODE_ROOT
 from .data import Entity
 from .run_experiment import bootstrap_ci_mean_diff, mcnemar
 
@@ -296,7 +297,7 @@ def build_summary(results: dict[str, dict]) -> dict:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--results", default=REPO_ROOT / "code" / "results", type=Path,
+    ap.add_argument("--results", default=CODE_ROOT / "results", type=Path,
                     help="results tree holding exp3a and exp3c (default: the repo's "
                          "code/results directory)")
     ap.add_argument("--part", choices=["a", "c", "both"], default="both",
@@ -307,12 +308,15 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     part_keys = ["a", "c"] if args.part == "both" else [args.part]
+
+    out = args.out or (CODE_ROOT / "results" / "relation_stratum_summary.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    C.require_stage3_records(args.results, [PARTS[k][0] for k in part_keys], label="--results")
+
     results = {part_key.upper(): analyze_part(args.results, part_key) for part_key in part_keys}
 
     print(build_text_report(results))
 
-    out = args.out or (REPO_ROOT / "code" / "results" / "relation_stratum_summary.json")
-    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(build_summary(results), indent=2, sort_keys=False), encoding="utf-8")
     print(f"wrote {out}")
     return 0

@@ -500,10 +500,9 @@ def report_power(nested: dict) -> tuple[str, dict]:
 
 # The measured 4-option built-item yield an E1-shaped run (stage 1 elicit -> stage 2 repair ->
 # stage 3 re-ask/probe over R0-R4) actually produced against its own attempted pool: Part A,
-# 387/1204 = 32.1% ("Pooled 387/1204 attempted (32.1%)", already published and audited for Part
-# A). Not re-derived from a committed file here because it is Part A's own already-published,
-# audited figure, not a number this module could recompute more authoritatively by re-reading
-# exp3a's raw stage files.
+# 387/1204 = 32.1%, pooled across Part A's own audited round-3 analysis. Not re-derived from a
+# committed file here because it is Part A's own already-published, audited figure, not a number
+# this module could recompute more authoritatively by re-reading exp3a's raw stage files.
 E1_BUILT_YIELD_4OPT = 387 / 1204
 
 E1_BUILT_TARGET_LOW = 300
@@ -689,7 +688,7 @@ def report_e1_estimate(results_dir: Path) -> tuple[str, dict]:
     w("")
     w("Projected GPU cost of E1 against a fourth, independent model lineage: 3 checkpoints,")
     w("4 options, targeting 300-390 built items at the measured 32.1% built-item yield for four")
-    w("options (Part A: 387/1204 attempted, already published and audited for Part A).")
+    w("options (Part A: 387/1204 attempted, this module's own `E1_BUILT_YIELD_4OPT` constant).")
     w("")
 
     ledger_rows = load_ledger_rows(C.GPU_LEDGER)
@@ -1022,7 +1021,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--results-dir", type=Path, default=C.RESULTS_DIR,
                      help=f"where to look for stage_necessity_*.jsonl (default: {C.RESULTS_DIR})")
-    ap.add_argument("--out-dir", type=Path, default=C.REPO_ROOT / "code",
+    ap.add_argument("--out-dir", type=Path, default=C.CODE_ROOT,
                      help="where to write the report and its JSON sidecar (default: code/, "
                           "never code/results/ -- committed run records are read-only)")
     ap.add_argument("--section", choices=[*SECTIONS, "all"], default="all")
@@ -1032,11 +1031,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.self_check:
         return self_check()
 
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    if not args.results_dir.is_dir():
+        raise SystemExit(f"--results-dir directory not found: {args.results_dir}")
+    if not any(args.results_dir.glob("**/stage_necessity_*.jsonl")):
+        raise SystemExit(
+            f"--results-dir: no stage_necessity_*.jsonl records found under: "
+            f"{args.results_dir} -- refusing to compute and report a zero-record result as if "
+            "it were data"
+        )
+
     sections = list(SECTIONS) if args.section == "all" else [args.section]
     report, payload = build_report(args.results_dir, sections)
     print(report)
 
-    args.out_dir.mkdir(parents=True, exist_ok=True)
     report_path = args.out_dir / "analysis_necessity_report.md"
     json_path = args.out_dir / "analysis_necessity_report.json"
     report_path.write_text(report, encoding="utf-8")

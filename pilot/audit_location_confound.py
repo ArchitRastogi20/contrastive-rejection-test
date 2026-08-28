@@ -36,6 +36,7 @@ from .analyze_run3 import (
     paired_mean,
     short_model,
 )
+from . import config as C
 from .config import REPO_ROOT, now_utc, stamp_utc
 from .run_experiment import bootstrap_ci_mean_diff
 
@@ -441,6 +442,8 @@ def main(argv: list[str] | None = None) -> int:
     # Report lands at the tree root; this project keeps its write-ups outside the code tree, so
     # the generated file is moved there afterwards rather than written across trees from here.
     out = args.out or (REPO_ROOT / "location_confound_audit_report.txt")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    C.require_stage3_records(args.results, [d for d, _ in PARTS.values()], label="--results")
     report = build_report(args.results)
     out.write_text(report, encoding="utf-8")
     print(f"wrote {out}")

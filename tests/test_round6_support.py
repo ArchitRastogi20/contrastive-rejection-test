@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-from pathlib import Path
 
 import pytest
 
@@ -24,9 +23,8 @@ from pilot.analyze_necessity import (
     report_integrity,
     report_strata,
 )
+from pilot.config import CODE_ROOT
 from pilot.watchdog import LEDGER_FIELDS
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 # ------------------------------------------------------------------- fixture rows (shared shape)
@@ -312,7 +310,7 @@ def _bash_or_skip() -> str:
 @pytest.mark.parametrize("script", ["monitor.sh", "prefetch_round6.sh"])
 def test_shell_script_passes_bash_syntax_check(script):
     bash = _bash_or_skip()
-    path = REPO_ROOT / "code" / "scripts" / script
+    path = CODE_ROOT / "scripts" / script
     assert path.exists(), f"missing {path}"
     result = subprocess.run([bash, "-n", str(path)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
@@ -322,7 +320,7 @@ def test_monitor_sh_usage_error_on_missing_arguments():
     """Cheap, GPU-free behavioural check beyond the syntax check: no PID/RUN_DIR must exit 2
     immediately rather than hanging in the monitor loop."""
     bash = _bash_or_skip()
-    path = REPO_ROOT / "code" / "scripts" / "monitor.sh"
+    path = CODE_ROOT / "scripts" / "monitor.sh"
     result = subprocess.run([bash, str(path)], capture_output=True, text=True, timeout=10)
     assert result.returncode == 2
     assert "usage" in result.stderr.lower()

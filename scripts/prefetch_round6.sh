@@ -66,8 +66,8 @@ PYEOF
 MIRROR_LLAMA=$(mirror_for "meta-llama/Llama-3.1-8B-Instruct")
 MIRROR_MISTRAL=$(mirror_for "mistralai/Mistral-7B-Instruct-v0.3")
 # Documented fallback if pilot.config could not be imported at all (e.g. no python found) --
-# the same two mirror repos the rest of this project names, so a broken import still lands
-# weights in the right place rather than skipping the gated repo's fallback entirely.
+# the same two mirror repos pilot/config.py's own UNGATED_MIRRORS names, so a broken import
+# still lands weights in the right place rather than skipping the gated repo's fallback entirely.
 [ "$MIRROR_LLAMA" != "-" ] || MIRROR_LLAMA="NousResearch/Meta-Llama-3.1-8B-Instruct"
 [ "$MIRROR_MISTRAL" != "-" ] || MIRROR_MISTRAL="unsloth/mistral-7b-instruct-v0.3"
 

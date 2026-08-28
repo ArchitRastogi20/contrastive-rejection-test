@@ -16,7 +16,8 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
-from .config import REPO_ROOT
+from . import config as C
+from .config import CODE_ROOT
 
 SEED = 20260822
 RESAMPLES = 5_000
@@ -198,7 +199,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--resamples", type=int, default=RESAMPLES)
     args = parser.parse_args(argv)
     RESAMPLES = args.resamples
-    out = args.out or (REPO_ROOT / "code" / "probe_missingness_audit_report.txt")
+    out = args.out or (CODE_ROOT / "probe_missingness_audit_report.txt")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    C.require_stage3_records(args.results, list(PARTS.values()), label="--results")
     out.write_text(build_report(args.results), encoding="utf-8")
     print(f"wrote {out}")
     return 0

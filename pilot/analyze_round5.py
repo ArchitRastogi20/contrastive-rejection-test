@@ -1105,6 +1105,8 @@ def main(argv: list[str] | None = None) -> int:
     parts = ["A", "B", "C"] if args.part == "all" else [args.part]
     sections = list(SECTIONS) if args.section == "all" else [args.section]
 
+    C.require_stage3_records(args.results, [PARTS[p][0] for p in parts], label="--results")
+
     report, payload = build_report(args.results, parts, sections)
     print(report)
 

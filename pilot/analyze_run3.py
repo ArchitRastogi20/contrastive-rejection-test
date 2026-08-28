@@ -20,7 +20,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from . import extract
-from .config import REPO_ROOT
+from . import config as C
+from .config import CODE_ROOT
 from .data import Entity
 from .run_experiment import bootstrap_ci_mean_diff, mcnemar
 
@@ -1141,14 +1142,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--results", default="results", type=Path,
                     help="the results tree holding exp3a, exp3b, exp3c (default: results)")
     ap.add_argument("--out", default=None, type=Path,
-                    help="where to write the report (default: a fixed location outside code/)")
+                    help="where to write the report (default: analysis_run3_report.txt at the "
+                         "code tree's root)")
     ap.add_argument("--self-check", action="store_true", help="arithmetic checks only")
     args = ap.parse_args(argv)
 
     if args.self_check:
         return self_check()
 
-    out = args.out or (REPO_ROOT / "code" / "analysis_run3_report.txt")
+    out = args.out or (CODE_ROOT / "analysis_run3_report.txt")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    C.require_stage3_records(args.results, [d for d, _ in PARTS.values()], label="--results")
     report = build_report(args.results)
     out.write_text(report, encoding="utf-8")
     print(f"wrote {out}")

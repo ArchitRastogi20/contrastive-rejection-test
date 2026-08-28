@@ -571,9 +571,17 @@ def make_design_schematic(example: dict, out_path: Path):
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     here = Path(__file__).resolve().parent
-    ap.add_argument("--results", type=Path, default=here.parent / "results",
+    # here.parent is the directory holding pilot/ and figures/ as siblings -- code/ in the
+    # working tree, the repo root itself in the flat public release. here.parent.parent is only
+    # meaningful when here.parent is actually named "code" (the working tree, where paper_full/
+    # is a sibling of code/); the flat release has no paper_full/ at all, so falling back to
+    # here.parent there keeps the default inside the cloned repository instead of writing above
+    # it. See pilot/config.py's CODE_ROOT/REPO_ROOT for the same layout-detection logic.
+    code_root = here.parent
+    repo_root = code_root.parent if code_root.name == "code" else code_root
+    ap.add_argument("--results", type=Path, default=code_root / "results",
                      help="results tree holding exp3a/exp3b/exp3c (default: code/results)")
-    ap.add_argument("--out", type=Path, default=here.parent.parent / "paper_full" / "figures",
+    ap.add_argument("--out", type=Path, default=repo_root / "paper_full" / "figures",
                      help="output directory for the rendered PDFs (default: paper_full/figures)")
     args = ap.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=True)
