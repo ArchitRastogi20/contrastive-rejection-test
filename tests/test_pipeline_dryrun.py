@@ -1,8 +1,8 @@
-"""End-to-end smoke test of pilot.run_pilot's dry-run mode with a stub model: no GPU, no network."""
+"""End-to-end smoke test of harness.run_pilot's dry-run mode with a stub model: no GPU, no network."""
 
 import json
 
-from pilot.run_pilot import main
+from harness.run_pilot import main
 
 
 def test_dry_run_writes_a_summary_and_raw_records(tmp_path):

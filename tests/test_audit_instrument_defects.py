@@ -1,4 +1,4 @@
-"""Tests for pilot.audit_instrument_defects: the non-trivial classification rules behind the
+"""Tests for harness.audit_instrument_defects: the non-trivial classification rules behind the
 five recomputed instrument-defect figures.
 
 Hand-written fixtures only; no GPU or network. The rules that only read committed JSONL (figures
@@ -10,8 +10,8 @@ isolation from a real corpus.
 
 from __future__ import annotations
 
-from pilot import extract
-from pilot.audit_instrument_defects import (
+from harness import extract
+from harness.audit_instrument_defects import (
     ABSENCE_CUES,
     RANK_ONLY_CUES,
     _enclosing_word,

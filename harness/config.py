@@ -1,4 +1,4 @@
-"""Configuration, paths and UTC logging for the contrastive-rejection pilot."""
+"""Configuration, paths and UTC logging for the contrastive-rejection harness."""
 
 from __future__ import annotations
 
@@ -10,9 +10,9 @@ from pathlib import Path
 
 UTC = timezone.utc
 
-# CODE_ROOT is the directory that actually contains pilot/ -- this file's grandparent -- which
+# CODE_ROOT is the directory that actually contains harness/ -- this file's grandparent -- which
 # holds regardless of whether that directory is reached as <repo>/code (the working tree) or as
-# the repo root itself (the flat public release, where pilot/ sits directly under the checkout).
+# the repo root itself (the flat public release, where harness/ sits directly under the checkout).
 # REPO_ROOT only takes the further step out of a "code" wrapper when one exists, so a script that
 # wants "the tree root, one level outside code/" (see audit_position_bias.py, for one) gets the
 # same directory in both layouts, instead of one that silently does not exist.

@@ -433,7 +433,7 @@ def source_of_repair(item: Item, rejection: Rejection) -> Entity | None:
 
 
 def is_usable(item: Item, rejection: Rejection) -> bool:
-    """The pilot's unit of account: specific, accurate, and repairable from released text."""
+    """The study's unit of account: specific, accurate, and repairable from released text."""
     return (
         rejection.is_specific
         and complaint_is_true(item, rejection) is True

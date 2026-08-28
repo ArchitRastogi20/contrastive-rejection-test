@@ -1,4 +1,4 @@
-"""Tests for pilot.analyze_run3: recomputes run-3 statistics from stage-3 JSONL fixtures.
+"""Tests for harness.analyze_run3: recomputes run-3 statistics from stage-3 JSONL fixtures.
 
 Hand-written fixtures only; no GPU or network.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import math
 
-from pilot.analyze_run3 import (
+from harness.analyze_run3 import (
     _margin,
     _median,
     _sign_counts,
@@ -288,7 +288,7 @@ def test_gate_eight_skew_excludes_unparseable_stage1_choices_from_the_denominato
     results = tmp_path
     part_dir = results / "exp3z"
     part_dir.mkdir()
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
     PARTS["Z"] = ("exp3z", "test fixture")
     try:
         # choice_correct is no longer trusted as written -- gate_eight_skew re-derives it from
@@ -403,7 +403,7 @@ def test_baseline_by_target_ratio_is_none_without_data():
 
 
 def test_load_part_keys_by_model_then_item_then_condition(tmp_path, monkeypatch):
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     part_dir = tmp_path / "exp3y"
     part_dir.mkdir()
@@ -439,7 +439,7 @@ def test_load_part_keys_by_model_then_item_then_condition(tmp_path, monkeypatch)
 def test_load_part_raises_on_missing_titles(tmp_path):
     """A stage-3 row whose (model, item_id) has no stage-1 titles is a coverage hole and must
     raise, not be silently skipped -- this is the loud-failure task 1 requires."""
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     part_dir = tmp_path / "exp3z"
     part_dir.mkdir()
@@ -567,7 +567,7 @@ def test_touched_files_contain_no_stray_control_characters():
     import pathlib
 
     here = pathlib.Path(__file__).resolve().parent
-    paths = [here.parent / "pilot" / "analyze_run3.py", here / "test_analyze_run3.py"]
+    paths = [here.parent / "harness" / "analyze_run3.py", here / "test_analyze_run3.py"]
 
     offenders = []
     for path in paths:

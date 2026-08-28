@@ -12,7 +12,7 @@ This counts that overlap. It is deliberately a plain lexical rule over the quest
 below so the classification can be audited rather than trusted, and it is committed so the
 figure in the paper regenerates:
 
-    python -m pilot.question_relevance
+    python -m harness.question_relevance
 
 No GPU, no network, no model: it reads committed stage-1 and stage-2 records only.
 """

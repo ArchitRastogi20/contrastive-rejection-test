@@ -16,7 +16,7 @@ Flattened `code/` tree of the private working repository: everything below sits 
 this repository's root.
 
 ```
-pilot/                       the experiment harness
+harness/                       the experiment harness
 ├── extract.py                  deterministic extractor: rejections, named attributes, choice parser
 ├── repair.py                   builds conditions R0-R4, runs the eight integrity gates
 ├── data.py, prompts.py, models.py, config.py, watchdog.py    corpus loading, prompts, backends, paths
@@ -48,8 +48,8 @@ requirements-colab.txt        the T4 fallback (plain transformers, no vLLM)
 .env.example                  names of environment variables the code reads, no values
 ```
 
-`pilot/config.py` resolves its paths relative to wherever `pilot/` itself sits, so the same
-commands work whether `pilot/` is under a `code/` directory (the private working tree) or
+`harness/config.py` resolves its paths relative to wherever `harness/` itself sits, so the same
+commands work whether `harness/` is under a `code/` directory (the private working tree) or
 directly at the repository root (this release). The commands below still pass `--results`/`--out`
 explicitly, since naming the path makes each example self-contained; every one was run from a
 fresh clone to confirm it.
@@ -68,18 +68,18 @@ roster); none of the analysis below needs either environment.
 pip install -r requirements.txt
 python -m pytest tests -q                       # 449 tests, no GPU, no network
 
-python -m pilot.analyze_run3 --results results --out /tmp/analysis_run3_report.txt   # Table 1
-python -m pilot.analyze_round5 --results results --out /tmp/round5.json --section loo            # leave-one-model-out
-python -m pilot.analyze_round5 --results results --out /tmp/round5.json --section heterogeneity
-python -m pilot.analyze_round5 --results results --out /tmp/round5.json --section fluency
-python -m pilot.audit_position_bias --results results --out /tmp/position_bias_report.txt        # letter effects
-python -m pilot.audit_probe_missingness --results results --out /tmp/probe_missingness_report.txt
-python -m pilot.audit_instrument_defects --self-check
-python -m pilot.audit_instrument_defects --results results   # the four quantified defects, no corpus needed
-python -m pilot.question_relevance --results results          # share of questions about the inserted attribute
+python -m harness.analyze_run3 --results results --out /tmp/analysis_run3_report.txt   # Table 1
+python -m harness.analyze_round5 --results results --out /tmp/round5.json --section loo            # leave-one-model-out
+python -m harness.analyze_round5 --results results --out /tmp/round5.json --section heterogeneity
+python -m harness.analyze_round5 --results results --out /tmp/round5.json --section fluency
+python -m harness.audit_position_bias --results results --out /tmp/position_bias_report.txt        # letter effects
+python -m harness.audit_probe_missingness --results results --out /tmp/probe_missingness_report.txt
+python -m harness.audit_instrument_defects --self-check
+python -m harness.audit_instrument_defects --results results   # the four quantified defects, no corpus needed
+python -m harness.question_relevance --results results          # share of questions about the inserted attribute
 ```
 
-Real generation needs one 24 GB card. `python -m pilot.run_experiment --self-check` exercises
+Real generation needs one 24 GB card. `python -m harness.run_experiment --self-check` exercises
 the eight integrity gates on fixtures with no GPU; `--dry-run --limit 6` exercises the pipeline
 with a stub backend.
 
@@ -114,7 +114,7 @@ untried checkpoints, four options; C: original roster, six options), four clear 
 R3-R4), does not clear correction**, Holm p = 0.2428. C R3-R4 clears it but rests on one model:
 dropping Mistral-7B-Instruct-v0.3 alone takes it to p = 0.30. A R1-R2 is the most defensible
 survivor, holding under every single-model exclusion. Part A supports a content effect at the
-named location and Part C at the unnamed one; no run supports both. `pilot/analyze_run3.py`
+named location and Part C at the unnamed one; no run supports both. `harness/analyze_run3.py`
 reproduces this table exactly, seeded, from `results/exp3a`, `exp3b`, `exp3c`.
 
 The two measures disagree: the discrete (choice) and continuous (forced-choice probability)
@@ -156,12 +156,12 @@ fixing them needs fresh generation this submission does not have.
    than asserting an absence. Excluding them and recomputing the twelve-test Holm ladder flips
    no verdict.
 
-`pilot/audit_instrument_defects.py` recomputes 4-7 from committed JSONL alone (4 and 5 also
+`harness/audit_instrument_defects.py` recomputes 4-7 from committed JSONL alone (4 and 5 also
 replay `repair.py`'s own condition-building call, verified byte-identical against the committed
-option titles first). 1 and 2 are in `pilot/extract.py`'s own `parse_choice`/`_letter_pick_re`;
+option titles first). 1 and 2 are in `harness/extract.py`'s own `parse_choice`/`_letter_pick_re`;
 3 is `_base_title`/`_TRAILING_PAREN` in the same file.
 
-## Other checks in `pilot/`
+## Other checks in `harness/`
 
 - **`audit_position_bias.py`**: R0 rejects a uniform letter distribution in Parts A and C
   ($\chi^2$, p<0.001); content contrasts read the same direction in log-odds as in probability.

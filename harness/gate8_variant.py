@@ -1,7 +1,7 @@
 """E3: does the R1-R3 / R2-R4 *location* effect survive when R3/R4's target is chosen without
 regard to whether it already lacks the named attribute?
 
-Gate 8 (see `pilot.repair.check_integrity`) requires R3/R4's target to lack the named attribute
+Gate 8 (see `harness.repair.check_integrity`) requires R3/R4's target to lack the named attribute
 before the edit, and `build_conditions_with_diagnostics`'s default target-selection rule
 ("prefer_lacking") *prefers* a candidate with that property. That coupling means a location
 effect measured under the default rule cannot tell apart two explanations: the model's
@@ -26,8 +26,8 @@ Only stage 3 -- re-asking under the five conditions -- touches the GPU, and it i
 two-call-per-condition shape `run_experiment.run_stage3` already uses (reused here, not
 reimplemented).
 
-    python -m pilot.gate8_variant --dry-run --strategy random --limit 4
-    python -m pilot.gate8_variant --from-stage1 results/exp3c/stage1_<model>.jsonl \\
+    python -m harness.gate8_variant --dry-run --strategy random --limit 4
+    python -m harness.gate8_variant --from-stage1 results/exp3c/stage1_<model>.jsonl \\
         --strategy random --out-dir results/gate8_variant_random
 
 Three stages per model, same split as `run_experiment`:

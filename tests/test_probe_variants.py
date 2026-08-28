@@ -10,8 +10,8 @@ import json
 
 import pytest
 
-from pilot.models import append_letter_probe
-from pilot.probe_variants import (
+from harness.models import append_letter_probe
+from harness.probe_variants import (
     PREFILL_PAREN_STEM,
     PREFILL_STEM,
     VARIANTS,
@@ -78,7 +78,7 @@ def test_variant_table_has_at_least_baseline_plus_two_others():
 
 
 def test_top_letter_is_the_argmax():
-    from pilot.models import LetterProbRead
+    from harness.models import LetterProbRead
 
     read = LetterProbRead(
         candidates=["A", "B", "C"], raw_logprobs={"A": -1.0, "B": -0.1, "C": -2.0},
@@ -88,7 +88,7 @@ def test_top_letter_is_the_argmax():
 
 
 def test_top_letter_is_none_when_nothing_was_read():
-    from pilot.models import LetterProbRead
+    from harness.models import LetterProbRead
 
     read = LetterProbRead(
         candidates=["A", "B"], raw_logprobs={"A": None, "B": None}, probs={},
@@ -208,7 +208,7 @@ def test_touched_files_contain_no_stray_control_characters():
     import pathlib
 
     here = pathlib.Path(__file__).resolve().parent
-    paths = [here.parent / "pilot" / "probe_variants.py", here / "test_probe_variants.py"]
+    paths = [here.parent / "harness" / "probe_variants.py", here / "test_probe_variants.py"]
 
     offenders = []
     for path in paths:

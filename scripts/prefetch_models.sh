@@ -64,6 +64,6 @@ if [ "$failed" -gt 0 ]; then
   echo
   echo "The pilot substitutes mirrors on its own at load time, so it will still run. If a"
   echo "whole family is unavailable, drop it and use the ungated substitute instead:"
-  echo "    python -m pilot.run_pilot --models Qwen/Qwen2.5-7B-Instruct $SUBSTITUTE"
+  echo "    python -m harness.run_pilot --models Qwen/Qwen2.5-7B-Instruct $SUBSTITUTE"
   echo "and record the substitution in the run write-up and the ledger."
 fi

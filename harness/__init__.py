@@ -1,0 +1,1 @@
+"""Contrastive-rejection experiment harness."""

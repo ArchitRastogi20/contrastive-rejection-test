@@ -5,25 +5,25 @@ already in ``code/results/``. Section 5 additionally rebuilds the item corpus of
 2WikiMultihopQA dump the run itself used, already cached locally) to recover which candidate the
 repair search actually accepted, by indexing the project's own ordered candidate lists with the
 1-based positions the stage-2 records already store -- it never replays the search itself.
-Section 6 reads the per-item surprisal ``pilot/surprisal.py`` already measured and committed
+Section 6 reads the per-item surprisal ``harness/surprisal.py`` already measured and committed
 (``code/results/surprisal___*.jsonl``) and joins it to the stage-3 choice; it does not call a
 model or recompute a surprisal reading either.
 
-    python -m pilot.analyze_round5                          # everything, all three parts
-    python -m pilot.analyze_round5 --part A --section loo    # one part, one section
-    python -m pilot.analyze_round5 --section provenance      # section 5 alone, needs the dataset
-    python -m pilot.analyze_round5 --section fluency         # section 6 alone, Part A + Part C
+    python -m harness.analyze_round5                          # everything, all three parts
+    python -m harness.analyze_round5 --part A --section loo    # one part, one section
+    python -m harness.analyze_round5 --section provenance      # section 5 alone, needs the dataset
+    python -m harness.analyze_round5 --section fluency         # section 6 alone, Part A + Part C
 
-Six families of numbers, none of which ``pilot/analyze_run3.py`` produces:
+Six families of numbers, none of which ``harness/analyze_run3.py`` produces:
 
     1. leave-one-model-out, both measures, three contrasts, each part
     2. Cochran's Q / I^2 between-model heterogeneity over the same three contrasts
     3. item-clustered (rather than row-clustered) percentile bootstrap, as a check on pooling
     4. per-relation stratification of the same three contrasts, small relations pooled as "other"
     5. where the R1/R3 (relevant) and R2/R4 (control) edit sentences actually come from
-    6. whether the R1-R2/R3-R4 content contrasts survive conditioning on ``pilot/surprisal.py``'s
+    6. whether the R1-R2/R3-R4 content contrasts survive conditioning on ``harness/surprisal.py``'s
        own per-item fluency gap (``--section fluency``) -- the tercile/leave-one-out analysis
-       ``pilot/surprisal.py`` itself only measures the raw gap for, never conditions on
+       ``harness/surprisal.py`` itself only measures the raw gap for, never conditions on
 """
 
 from __future__ import annotations
@@ -504,7 +504,7 @@ def resolve_control_provenance(results: Path, part: str, *, items_by_id=None,
 # ========================================================== 6. fluency conditioning (E1)
 
 
-# ``pilot/surprisal.py`` writes one file per model, named from the model path with every
+# ``harness/surprisal.py`` writes one file per model, named from the model path with every
 # path separator turned into an underscore -- never one file per part, so a single glob picks
 # up every model's rows across every part it was run on.
 SURPRISAL_GLOB = "surprisal___*.jsonl"
@@ -535,7 +535,7 @@ FLUENCY_LOO_MIN_DISCORDANT = 1
 def _dedup_surprisal_rows(rows: Iterable[dict]) -> tuple[dict[tuple[str, str, str, str], dict], int]:
     """Last-write-wins de-duplication on ``(model, part, item_id, condition)``.
 
-    ``pilot/surprisal.py`` appends to its per-model file every time it runs (``open(path, "a")``
+    ``harness/surprisal.py`` appends to its per-model file every time it runs (``open(path, "a")``
     in ``run_surprisal``); a model re-run after a partial or aborted pass therefore leaves two
     writes for the same key in the same file, not one overwritten write. Verified directly
     against this project's own committed files rather than assumed (rule 5): as of this section
@@ -650,7 +650,7 @@ def join_fluency_contrast(
 def fluency_condition_means(joined: list[dict]) -> dict:
     """Per-model and pooled mean NLL for each of the contrast's two conditions, over exactly the
     joined (paired-and-choice-complete) population the rest of this section uses -- not the
-    broader, unpaired population ``pilot/surprisal.py``'s own ``condition_summary`` reports, so
+    broader, unpaired population ``harness/surprisal.py``'s own ``condition_summary`` reports, so
     every number in this section's table is read off one consistent population."""
     by_model: dict[str, dict[str, list[float]]] = {}
     for row in joined:
@@ -956,7 +956,7 @@ def report_provenance(results: Path, parts: list[str]) -> tuple[str, dict]:
 
 def report_fluency(results: Path, parts: list[str]) -> tuple[str, dict]:
     """Whether the R3-R4 and R1-R2 content contrasts survive conditioning on the fluency gap
-    ``pilot/surprisal.py`` measures: per-model/pooled mean NLL by condition, the paired contrast,
+    ``harness/surprisal.py`` measures: per-model/pooled mean NLL by condition, the paired contrast,
     and -- within terciles of paired Delta-surprisal -- the discrete contrast and its
     leave-one-model-out.
 
@@ -971,7 +971,7 @@ def report_fluency(results: Path, parts: list[str]) -> tuple[str, dict]:
     payload: dict = {}
     w("## 6. Fluency conditioning (E1)")
     w("")
-    w("Per-item surprisal from `pilot/surprisal.py`'s own `surprisal___*.jsonl`, joined to the "
+    w("Per-item surprisal from `harness/surprisal.py`'s own `surprisal___*.jsonl`, joined to the "
       "committed stage-3 `chosen_is_edited`. Kept only where both conditions of a contrast have "
       "a non-null surprisal read and a non-null choice.")
     w("")
@@ -1073,9 +1073,9 @@ def build_report(results: Path, parts: list[str], sections: list[str]) -> tuple[
     w = lines.append
     w("# Round-5 offline analyses")
     w("")
-    w("Generated by `python -m pilot.analyze_round5` from the committed stage-2/stage-3 JSONL "
+    w("Generated by `python -m harness.analyze_round5` from the committed stage-2/stage-3 JSONL "
       f"in `code/results/exp3a`, `exp3b`, `exp3c`. Every bootstrap here uses seed `{SEED}` with "
-      f"`{RESAMPLES}` resamples, matching `pilot/analyze_run3.py`; every exact test is the same "
+      f"`{RESAMPLES}` resamples, matching `harness/analyze_run3.py`; every exact test is the same "
       "`math.comb`-based binomial `run_experiment.mcnemar` uses.")
     w("")
     payload: dict = {"seed": SEED, "n_resamples": RESAMPLES, "parts": parts,

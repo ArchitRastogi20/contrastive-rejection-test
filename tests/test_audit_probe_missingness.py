@@ -1,6 +1,6 @@
 """Unit tests for the offline condition-specific probe-missingness audit."""
 
-from pilot.audit_probe_missingness import (
+from harness.audit_probe_missingness import (
     CONDITIONS,
     condition_counts,
     paired_complete_counts,

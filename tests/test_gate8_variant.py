@@ -1,4 +1,4 @@
-"""Tests for pilot.gate8_variant (E3): the R3/R4 target-selection strategies, and the script's
+"""Tests for harness.gate8_variant (E3): the R3/R4 target-selection strategies, and the script's
 own plumbing (budget check, --part sharding, per-item seeding, --dry-run end to end).
 
 Hand-written fixtures only; no GPU or network."""
@@ -9,10 +9,10 @@ import random
 
 import pytest
 
-from pilot import config as C
-from pilot.data import Entity, Item
-from pilot.extract import Rejection
-from pilot.repair import (
+from harness import config as C
+from harness.data import Entity, Item
+from harness.extract import Rejection
+from harness.repair import (
     R3_STRATEGIES,
     RepairUnavailable,
     build_conditions_with_diagnostics,
@@ -21,7 +21,7 @@ from pilot.repair import (
     select_r3_target_index,
 )
 
-from pilot.gate8_variant import (
+from harness.gate8_variant import (
     _item_rng,
     _parse_part,
     _select_part,
@@ -322,10 +322,10 @@ def _stage1_row_via_stub(item: Item) -> dict:
     since her profile is first to mention "born") and rejects Bruno (B) for lacking
     date_of_birth -- the rival this whole fixture is built around.
     """
-    from pilot import prompts
-    from pilot.models import StubBackend
-    from pilot.run_experiment import _stage1_row
-    from pilot.run_pilot import _StubReplies
+    from harness import prompts
+    from harness.models import StubBackend
+    from harness.run_experiment import _stage1_row
+    from harness.run_pilot import _StubReplies
 
     stub = StubBackend(_StubReplies(), name="teststub")
     response = stub.generate([prompts.render(item, "elicited")])[0]
@@ -389,14 +389,14 @@ def test_estimate_cost_s_is_linear_in_item_count():
 
 def test_check_budget_refuses_when_estimate_exceeds_remaining(monkeypatch):
     monkeypatch.setattr(
-        "pilot.gate8_variant.cumulative_gpu_seconds", lambda: C.PROJECT_GPU_BUDGET_S - 1
+        "harness.gate8_variant.cumulative_gpu_seconds", lambda: C.PROJECT_GPU_BUDGET_S - 1
     )
     with pytest.raises(SystemExit):
         check_budget(estimated_s=100.0, label="test")
 
 
 def test_check_budget_allows_when_estimate_fits(monkeypatch):
-    monkeypatch.setattr("pilot.gate8_variant.cumulative_gpu_seconds", lambda: 0.0)
+    monkeypatch.setattr("harness.gate8_variant.cumulative_gpu_seconds", lambda: 0.0)
     check_budget(estimated_s=100.0, label="test")  # must not raise
 
 

@@ -1,6 +1,6 @@
 """Unit tests for the offline option-letter-effects audit."""
 
-from pilot.audit_position_bias import (
+from harness.audit_position_bias import (
     RESAMPLES,
     SEED,
     chi_square_stat,

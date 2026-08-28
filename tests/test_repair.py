@@ -1,12 +1,12 @@
-"""Tests for pilot.repair: builds conditions R0-R4 and checks the eight integrity gates.
+"""Tests for harness.repair: builds conditions R0-R4 and checks the eight integrity gates.
 
 Hand-written fixtures only; no GPU or network."""
 
 import pytest
 
-from pilot.data import Entity, Item
-from pilot.extract import Rejection, attribute_in_profile
-from pilot.repair import (
+from harness.data import Entity, Item
+from harness.extract import Rejection, attribute_in_profile
+from harness.repair import (
     R1_SEARCH_CAP,
     R2_SEARCH_CAP,
     RepairUnavailable,
@@ -785,7 +785,7 @@ def test_r4_gate_failure_drops_the_whole_item_with_integrity_gate_failed_reason(
     gate 8 regardless of which source sentence is tried. The item drops as a whole rather than
     being kept with four conditions and a missing fifth -- unchanged from before this fix,
     because there was genuinely no better candidate to select."""
-    from pilot.run_experiment import _drop_category
+    from harness.run_experiment import _drop_category
 
     item = Item(
         item_id="r4gate8drop",
@@ -999,7 +999,7 @@ def test_r3_target_selection_is_deterministic():
 
 
 def test_dry_run_end_to_end_produces_a_summary(tmp_path):
-    from pilot.run_experiment import main
+    from harness.run_experiment import main
 
     rc = main(["--dry-run", "--limit", "4", "--out-dir", str(tmp_path)])
     assert rc == 0
@@ -1014,7 +1014,7 @@ def test_dry_run_end_to_end_produces_a_summary(tmp_path):
 
 
 def test_self_check_passes():
-    from pilot.run_experiment import self_check
+    from harness.run_experiment import self_check
 
     assert self_check() == 0
 
@@ -1028,8 +1028,8 @@ def test_stage3_records_the_edited_letter_and_its_own_correctness_per_condition(
     records must stay comparable). Uses `make_r4_item()`: rival B, R3/R4 target C (Grazyna)."""
     import json
 
-    from pilot.models import StubBackend
-    from pilot.run_experiment import CONDITION_LABELS, run_stage3
+    from harness.models import StubBackend
+    from harness.run_experiment import CONDITION_LABELS, run_stage3
 
     item, rejection = make_r4_item()
     index = build_corpus_index([item])
@@ -1087,7 +1087,7 @@ def test_sources_contain_no_stray_control_characters():
     import glob
 
     offenders = []
-    for path in glob.glob("pilot/*.py") + glob.glob("tests/*.py"):
+    for path in glob.glob("harness/*.py") + glob.glob("tests/*.py"):
         for i, byte in enumerate(open(path, "rb").read()):
             if byte < 9 or byte in (11, 12) or 14 <= byte < 32:
                 offenders.append((path, i, byte))

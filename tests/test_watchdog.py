@@ -1,7 +1,7 @@
-"""Tests for pilot.watchdog: VRAM-breach abort logic and GPU-seconds accounting."""
+"""Tests for harness.watchdog: VRAM-breach abort logic and GPU-seconds accounting."""
 
-import pilot.watchdog as W
-from pilot.watchdog import Watchdog, commit_gpu_seconds, cumulative_gpu_seconds
+import harness.watchdog as W
+from harness.watchdog import Watchdog, commit_gpu_seconds, cumulative_gpu_seconds
 
 
 def test_vram_breach_aborts_only_after_consecutive_strikes(monkeypatch):
@@ -55,7 +55,7 @@ def test_gpu_ledger_appends_and_accumulates(tmp_path):
 
 
 def test_dtype_follows_compute_capability():
-    from pilot.models import preferred_dtype
+    from harness.models import preferred_dtype
 
     # a T4 is 7.5 and has no bfloat16 at all; vLLM refuses to load if asked for it
     assert preferred_dtype((7, 5)) == "float16"
@@ -65,8 +65,8 @@ def test_dtype_follows_compute_capability():
 
 
 def test_profile_follows_vram(monkeypatch):
-    import pilot.models as M
-    from pilot.config import MODEL_PROFILES
+    import harness.models as M
+    from harness.config import MODEL_PROFILES
 
     monkeypatch.setattr(M, "device_vram_gib", lambda: 15.7)   # a T4
     assert M.resolve_profile("auto") == "t4"

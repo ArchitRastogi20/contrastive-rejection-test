@@ -6,7 +6,7 @@ R3-edited letter (via `repair.build_conditions_with_diagnostics`'s exclusion rul
 directly from stage 3's own `edited_letter` field when present) and reports how often each
 condition's choice landed on the option that condition actually edited. No GPU, no network.
 
-    python -m pilot.r3_recency --exp-dir results/exp --out results/r3_recency_summary.json
+    python -m harness.r3_recency --exp-dir results/exp --out results/r3_recency_summary.json
 
 Never writes into `--exp-dir` itself.
 """

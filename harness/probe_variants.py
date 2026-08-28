@@ -1,7 +1,7 @@
 """E2: does restructuring the forced-choice letter probe raise how often it completes, and does
 it change the read it produces when it does?
 
-The continuous outcome measure (`pilot.models.append_letter_probe` + `letter_probs`) appends one
+The continuous outcome measure (`harness.models.append_letter_probe` + `letter_probs`) appends one
 instruction to the existing prompt and forces a single generated token, then reads that token's
 probability mass on each candidate letter. That read is complete on every row for most models,
 but is markedly less so for others -- on one model's rows it completes only a minority of the
@@ -20,7 +20,7 @@ model's reply to begin with an answer rather than merely asking it to. The table
 data, not a chain of `if variant == ...:` branches, so a fourth variant is one more entry.
 
 **What a prefilled assistant turn actually does is not assumed.** Continuing an assistant turn
-(`continue_final_message=True` on `apply_chat_template`, wired into `pilot.models.
+(`continue_final_message=True` on `apply_chat_template`, wired into `harness.models.
 render_for_probe`) depends on the tokenizer's chat template treating that flag as "keep going
 from here" rather than silently reopening a fresh assistant header after the stem -- template
 support for this is not uniform, and neither is whether it suppresses a reasoning model's
@@ -37,13 +37,13 @@ assumption made in this docstring.
 this module never bypasses) -- only the chat a variant hands to that machinery differs.
 
 **Reads already-built items, regenerates nothing upstream.** Same reconstruction as
-`pilot.surprisal` (`pilot.surprisal.reconstruct_conditions`): the five R0-R4 conditions per item
+`harness.surprisal` (`harness.surprisal.reconstruct_conditions`): the five R0-R4 conditions per item
 were already built and already shown to the model in a committed run-3 stage-3 pass. This module
 adds one new kind of model call (a forced-choice read under each variant's chat) on top of that
 already-committed item set; it does not re-elicit or re-repair anything.
 
-    python -m pilot.probe_variants --dry-run                    # whole pipeline, stub, no GPU
-    python -m pilot.probe_variants --part B --models DeepSeek    # the real thing
+    python -m harness.probe_variants --dry-run                    # whole pipeline, stub, no GPU
+    python -m harness.probe_variants --part B --models DeepSeek    # the real thing
 """
 
 from __future__ import annotations
@@ -147,7 +147,7 @@ def top_letter(read: LetterProbRead) -> str | None:
 
 CALLS_PER_ROW = len(VARIANTS)  # one letter_probs call per variant, same (item, condition)
 
-# Documented, unverified placeholder -- see `pilot.surprisal.EST_SECONDS_PER_CALL` for the same
+# Documented, unverified placeholder -- see `harness.surprisal.EST_SECONDS_PER_CALL` for the same
 # caveat. A `letter_probs` call is a single forced-token generation, the same shape run 3's own
 # continuous-measure probe already used at roughly 2.6s/cell including a much longer free-text
 # generation alongside it -- 0.5s/call is a conservative guess for the probe call alone, not a
@@ -164,7 +164,7 @@ def estimate_gpu_seconds(n_rows: int) -> float:
 def budget_check(
     n_rows: int, *, spent: float, allowance: float = C.PROJECT_GPU_BUDGET_S,
 ) -> dict:
-    """Same shape and the same purity guarantee as `pilot.surprisal.budget_check`: no ledger
+    """Same shape and the same purity guarantee as `harness.surprisal.budget_check`: no ledger
     I/O, so it is testable with a hand-supplied `spent`."""
     estimate = estimate_gpu_seconds(n_rows)
     remaining = allowance - spent
@@ -310,7 +310,7 @@ def variant_agreement(rows: list[dict]) -> dict:
 
 
 def _dry_run_reconstruction() -> dict[str, ReconstructedItem]:
-    """Same fixture-only construction `pilot.surprisal._dry_run_reconstruction` uses -- kept as
+    """Same fixture-only construction `harness.surprisal._dry_run_reconstruction` uses -- kept as
     its own copy (not imported) so this module's dry run does not depend on the internal
     surprisal-specific chat rendering `run_surprisal` performs, only on the item/condition
     reconstruction this module also needs."""

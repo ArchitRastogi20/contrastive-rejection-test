@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Download round 6's four weight sets in parallel, straight to the literal local directories
-# `pilot.run_necessity`/`pilot.probe_variants` expect: committed stage-1 records name a `model`
+# `harness.run_necessity`/`harness.probe_variants` expect: committed stage-1 records name a `model`
 # field that is a local directory path, not a hub repo id, so the weights must land at exactly
 # `<MODEL_ROOT>/<Name>` or the matching model is silently skipped by the run, not substituted.
 #
@@ -12,7 +12,7 @@
 #   - covers the DeepSeek AWQ checkpoint round 6 also needs;
 #   - skips a target whose local directory already looks complete, since redundant re-downloads
 #     cost real money on a metered pod;
-#   - reads the ungated-mirror mapping straight out of `pilot/config.py`'s `UNGATED_MIRRORS`
+#   - reads the ungated-mirror mapping straight out of `harness/config.py`'s `UNGATED_MIRRORS`
 #     rather than duplicating it, so the two files cannot drift apart.
 #
 # `prefetch_models.sh` itself is not modified -- this is a separate script for a separate target
@@ -35,7 +35,7 @@ stamp() { TZ=UTC date '+%Y-%m-%d %H:%M:%S UTC'; }
 
 # Same "is this python3 actually usable" check monitor.sh uses -- some hosts put a
 # non-functional `python3` stub on PATH (e.g. Windows' App execution alias), so presence alone
-# is not enough before trusting it to import pilot.config.
+# is not enough before trusting it to import harness.config.
 PYBIN=""
 for candidate in python3 python; do
   if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c "" >/dev/null 2>&1; then
@@ -45,7 +45,7 @@ for candidate in python3 python; do
 done
 
 mirror_for() {
-  # mirror_for <repo> -- prints pilot.config.UNGATED_MIRRORS[<repo>], or "-" if absent/unreadable.
+  # mirror_for <repo> -- prints harness.config.UNGATED_MIRRORS[<repo>], or "-" if absent/unreadable.
   repo="$1"
   if [ -z "$PYBIN" ]; then
     echo "-"
@@ -55,7 +55,7 @@ mirror_for() {
 import sys
 sys.path.insert(0, ".")
 try:
-    from pilot.config import UNGATED_MIRRORS
+    from harness.config import UNGATED_MIRRORS
 except Exception:
     print("-")
 else:
@@ -65,8 +65,8 @@ PYEOF
 
 MIRROR_LLAMA=$(mirror_for "meta-llama/Llama-3.1-8B-Instruct")
 MIRROR_MISTRAL=$(mirror_for "mistralai/Mistral-7B-Instruct-v0.3")
-# Documented fallback if pilot.config could not be imported at all (e.g. no python found) --
-# the same two mirror repos pilot/config.py's own UNGATED_MIRRORS names, so a broken import
+# Documented fallback if harness.config could not be imported at all (e.g. no python found) --
+# the same two mirror repos harness/config.py's own UNGATED_MIRRORS names, so a broken import
 # still lands weights in the right place rather than skipping the gated repo's fallback entirely.
 [ "$MIRROR_LLAMA" != "-" ] || MIRROR_LLAMA="NousResearch/Meta-Llama-3.1-8B-Instruct"
 [ "$MIRROR_MISTRAL" != "-" ] || MIRROR_MISTRAL="unsloth/mistral-7b-instruct-v0.3"

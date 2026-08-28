@@ -5,7 +5,7 @@ generation. Reports completion by model, part, and condition, plus the number of
 retained by each paired continuous contrast, using a within-item permutation test of the
 largest condition-rate spread.
 
-    python -m pilot.audit_probe_missingness
+    python -m harness.audit_probe_missingness
 """
 
 from __future__ import annotations

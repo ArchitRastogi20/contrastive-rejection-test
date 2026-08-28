@@ -2,8 +2,8 @@
 
 import pytest
 
-from pilot.config import FIXTURE_DIR, N_OPTIONS, SEED
-from pilot.data import (
+from harness.config import FIXTURE_DIR, N_OPTIONS, SEED
+from harness.data import (
     build_item,
     build_items,
     describe_schema,

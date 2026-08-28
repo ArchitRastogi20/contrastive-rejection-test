@@ -15,7 +15,7 @@ production `run_experiment.run_stage2` (unmodified, default target-selection str
 exactly the R0-R4 conditions a real run would have built. The only new work here is stage 3's
 loop, run --n-samples times per condition per requested temperature.
 
-A hard, load-bearing limitation, not a bug: `pilot.models.Backend.generate()` (both the vLLM
+A hard, load-bearing limitation, not a bug: `harness.models.Backend.generate()` (both the vLLM
 and the transformers implementation) hardcodes greedy decoding at `config.TEMPERATURE`/
 `config.SEED` -- there is no per-call temperature or seed override in that interface. This
 module does not, and must not, reimplement vLLM/transformers sampling to work around that (see
@@ -24,14 +24,14 @@ this module's ownership note); it can only run the *real* backend at `config.TEM
 not hidden (see `degenerate_zero_variance` in the per-temperature summary). Any temperature
 other than `config.TEMPERATURE` against a real backend is refused outright, loudly, before any
 GPU is touched -- see `_refuse_unsupported_temperatures`. Sampling at a genuinely different temperature needs a small
-addition to `pilot.models.Backend.generate()` (a `temperature`/`seed` parameter threaded into
+addition to `harness.models.Backend.generate()` (a `temperature`/`seed` parameter threaded into
 `SamplingParams`/`generate()`) that is outside this file's ownership. `--dry-run` is unaffected:
 `StubBackend` has no such hardware backing, so the dry run exercises the full sampling,
 modal-choice and agreement logic against synthetic per-sample variation (see
 `_SweepStubResponder`).
 
-    python -m pilot.decoding_sweep --dry-run --temperatures 0.0 0.7 --n-samples 3
-    python -m pilot.decoding_sweep --from-stage1 results/exp3c/stage1_<model>.jsonl \\
+    python -m harness.decoding_sweep --dry-run --temperatures 0.0 0.7 --n-samples 3
+    python -m harness.decoding_sweep --from-stage1 results/exp3c/stage1_<model>.jsonl \\
         --greedy-stage3-dir results/exp3c --temperatures 0.7 --n-samples 5 \\
         --out-dir results/decoding_sweep_t07
 """
@@ -111,19 +111,19 @@ def derive_sample_seed(
 
 def _refuse_unsupported_temperatures(temperatures: list[float], *, dry_run: bool) -> None:
     """Stop, loudly, before any GPU is touched, if a real (non-stub) run asks for a temperature
-    `pilot.models.Backend.generate()` cannot actually honour. See the module docstring."""
+    `harness.models.Backend.generate()` cannot actually honour. See the module docstring."""
     if dry_run:
         return
     unsupported = sorted({t for t in temperatures if t != C.TEMPERATURE})
     if unsupported:
         raise SystemExit(
             f"decoding_sweep: temperature(s) {unsupported} requested against a real backend, "
-            f"but pilot.models.Backend.generate() hardcodes greedy decoding at "
+            f"but harness.models.Backend.generate() hardcodes greedy decoding at "
             f"config.TEMPERATURE ({C.TEMPERATURE}) with no per-call override -- only "
             f"{C.TEMPERATURE} (greedy, zero sample variance -- see 'degenerate_zero_variance' "
             "in the per-temperature summary) can "
             "actually be sampled against the real model today. Genuine sampling needs a "
-            "temperature/seed parameter added to Backend.generate() in pilot/models.py, which "
+            "temperature/seed parameter added to Backend.generate() in harness/models.py, which "
             "this module does not own and must not reimplement. Use --dry-run to exercise the "
             "rest of this pipeline against StubBackend instead."
         )

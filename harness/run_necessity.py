@@ -1,7 +1,7 @@
 """E3: necessity -- if the model chose X and justified it by saying rival Y lacks attribute A,
 is A load-bearing for X itself?
 
-The project's existing experiment (`pilot.run_experiment`) tests sufficiency: a model rejects a
+The project's existing experiment (`harness.run_experiment`) tests sufficiency: a model rejects a
 rival by naming a missing fact, the experimenter inserts that fact into the rival's profile, and
 the choice is re-measured. Its own report states the gap this module closes: "R1-R2 and R3-R4
 test sufficiency, not necessity, since nothing here removes the fact from a profile already
@@ -9,20 +9,20 @@ lacking it." E3 is the mirror -- remove the sentence stating A from X's *own* pr
 and see whether the choice moves away from X. If it does, A was doing work; if it does not, "Y
 lacks A" was decoration that happened to be true.
 
-Three conditions per qualifying item, N0-N2, in the same shape `pilot.repair`'s R0-R4 already
+Three conditions per qualifying item, N0-N2, in the same shape `harness.repair`'s R0-R4 already
 use: N0 is the unedited item (an integrity check under greedy decoding, not a treatment); N1
 deletes the chosen option's own sentence stating A; N2 deletes a different, length-matched
 sentence from the same profile instead, so a flip under N1 is not merely "any deletion confuses
 the model." Population and conditions are built entirely from committed stage-1 records
-(`pilot.extract.analyse`/`is_usable`, reused unchanged) and the item's own already-released
+(`harness.extract.analyse`/`is_usable`, reused unchanged) and the item's own already-released
 profile text -- no new stage-1 generation, no repair search, no sibling sourcing: unlike R1/R2,
 N1/N2 never touch any profile but the chosen option's own.
 
-    python -m pilot.run_necessity --self-check              # gate logic on the fixture, no GPU
-    python -m pilot.run_necessity --dry-run                 # whole pipeline, stub model, no GPU
-    python -m pilot.run_necessity --part A --models Qwen2.5-7B   # the real thing
+    python -m harness.run_necessity --self-check              # gate logic on the fixture, no GPU
+    python -m harness.run_necessity --dry-run                 # whole pipeline, stub model, no GPU
+    python -m harness.run_necessity --part A --models Qwen2.5-7B   # the real thing
 
-Every field is read off the model's own text by `pilot.extract`; no LLM judges anything here.
+Every field is read off the model's own text by `harness.extract`; no LLM judges anything here.
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ CONDITION_LABELS = ("N0", "N1", "N2")
 # before trusting it for a larger checkpoint.
 EST_SECONDS_PER_CONDITION = 2.4
 
-# Mirrors `pilot.surprisal.PARTS`/`pilot.probe_variants.PARTS` exactly (each of those modules
+# Mirrors `harness.surprisal.PARTS`/`harness.probe_variants.PARTS` exactly (each of those modules
 # keeps its own copy rather than sharing one -- see their docstrings). Run 3's committed
 # stage-1/2/3 output is split across these three directories (A, B at 4 options; C at 6).
 PARTS = {"A": "exp3a", "B": "exp3b", "C": "exp3c"}
@@ -355,7 +355,7 @@ def _rows(path: Path):
 
 
 def _stage1_rows_by_model(root: Path, *, recursive: bool) -> dict[str, list[dict]]:
-    """Every committed stage-1 row under `root`, grouped by model. Same convention `pilot.
+    """Every committed stage-1 row under `root`, grouped by model. Same convention `harness.
     surprisal._stage1_rows_by_model` uses -- kept as its own copy here, this project's
     established per-experiment-script pattern (`run_experiment.py`, `surprisal.py`,
     `probe_variants.py` each keep a thin copy of this kind of helper rather than sharing one).
@@ -426,7 +426,7 @@ def estimate_gpu_seconds(n_items: int) -> float:
 def budget_check(
     n_items: int, *, spent: float, allowance: float = C.PROJECT_GPU_BUDGET_S,
 ) -> dict:
-    """Same shape and the same purity guarantee as `pilot.probe_variants.budget_check`: no
+    """Same shape and the same purity guarantee as `harness.probe_variants.budget_check`: no
     ledger I/O, so it is testable with a hand-supplied `spent`."""
     estimate = estimate_gpu_seconds(n_items)
     remaining = allowance - spent

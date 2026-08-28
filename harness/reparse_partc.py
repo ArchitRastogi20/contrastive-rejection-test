@@ -5,21 +5,21 @@ letter regexes at [A-D], so a bare-letter answer of "E" or "F" was invisible to 
 path and fell through to the entity-title path -- which recovers a name but not a lone letter.
 That left `choice` null on rows where the model in fact named a candidate. This script re-reads
 every Part C stage-3 response with the corrected, option-count-aware `parse_choice` (imported
-from `extract.py`, not reimplemented) and recomputes every discrete number the pilot reports for
+from `extract.py`, not reimplemented) and recomputes every discrete number the study reports for
 Part C: the four matched-pairs contrasts, the twelve-test Holm family, and the three
 leave-one-model-out checks.
 
 It is read-only against `code/results/`: it loads stage-1 (for the fixed option order) and
 stage-3 (for the response text and the original, uncorrected `choice`) and writes nothing back.
 
-Run from the directory that holds `pilot/` and `results/` (the `code/` tree in the working
+Run from the directory that holds `harness/` and `results/` (the `code/` tree in the working
 repository, the tree root in the released one):
 
-    python -m pilot.reparse_partc
+    python -m harness.reparse_partc
 
 or as a bare script, which puts that directory on `sys.path` itself:
 
-    python pilot/reparse_partc.py
+    python harness/reparse_partc.py
 
 Standard library only. No randomness is used, so there is nothing to seed.
 """
@@ -34,10 +34,10 @@ import sys
 from collections import defaultdict
 
 if __package__ in (None, ""):
-    # Invoked as a bare script rather than `python -m pilot.reparse_partc`: put the `code/`
-    # directory (this file's parent's parent) on sys.path so `pilot` resolves as a package.
+    # Invoked as a bare script rather than `python -m harness.reparse_partc`: put the `code/`
+    # directory (this file's parent's parent) on sys.path so `harness` resolves as a package.
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from pilot.extract import parse_choice
+    from harness.extract import parse_choice
 else:
     from .extract import parse_choice
 

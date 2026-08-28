@@ -2,7 +2,7 @@
 its host paragraph in the content arm (R1/R3, the attribute the model actually named) as it is
 in the length-matched arm (R2/R4, a different attribute of the same token length)?
 
-The repair (`pilot.repair`) matches R1/R2 and R3/R4 only on token length before inserting one
+The repair (`harness.repair`) matches R1/R2 and R3/R4 only on token length before inserting one
 sentence into a candidate's profile. Length is not fluency: a sentence that is well-formed and
 expected in context can differ sharply in how surprising its individual words are from one that
 merely has the same word count. If the two arms are not also matched on that, an effect later
@@ -16,9 +16,9 @@ tokens before it in the rendered profile -- never anything the insertion comes b
 causal model cannot have used it anyway. Reported per (item, condition, model) as both the mean
 per token and the total, plus the paired R1-R2 and R3-R4 differences.
 
-**The hard part.** `pilot.models` had no prompt-level logprob path before this: `generate()`
+**The hard part.** `harness.models` had no prompt-level logprob path before this: `generate()`
 produces text, and `letter_probs()` reads the top-k over one *next* token. `Backend.
-prompt_token_logprobs` (added in `pilot.models`) is the new one, exposed identically on
+prompt_token_logprobs` (added in `harness.models`) is the new one, exposed identically on
 `VLLMBackend`, `HFBackend` and `StubBackend` so this module runs against a stub with no GPU.
 Locating *which* tokens in the edited prompt are the inserted ones is the correctness-critical
 step and is done by `models.find_inserted_span`: the longest common prefix and the longest
@@ -35,14 +35,14 @@ kwarg works; a real run should fall back to `--backend transformers` if it does 
 
 **This does not regenerate anything.** The five conditions per item were already built and
 already shown to the model in a committed run-3 stage-3 pass (`code/results/exp3a`, `exp3b`,
-`exp3c` -- see `pilot.analyze_run3`'s `PARTS`, mirrored here). `repair.build_conditions` is a
+`exp3c` -- see `harness.analyze_run3`'s `PARTS`, mirrored here). `repair.build_conditions` is a
 pure function of (item, rejection, corpus_index, choice_letter); replaying it against the
 already-committed stage-1 response and stage-2 record reproduces byte-identical R0-R4 profiles
 without asking a model anything new. This module's own model calls are the *new* instrumentation
 (a prompt-logprob read), not a repeat of stage 1-3's generation.
 
-    python -m pilot.surprisal --dry-run                    # whole pipeline, stub model, no GPU
-    python -m pilot.surprisal --part A --models Qwen2.5-7B  # the real thing, run-3 Part A
+    python -m harness.surprisal --dry-run                    # whole pipeline, stub model, no GPU
+    python -m harness.surprisal --part A --models Qwen2.5-7B  # the real thing, run-3 Part A
 """
 
 from __future__ import annotations
@@ -81,7 +81,7 @@ log = logging.getLogger("surprisal")
 CONDITIONS_WITH_INSERTS = ("R1", "R2", "R3", "R4")
 CONTENT_CONTRASTS = (("R1", "R2"), ("R3", "R4"))
 
-# Mirrors `pilot.analyze_run3.PARTS` exactly: run 3's committed stage-1/2/3 output is split
+# Mirrors `harness.analyze_run3.PARTS` exactly: run 3's committed stage-1/2/3 output is split
 # across these three directories (A, B at 4 options; C at 6). Kept as its own copy here rather
 # than imported, since `analyze_run3`'s dict carries a human-readable description string this
 # module does not need and importing just for a literal would be a stranger coupling than
@@ -219,7 +219,7 @@ def _rebuild_item_set(
 
 
 # Two different, independently-necessary numbers -- both learned the hard way by cross-checking
-# this project's own committed data against `pilot.rescore.rebuild_items` (rule 5) rather than
+# this project's own committed data against `harness.rescore.rebuild_items` (rule 5) rather than
 # by reasoning about the code, and both matter for a faithful reconstruction:
 #
 # 1. **Corpus breadth** (`corpus_n_items` below): `run_experiment.main` builds one `items` list
@@ -458,7 +458,7 @@ def span_surprisal(base_read: PromptLogprobs, edited_read: PromptLogprobs) -> Sp
     `complete` is False whenever the span is empty (no insertion was found -- the two prompts
     were identical, which is itself worth flagging rather than silently reporting 0 tokens as a
     real reading) or any token in it lacks a logprob; such a read must be excluded from the
-    paired analysis downstream, never imputed, the same discipline `pilot.models.LetterProbRead`
+    paired analysis downstream, never imputed, the same discipline `harness.models.LetterProbRead`
     already established for the forced-choice read.
     """
     start, end = find_inserted_span(base_read.token_ids, edited_read.token_ids)

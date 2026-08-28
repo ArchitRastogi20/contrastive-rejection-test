@@ -6,11 +6,11 @@ Run from the repository root or from ``code/``::
     python code/figures/make_figures.py --results code/results --out paper_full/figures
 
 Figure 1 is a forest plot recomputed from the committed stage-3 JSONL under
-``code/results/exp3a``, ``exp3b``, ``exp3c`` via ``pilot.analyze_run3``; no network needed.
+``code/results/exp3a``, ``exp3b``, ``exp3c`` via ``harness.analyze_run3``; no network needed.
 
 Figure 2 is a design schematic whose worked example is reconstructed end to end from a real
 item's stage-1/stage-2 records (``code/results/exp2``, ``code/results/exp3a``) using
-``pilot.data`` and ``pilot.repair``, and asserts the reconstruction matches the committed
+``harness.data`` and ``harness.repair``, and asserts the reconstruction matches the committed
 record. This step needs network access once, to pull the source dataset
 (``framolfese/2WikiMultihopQA``) from the Hugging Face Hub.
 
@@ -72,13 +72,13 @@ CONTRASTS = [("R1", "R2", "content, rival"),
 PARTS = ["A", "B", "C"]
 
 
-def _load_pilot():
-    """Import code/pilot/analyze_run3.py regardless of the caller's cwd."""
+def _load_harness():
+    """Import code/harness/analyze_run3.py regardless of the caller's cwd."""
     here = Path(__file__).resolve()
     code_dir = here.parent.parent  # code/
     if str(code_dir) not in sys.path:
         sys.path.insert(0, str(code_dir))
-    from pilot import analyze_run3 as ar3  # noqa: E402
+    from harness import analyze_run3 as ar3  # noqa: E402
     return ar3
 
 
@@ -89,7 +89,7 @@ def compute_contrast_table(results_dir: Path):
     ``load_part``/``discrete_outcomes``/``discrete_contrast``/``paired_mean`` calls,
     same seed (module default, ``SEED = 20260822``), same resample count.
     """
-    ar3 = _load_pilot()
+    ar3 = _load_harness()
     rows = []
     raw_p = {}
     for part in PARTS:
@@ -275,11 +275,11 @@ def load_worked_example(results_dir: Path) -> dict:
     to agree with that row before anything is returned. A mismatch raises; it does not fall back
     to a plausible-looking guess.
     """
-    _load_pilot()  # puts code/ on sys.path
-    from pilot.data import load_records, build_items
-    from pilot import repair as repair_mod
-    from pilot.extract import Rejection
-    from pilot import config as C
+    _load_harness()  # puts code/ on sys.path
+    from harness.data import load_records, build_items
+    from harness import repair as repair_mod
+    from harness.extract import Rejection
+    from harness import config as C
 
     stage1_path = (results_dir / EXAMPLE_STAGE1_SOURCE_DIR
                    / f"stage1___workspace___hf__models__{EXAMPLE_MODEL_DIR_TAG}.jsonl")
@@ -571,12 +571,12 @@ def make_design_schematic(example: dict, out_path: Path):
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     here = Path(__file__).resolve().parent
-    # here.parent is the directory holding pilot/ and figures/ as siblings -- code/ in the
+    # here.parent is the directory holding harness/ and figures/ as siblings -- code/ in the
     # working tree, the repo root itself in the flat public release. here.parent.parent is only
     # meaningful when here.parent is actually named "code" (the working tree, where paper_full/
     # is a sibling of code/); the flat release has no paper_full/ at all, so falling back to
     # here.parent there keeps the default inside the cloned repository instead of writing above
-    # it. See pilot/config.py's CODE_ROOT/REPO_ROOT for the same layout-detection logic.
+    # it. See harness/config.py's CODE_ROOT/REPO_ROOT for the same layout-detection logic.
     code_root = here.parent
     repo_root = code_root.parent if code_root.name == "code" else code_root
     ap.add_argument("--results", type=Path, default=code_root / "results",

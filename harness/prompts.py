@@ -1,4 +1,4 @@
-"""The two prompts for the pilot's two arms, and the renderer that builds a chat from an item.
+"""The two prompts for the study's two arms, and the renderer that builds a chat from an item.
 
 ``spontaneous`` never asks the model to rule anything out. ``elicited`` asks directly which
 candidate was ruled out and what is missing from its profile.

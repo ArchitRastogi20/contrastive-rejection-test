@@ -1,9 +1,9 @@
 """Run the contrastive-repair experiment (S3): does repairing the named defect move the
 model's choice more than an unrelated edit does, or more than editing a different profile does?
 
-    python -m pilot.run_experiment --self-check     # stage 1-2 logic + all 8 gates, no GPU
-    python -m pilot.run_experiment --dry-run        # whole pipeline, stub model, no GPU
-    python -m pilot.run_experiment                  # the real thing
+    python -m harness.run_experiment --self-check     # stage 1-2 logic + all 8 gates, no GPU
+    python -m harness.run_experiment --dry-run        # whole pipeline, stub model, no GPU
+    python -m harness.run_experiment                  # the real thing
 
 Three stages, each written to its own JSONL with the full raw response kept.
 
@@ -14,7 +14,7 @@ Three stages, each written to its own JSONL with the full raw response kept.
     stage 3  re-ask under all five conditions and record which option was chosen, whether it
              is the repaired rival, and whether the new explanation still names the same defect.
 
-Every field is read off the model's own text by `pilot.extract`; no LLM judges anything here.
+Every field is read off the model's own text by `harness.extract`; no LLM judges anything here.
 """
 
 from __future__ import annotations
@@ -202,7 +202,7 @@ def run_stage2(
                       "attribute": rejection.attribute}
             try:
                 # build_conditions_with_diagnostics searches R1 x R2 candidates jointly (see
-                # pilot/repair.py) and only raises once both are genuinely exhausted -- the
+                # harness/repair.py) and only raises once both are genuinely exhausted -- the
                 # gates have already run internally by the time this returns cleanly, so there
                 # is no separate post-hoc check_integrity call here any more.
                 conditions, diag = repair.build_conditions_with_diagnostics(
@@ -811,7 +811,7 @@ def main(argv: list[str] | None = None) -> int:
     items = build_items(records, n_items=args.limit, n_options=args.n_options, seed=C.SEED)
     log.info("built %d items from %d records", len(items), len(records))
     if not items:
-        log.error("no usable items. Run pilot.run_pilot --inspect-schema first.")
+        log.error("no usable items. Run harness.run_pilot --inspect-schema first.")
         return 2
 
     corpus_index = repair.build_corpus_index(items)

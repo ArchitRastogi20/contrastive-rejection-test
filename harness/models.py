@@ -69,7 +69,7 @@ def render_for_probe(tok, chat: Chat) -> tuple[str, bool]:
     A chat ending in a user turn (today's only probe, `append_letter_probe`'s output) renders
     exactly as `letter_probs` always has: `add_generation_prompt=True`, a fresh assistant turn
     opened for the model to fill in. A chat ending in an *assistant* turn -- a prefilled-stem
-    probe variant (see `pilot.probe_variants`) -- is rendered as a continuation of that turn
+    probe variant (see `harness.probe_variants`) -- is rendered as a continuation of that turn
     instead (`continue_final_message=True`), so the forced token is the next token *after* the
     stem, not a new reply to it.
 
@@ -133,7 +133,7 @@ class PromptLogprobs:
     the model assigned to the token that is actually there, conditioned only on the tokens
     before it. This is the causal-LM reading a forced-choice generation call cannot give: a
     prompt-level (not next-token) logprob, used here to score how surprising an *inserted*
-    sentence is in the context it was inserted into (see `pilot.surprisal`).
+    sentence is in the context it was inserted into (see `harness.surprisal`).
 
     `token_ids` and `tokens` are kept for every backend, including the stub, so a span of
     interest inside this prompt can be located positionally (see `find_inserted_span`) without
@@ -169,7 +169,7 @@ class PromptLogprobsUnsupported(RuntimeError):
     verified anywhere in this repository -- there is no GPU available to check it against a
     real engine. Rather than assume support, `VLLMBackend.prompt_token_logprobs` probes for it
     at call time and raises this, with the underlying error attached, the first time it turns
-    out not to work -- a caller (see `pilot.surprisal`) can catch this specifically and fall
+    out not to work -- a caller (see `harness.surprisal`) can catch this specifically and fall
     back to the transformers path (`HFBackend`) instead of crashing the whole run.
     """
 
@@ -181,7 +181,7 @@ class ContinuationUnsupported(RuntimeError):
     `apply_chat_template`, but *accepting the keyword* and *a given model's chat template
     actually treating it as "keep going from here" rather than restarting with a fresh
     assistant header* are two different things -- the second is exactly what
-    `pilot.probe_variants` exists to measure, not assume, for a reasoning model whose template
+    `harness.probe_variants` exists to measure, not assume, for a reasoning model whose template
     may or may not suppress the opening `<think>` block on a prefilled turn. This exception
     covers only the first, structural failure (an old `transformers` without the keyword at
     all); the second is reported as data (`PromptLogprobs`/`LetterProbRead` `detail`), never as
@@ -408,7 +408,7 @@ class Backend:
 
     def prompt_token_logprobs(self, chats: Sequence[Chat]) -> list[PromptLogprobs]:
         """Every prompt token's own logprob, conditioned on the tokens before it -- one call per
-        chat, no generation. Used by `pilot.surprisal` to score how surprising an inserted
+        chat, no generation. Used by `harness.surprisal` to score how surprising an inserted
         sentence is in the context it was inserted into; not needed by, and never a replacement
         for, `generate` or `letter_probs`."""
         raise NotImplementedError

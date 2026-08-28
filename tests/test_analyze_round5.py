@@ -1,4 +1,4 @@
-"""Tests for pilot.analyze_round5: recomputes round-5 statistics from hand-written fixtures.
+"""Tests for harness.analyze_round5: recomputes round-5 statistics from hand-written fixtures.
 
 No GPU, no network; the provenance-resolver tests pass hand-built Entity/Item objects and a
 hand-built corpus index in directly (via resolve_control_provenance's items_by_id/corpus_index
@@ -10,10 +10,10 @@ from __future__ import annotations
 import json
 import math
 
-from pilot.data import Entity, Item
-from pilot.repair import build_corpus_index
+from harness.data import Entity, Item
+from harness.repair import build_corpus_index
 
-from pilot.analyze_round5 import (
+from harness.analyze_round5 import (
     MIN_ROWS_PER_RELATION,
     _chi2_sf_even_df,
     _dedup_surprisal_rows,
@@ -309,7 +309,7 @@ def _make_provenance_stage2_row(item_id="book-1", built=True, r1_examined=1, r2_
 
 
 def test_provenance_resolver_computes_rates_when_everything_resolves(tmp_path):
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     item = _make_provenance_item()
     corpus_index = build_corpus_index([item])
@@ -346,7 +346,7 @@ def test_provenance_resolver_refuses_a_percentage_when_a_row_is_unresolved(tmp_p
     exists to prevent in the real corpus. The resolver must still report resolved/unresolved
     counts, but cross_item_rate and relation_rates must come back None rather than a percentage
     computed over only the items that happened to resolve."""
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     item = _make_provenance_item()
     corpus_index = build_corpus_index([item])
@@ -378,7 +378,7 @@ def test_provenance_resolver_refuses_a_percentage_on_an_out_of_range_examined_in
     """r2_examined points past the end of the (correctly rebuilt, size-1) R2 candidate list --
     this must count as unresolved, not silently clamp or raise, and must still withhold the
     percentage."""
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     item = _make_provenance_item()
     corpus_index = build_corpus_index([item])
@@ -409,7 +409,7 @@ def test_provenance_resolver_ignores_rows_that_were_not_built():
     from pathlib import Path
     import tempfile
 
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     item = _make_provenance_item()
     corpus_index = build_corpus_index([item])
@@ -473,7 +473,7 @@ def test_load_fluency_choices_recomputes_from_the_raw_response(tmp_path):
     stayed wrong for the fluency section even after ``analyze_run3.load_part`` was fixed. It
     must now re-derive ``choice``/``chosen_is_edited`` from the raw ``response`` the same way,
     via stage-1's own ``option_titles``."""
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     part_dir = tmp_path / "exp3z"
     part_dir.mkdir()
@@ -498,7 +498,7 @@ def test_load_fluency_choices_recomputes_from_the_raw_response(tmp_path):
 
 
 def test_load_fluency_choices_raises_on_missing_titles(tmp_path):
-    from pilot.analyze_run3 import PARTS
+    from harness.analyze_run3 import PARTS
 
     part_dir = tmp_path / "exp3z2"
     part_dir.mkdir()
@@ -639,7 +639,7 @@ def test_touched_files_contain_no_stray_control_characters():
     import pathlib
 
     here = pathlib.Path(__file__).resolve().parent
-    paths = [here.parent / "pilot" / "analyze_round5.py", here / "test_analyze_round5.py"]
+    paths = [here.parent / "harness" / "analyze_round5.py", here / "test_analyze_round5.py"]
 
     offenders = []
     for path in paths:

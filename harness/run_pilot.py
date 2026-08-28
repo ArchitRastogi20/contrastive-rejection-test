@@ -1,8 +1,8 @@
 """Run the contrastive-rejection pilot.
 
-    python -m pilot.run_pilot --inspect-schema        # look at the data before trusting it
-    python -m pilot.run_pilot --dry-run              # whole pipeline, stub model, no GPU
-    python -m pilot.run_pilot                        # the real thing
+    python -m harness.run_pilot --inspect-schema        # look at the data before trusting it
+    python -m harness.run_pilot --dry-run              # whole pipeline, stub model, no GPU
+    python -m harness.run_pilot                        # the real thing
 
 Per model and per arm, measures how often an explanation rejects a rival option, how often
 that rejection names a concrete attribute, how often the complaint is true of the profile, and
@@ -41,7 +41,7 @@ from .models import (
 )
 from .watchdog import Watchdog, commit_gpu_seconds, cumulative_gpu_seconds
 
-log = logging.getLogger("pilot")
+log = logging.getLogger("harness")
 
 
 # --------------------------------------------------------------------------- stub replies

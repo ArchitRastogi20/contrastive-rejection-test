@@ -17,8 +17,8 @@ Where it is, the irrelevant control is relation-matched to the repair sentence, 
 effect is attributable to relevance rather than to template mismatch. Where it is not, the two
 remain confounded. Comparing the contrasts across the two strata is the check.
 
-    python -m pilot.analyze_relation_stratum                  # both parts, full report
-    python -m pilot.analyze_relation_stratum --part a         # Part A only
+    python -m harness.analyze_relation_stratum                  # both parts, full report
+    python -m harness.analyze_relation_stratum --part a         # Part A only
 
 Discrete measure: McNemar b/c on `chosen_is_edited`, matched-pairs odds ratio (Haldane-Anscombe
 +0.5 on both cells only when a cell is zero), Wald CI on the log odds ratio, exact two-sided

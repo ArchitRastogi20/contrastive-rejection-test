@@ -34,13 +34,13 @@ python -m pytest tests -q || fail=1
 
 echo
 echo "$(stamp) 2/4 dry run of the real pipeline against the stub model"
-python -m pilot.run_pilot --dry-run --limit 4 --out-dir results/smoke || fail=1
+python -m harness.run_pilot --dry-run --limit 4 --out-dir results/smoke || fail=1
 
 echo
 echo "$(stamp) 3/4 dataset schema, against the live hub"
-echo "     (a failure here means the released field shapes have moved -- fix pilot/data.py"
+echo "     (a failure here means the released field shapes have moved -- fix harness/data.py"
 echo "      before spending GPU time, and do not guess at the field names)"
-python -m pilot.run_pilot --inspect-schema --scan 3 || fail=1
+python -m harness.run_pilot --inspect-schema --scan 3 || fail=1
 
 echo
 if [ "$fail" -eq 0 ]; then

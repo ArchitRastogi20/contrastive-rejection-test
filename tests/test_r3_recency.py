@@ -1,10 +1,10 @@
-"""Tests for pilot.r3_recency: derives the R3 recency measure and target letter.
+"""Tests for harness.r3_recency: derives the R3 recency measure and target letter.
 
 Hand-written fixtures only; no GPU or network."""
 
 import json
 
-from pilot.r3_recency import (
+from harness.r3_recency import (
     CONDITIONS,
     LetterUnavailable,
     analyse,
@@ -212,7 +212,7 @@ def _stage3_row_with_letter(model, item_id, condition, *, rival_letter, choice, 
 
 
 def test_run1_style_records_without_edited_letter_still_derive():
-    from pilot.r3_recency import _recorded_targets
+    from harness.r3_recency import _recorded_targets
 
     conds = {
         "R0": _stage3_row("M1", "x", "R0", rival_letter="A", choice="B"),
@@ -317,7 +317,7 @@ def test_new_files_contain_no_stray_control_characters():
     import pathlib
 
     here = pathlib.Path(__file__).resolve().parent
-    paths = [here.parent / "pilot" / "r3_recency.py", here / "test_r3_recency.py"]
+    paths = [here.parent / "harness" / "r3_recency.py", here / "test_r3_recency.py"]
 
     offenders = []
     for path in paths:

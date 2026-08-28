@@ -1,7 +1,7 @@
-"""Tests for pilot.extract: sentence splitting, rejection/attribute extraction, and choice parsing."""
+"""Tests for harness.extract: sentence splitting, rejection/attribute extraction, and choice parsing."""
 
-from pilot.data import Entity, Item
-from pilot.extract import (
+from harness.data import Entity, Item
+from harness.extract import (
     analyse,
     complaint_is_true,
     find_attribute,
@@ -261,7 +261,7 @@ def test_a_bare_date_complaint_is_not_repairable():
 
 
 def test_born_without_a_date_is_not_a_date_of_birth():
-    from pilot.extract import attribute_in_profile
+    from harness.extract import attribute_in_profile
 
     assert attribute_in_profile("She was born in 1970 in Krakow.", "date_of_birth") is True
     assert attribute_in_profile("She was born in Krakow.", "date_of_birth") is False
@@ -272,7 +272,7 @@ def test_born_without_a_date_is_not_a_date_of_birth():
 
 
 def test_a_candidate_name_cannot_supply_the_attribute_cue():
-    from pilot.extract import strip_titles
+    from harness.extract import strip_titles
 
     titles = ["Robert Bresson", "When Were You Born", "Charles Saunders (director)"]
     # "Bres-son" supplied "son", "When Were You Born" supplied "born", and the parenthetical
@@ -291,7 +291,7 @@ def test_sources_contain_no_stray_control_characters():
     import glob
 
     offenders = []
-    for path in glob.glob("pilot/*.py") + glob.glob("tests/*.py"):
+    for path in glob.glob("harness/*.py") + glob.glob("tests/*.py"):
         for i, byte in enumerate(open(path, "rb").read()):
             if byte < 9 or byte in (11, 12) or 14 <= byte < 32:
                 offenders.append((path, i, byte))

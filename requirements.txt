@@ -14,7 +14,7 @@
 #                     which newer transformers removed. Tokenizer init crashes.
 #
 # Consequence worth knowing: vllm 0.6.3.post1 predates the Qwen3 architecture, so no Qwen3
-# checkpoint can run on this image. The substitute model in pilot/config.py is a Qwen2.5.
+# checkpoint can run on this image. The substitute model in harness/config.py is a Qwen2.5.
 
 vllm==0.6.3.post1
 transformers==4.46.3

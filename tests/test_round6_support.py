@@ -1,4 +1,4 @@
-"""Tests for the round-6 support code: pilot.analyze_necessity's arithmetic, and a syntax check
+"""Tests for the round-6 support code: harness.analyze_necessity's arithmetic, and a syntax check
 on scripts/monitor.sh and scripts/prefetch_round6.sh.
 
 Hand-written fixtures only; no GPU, no network, seconds to run.
@@ -11,7 +11,7 @@ import subprocess
 
 import pytest
 
-from pilot.analyze_necessity import (
+from harness.analyze_necessity import (
     ASSUMED_MODEL_LOAD_S,
     E1_BUILT_YIELD_4OPT,
     _rate_from_ledger,
@@ -23,8 +23,8 @@ from pilot.analyze_necessity import (
     report_integrity,
     report_strata,
 )
-from pilot.config import CODE_ROOT
-from pilot.watchdog import LEDGER_FIELDS
+from harness.config import CODE_ROOT
+from harness.watchdog import LEDGER_FIELDS
 
 
 # ------------------------------------------------------------------- fixture rows (shared shape)
@@ -178,7 +178,7 @@ def test_strata_flags_a_too_small_stratum_in_the_report_text():
 
 
 def test_continuous_outcomes_skip_rows_with_a_missing_delta():
-    from pilot.analyze_necessity import report_continuous
+    from harness.analyze_necessity import report_continuous
 
     rows = [
         _row("M", "has_delta", "N0", still=True, delta=None),
@@ -197,7 +197,7 @@ def test_continuous_outcomes_skip_rows_with_a_missing_delta():
 
 
 def test_continuous_report_does_not_raise_when_every_row_is_missing_a_delta():
-    from pilot.analyze_necessity import report_continuous
+    from harness.analyze_necessity import report_continuous
 
     rows = [
         _row("M", "i1", "N0", still=True, delta=None),

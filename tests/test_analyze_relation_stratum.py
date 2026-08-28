@@ -1,11 +1,11 @@
-"""Tests for pilot.analyze_relation_stratum: hand-written fixtures only, no GPU or network."""
+"""Tests for harness.analyze_relation_stratum: hand-written fixtures only, no GPU or network."""
 
 from __future__ import annotations
 
 import json
 import math
 
-from pilot.analyze_relation_stratum import (
+from harness.analyze_relation_stratum import (
     PARENTAGE_ATTRIBUTES,
     continuous_contrast,
     continuous_pairs,
@@ -202,7 +202,7 @@ def test_load_part_keys_by_model_and_item_id_and_reads_the_condition(tmp_path):
     # (model, item_id) it loads, so it can re-derive choice/chosen_is_edited from each row's
     # raw response with the fixed parser -- see test_load_part_raises_on_missing_titles below
     # for what happens without this.
-    from pilot.analyze_run3 import PARTS as RUN3_PARTS
+    from harness.analyze_run3 import PARTS as RUN3_PARTS
 
     part_dir = tmp_path / "exp3z"
     part_dir.mkdir()
@@ -241,7 +241,7 @@ def test_load_part_keys_by_model_and_item_id_and_reads_the_condition(tmp_path):
 def test_load_part_raises_on_missing_titles(tmp_path):
     """A stage-3 row whose (model, item_id) has no stage-1 titles is a coverage hole and must
     raise, not be silently trusted -- mirrors analyze_run3's identical guard."""
-    from pilot.analyze_run3 import PARTS as RUN3_PARTS
+    from harness.analyze_run3 import PARTS as RUN3_PARTS
 
     part_dir = tmp_path / "exp3z2"
     part_dir.mkdir()
@@ -269,7 +269,7 @@ def test_touched_files_contain_no_stray_control_characters():
     import pathlib
 
     here = pathlib.Path(__file__).resolve().parent
-    paths = [here.parent / "pilot" / "analyze_relation_stratum.py", here / "test_analyze_relation_stratum.py"]
+    paths = [here.parent / "harness" / "analyze_relation_stratum.py", here / "test_analyze_relation_stratum.py"]
 
     offenders = []
     for path in paths:

@@ -1,6 +1,6 @@
 """Re-score saved raw responses with the current extractor. No GPU, no generation.
 
-    python -m pilot.rescore --results-dir results
+    python -m harness.rescore --results-dir results
 
 Rebuilds the item set deterministically from the seed and verifies, by item id and option
 order, that the rebuilt items match the ones the run actually used; stops rather than scoring

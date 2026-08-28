@@ -1,6 +1,6 @@
 """Unit tests for the offline third-option-baseline confound audit."""
 
-from pilot.audit_location_confound import (
+from harness.audit_location_confound import (
     BAND_FLOOR,
     LOOSE_BAND,
     TIGHT_BAND,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # External health-check loop for a running pilot job on the metered pod.
 #
-# The in-process watchdog (pilot/watchdog.py) samples VRAM, tracks an ETA, aborts a model after
+# The in-process watchdog (harness/watchdog.py) samples VRAM, tracks an ETA, aborts a model after
 # three consecutive over-ceiling readings, and writes heartbeat.json -- but it cannot report that
 # the *process itself* has died. This script is the outside check: it does not touch the
 # watchdog's own logic (no VRAM-abort decision is made here, no GPU-seconds are committed), it
@@ -152,7 +152,7 @@ check_heartbeat() {
 
 check_vram() {
   # Sets VRAM_BREACH=1 on a reading above the ceiling; VRAM_STRIKE_COUNT persists across loop
-  # iterations (a plain variable in this same shell), mirroring pilot/watchdog.py's own
+  # iterations (a plain variable in this same shell), mirroring harness/watchdog.py's own
   # consecutive-strikes rule, scaled to this script's coarser 120s cadence.
   VRAM_BREACH=0
   if ! command -v nvidia-smi >/dev/null 2>&1; then

@@ -1,5 +1,5 @@
-"""Tests for the inserted-sentence surprisal experiment (E1): `pilot.models.find_inserted_span`
-and the new `prompt_token_logprobs` backend surface, plus `pilot.surprisal`'s arithmetic, budget
+"""Tests for the inserted-sentence surprisal experiment (E1): `harness.models.find_inserted_span`
+and the new `prompt_token_logprobs` backend surface, plus `harness.surprisal`'s arithmetic, budget
 check and end-to-end dry run.
 
 Hand-written fixtures only; no GPU or network.
@@ -12,8 +12,8 @@ import math
 
 import pytest
 
-from pilot.models import PromptLogprobs, StubBackend, find_inserted_span
-from pilot.surprisal import (
+from harness.models import PromptLogprobs, StubBackend, find_inserted_span
+from harness.surprisal import (
     budget_check,
     condition_summary,
     estimate_gpu_seconds,
@@ -351,7 +351,7 @@ def test_touched_files_contain_no_stray_control_characters():
     import pathlib
 
     here = pathlib.Path(__file__).resolve().parent
-    paths = [here.parent / "pilot" / "surprisal.py", here / "test_surprisal.py"]
+    paths = [here.parent / "harness" / "surprisal.py", here / "test_surprisal.py"]
 
     offenders = []
     for path in paths:

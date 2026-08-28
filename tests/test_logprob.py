@@ -1,5 +1,5 @@
-"""Tests for the forced-choice letter-probability continuous outcome measure: pilot.models'
-letter-probe helpers and pilot.run_experiment's continuous-contrast functions.
+"""Tests for the forced-choice letter-probability continuous outcome measure: harness.models'
+letter-probe helpers and harness.run_experiment's continuous-contrast functions.
 
 Hand-written fixtures only; no GPU or network.
 """
@@ -12,15 +12,15 @@ from types import SimpleNamespace
 
 import pytest
 
-from pilot import repair
-from pilot.models import (
+from harness import repair
+from harness.models import (
     StubBackend,
     append_letter_probe,
     letter_read_from_token_logprobs,
     renormalize_letter_logprobs,
     resolve_letter_token_ids,
 )
-from pilot.run_experiment import (
+from harness.run_experiment import (
     _fixture_item_for_gates,
     all_continuous_contrasts,
     bootstrap_ci_mean_diff,
@@ -581,7 +581,7 @@ def test_touched_files_contain_no_stray_control_characters():
     import pathlib
 
     here = pathlib.Path(__file__).resolve().parent
-    paths = [here.parent / "pilot" / "models.py", here.parent / "pilot" / "run_experiment.py",
+    paths = [here.parent / "harness" / "models.py", here.parent / "harness" / "run_experiment.py",
              here / "test_logprob.py"]
 
     offenders = []

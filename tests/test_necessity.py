@@ -10,10 +10,10 @@ import json
 
 import pytest
 
-from pilot import config as C
-from pilot.data import Entity, Item, build_item
-from pilot.extract import Rejection, attribute_in_profile
-from pilot.run_necessity import (
+from harness import config as C
+from harness.data import Entity, Item, build_item
+from harness.extract import Rejection, attribute_in_profile
+from harness.run_necessity import (
     NecessityUnavailable,
     SelectedItem,
     budget_check,
@@ -445,7 +445,7 @@ def test_select_items_is_deterministic_given_the_seed():
 
 
 def test_run_stage_necessity_records_still_chooses_original_per_condition(tmp_path):
-    from pilot.models import StubBackend
+    from harness.models import StubBackend
 
     item = make_item()
     conditions, _ = build_necessity_conditions(item, CHOSEN_LETTER, ATTRIBUTE)

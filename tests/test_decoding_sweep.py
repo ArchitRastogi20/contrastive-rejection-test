@@ -1,4 +1,4 @@
-"""Tests for pilot.decoding_sweep (E4): per-sample seed derivation, the sampling adapter, the
+"""Tests for harness.decoding_sweep (E4): per-sample seed derivation, the sampling adapter, the
 modal-choice/agreement summary, the budget check, and --dry-run end to end.
 
 Hand-written fixtures only; no GPU or network."""
@@ -7,12 +7,12 @@ import json
 
 import pytest
 
-from pilot import config as C
-from pilot.data import Entity, Item
-from pilot.extract import Rejection
-from pilot.repair import build_conditions, build_corpus_index
+from harness import config as C
+from harness.data import Entity, Item
+from harness.extract import Rejection
+from harness.repair import build_conditions, build_corpus_index
 
-from pilot.decoding_sweep import (
+from harness.decoding_sweep import (
     _SweepStubResponder,
     _edited_letter_by_condition,
     _load_greedy_stage3,
@@ -28,7 +28,7 @@ from pilot.decoding_sweep import (
     mcnemar_on_modal_choice,
     run_stage3_sweep,
 )
-from pilot.models import StubBackend
+from harness.models import StubBackend
 
 
 # --------------------------------------------------------------------- derive_sample_seed
@@ -80,14 +80,14 @@ def test_estimate_cost_s_is_a_product_of_its_four_inputs():
 
 def test_check_budget_refuses_when_estimate_exceeds_remaining(monkeypatch):
     monkeypatch.setattr(
-        "pilot.decoding_sweep.cumulative_gpu_seconds", lambda: C.PROJECT_GPU_BUDGET_S - 1
+        "harness.decoding_sweep.cumulative_gpu_seconds", lambda: C.PROJECT_GPU_BUDGET_S - 1
     )
     with pytest.raises(SystemExit):
         check_budget(estimated_s=100.0, label="test")
 
 
 def test_check_budget_allows_when_estimate_fits(monkeypatch):
-    monkeypatch.setattr("pilot.decoding_sweep.cumulative_gpu_seconds", lambda: 0.0)
+    monkeypatch.setattr("harness.decoding_sweep.cumulative_gpu_seconds", lambda: 0.0)
     check_budget(estimated_s=100.0, label="test")  # must not raise
 
 
