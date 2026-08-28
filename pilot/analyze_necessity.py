@@ -500,9 +500,10 @@ def report_power(nested: dict) -> tuple[str, dict]:
 
 # The measured 4-option built-item yield an E1-shaped run (stage 1 elicit -> stage 2 repair ->
 # stage 3 re-ask/probe over R0-R4) actually produced against its own attempted pool: Part A,
-# 387/1204 = 32.1% (docs/RESULTS_RUN3.md, "Pooled 387/1204 attempted (32.1%)"). Not re-derived
-# from a committed file here because it is Part A's own already-published, audited figure, not a
-# number this module could recompute more authoritatively by re-reading exp3a's raw stage files.
+# 387/1204 = 32.1% ("Pooled 387/1204 attempted (32.1%)", already published and audited for Part
+# A). Not re-derived from a committed file here because it is Part A's own already-published,
+# audited figure, not a number this module could recompute more authoritatively by re-reading
+# exp3a's raw stage files.
 E1_BUILT_YIELD_4OPT = 387 / 1204
 
 E1_BUILT_TARGET_LOW = 300
@@ -688,7 +689,7 @@ def report_e1_estimate(results_dir: Path) -> tuple[str, dict]:
     w("")
     w("Projected GPU cost of E1 against a fourth, independent model lineage: 3 checkpoints,")
     w("4 options, targeting 300-390 built items at the measured 32.1% built-item yield for four")
-    w("options (Part A: 387/1204 attempted, `docs/RESULTS_RUN3.md`).")
+    w("options (Part A: 387/1204 attempted, already published and audited for Part A).")
     w("")
 
     ledger_rows = load_ledger_rows(C.GPU_LEDGER)

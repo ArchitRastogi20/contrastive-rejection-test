@@ -1,0 +1,288 @@
+{
+  "seed": 20260822,
+  "n_resamples": 10000,
+  "parentage_attributes": [
+    "child",
+    "father",
+    "mother"
+  ],
+  "contrasts": [
+    "R1-R2",
+    "R3-R4"
+  ],
+  "strata": [
+    "parentage",
+    "non_parentage",
+    "pooled"
+  ],
+  "parts": {
+    "A": {
+      "directory": "exp3a",
+      "label": "Part A, 4 options",
+      "models": [
+        "Llama-3.1-8B-Instruct",
+        "Mistral-7B-Instruct-v0.3",
+        "Qwen2.5-7B-Instruct"
+      ],
+      "stratum_sizes": {
+        "parentage": 38,
+        "non_parentage": 349,
+        "pooled": 387
+      },
+      "contrasts": {
+        "R1-R2": {
+          "parentage": {
+            "n_items": 38,
+            "discrete": {
+              "b": 5,
+              "c": 1,
+              "n_discordant": 6,
+              "p_exact_two_sided": 0.21875,
+              "or": 5.0,
+              "or_ci_low": 0.58412836747596,
+              "or_ci_high": 42.79881168590719,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.03252260227930331,
+              "ci_low": -0.07454855093460451,
+              "ci_high": 0.13552558222851332,
+              "n": 28
+            }
+          },
+          "non_parentage": {
+            "n_items": 349,
+            "discrete": {
+              "b": 31,
+              "c": 14,
+              "n_discordant": 45,
+              "p_exact_two_sided": 0.016094360031274846,
+              "or": 2.2142857142857144,
+              "or_ci_low": 1.1779808779769834,
+              "or_ci_high": 4.1622587566193054,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.03855222453298711,
+              "ci_low": 0.012278691064884332,
+              "ci_high": 0.06535339525083815,
+              "n": 273
+            }
+          },
+          "pooled": {
+            "n_items": 387,
+            "discrete": {
+              "b": 36,
+              "c": 15,
+              "n_discordant": 51,
+              "p_exact_two_sided": 0.0046013097117665325,
+              "or": 2.4,
+              "or_ci_low": 1.3140647109446937,
+              "or_ci_high": 4.383345775916227,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.03799132943962117,
+              "ci_low": 0.01209167807060144,
+              "ci_high": 0.06396816251015826,
+              "n": 301
+            }
+          }
+        },
+        "R3-R4": {
+          "parentage": {
+            "n_items": 38,
+            "discrete": {
+              "b": 1,
+              "c": 1,
+              "n_discordant": 2,
+              "p_exact_two_sided": 1.0,
+              "or": 1.0,
+              "or_ci_low": 0.06254565041285011,
+              "or_ci_high": 15.988322023981196,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.06093914922653599,
+              "ci_low": -0.004852299441889383,
+              "ci_high": 0.15228556274117339,
+              "n": 28
+            }
+          },
+          "non_parentage": {
+            "n_items": 349,
+            "discrete": {
+              "b": 28,
+              "c": 8,
+              "n_discordant": 36,
+              "p_exact_two_sided": 0.0011932429624721408,
+              "or": 3.5,
+              "or_ci_low": 1.5952251996490578,
+              "or_ci_high": 7.679166554474531,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.03240174814509409,
+              "ci_low": 0.011454215437867328,
+              "ci_high": 0.05395726294384341,
+              "n": 277
+            }
+          },
+          "pooled": {
+            "n_items": 387,
+            "discrete": {
+              "b": 29,
+              "c": 9,
+              "n_discordant": 38,
+              "p_exact_two_sided": 0.0016580525261815637,
+              "or": 3.2222222222222223,
+              "or_ci_low": 1.5253115179437293,
+              "or_ci_high": 6.806947910142083,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.035021575129619904,
+              "ci_low": 0.014943969091950835,
+              "ci_high": 0.055987045965273576,
+              "n": 305
+            }
+          }
+        }
+      }
+    },
+    "C": {
+      "directory": "exp3c",
+      "label": "Part C, 6 options",
+      "models": [
+        "Llama-3.1-8B-Instruct",
+        "Mistral-7B-Instruct-v0.3",
+        "Qwen2.5-7B-Instruct"
+      ],
+      "stratum_sizes": {
+        "parentage": 56,
+        "non_parentage": 507,
+        "pooled": 563
+      },
+      "contrasts": {
+        "R1-R2": {
+          "parentage": {
+            "n_items": 56,
+            "discrete": {
+              "b": 1,
+              "c": 2,
+              "n_discordant": 3,
+              "p_exact_two_sided": 1.0,
+              "or": 0.5,
+              "or_ci_low": 0.04533630518608517,
+              "or_ci_high": 5.514344386333697,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.07228163697278163,
+              "ci_low": 0.009781712138179553,
+              "ci_high": 0.1620485225774769,
+              "n": 32
+            }
+          },
+          "non_parentage": {
+            "n_items": 507,
+            "discrete": {
+              "b": 47,
+              "c": 21,
+              "n_discordant": 68,
+              "p_exact_two_sided": 0.0021862431776861705,
+              "or": 2.238095238095238,
+              "or_ci_low": 1.3379850170438625,
+              "or_ci_high": 3.7437416943962463,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.03438209012216589,
+              "ci_low": 0.015756853721528866,
+              "ci_high": 0.0541604486100419,
+              "n": 371
+            }
+          },
+          "pooled": {
+            "n_items": 563,
+            "discrete": {
+              "b": 48,
+              "c": 23,
+              "n_discordant": 71,
+              "p_exact_two_sided": 0.004065116124638666,
+              "or": 2.0869565217391304,
+              "or_ci_low": 1.26954183168754,
+              "or_ci_high": 3.4306766543014064,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.037391483420477815,
+              "ci_low": 0.019349324584084046,
+              "ci_high": 0.056542847166279026,
+              "n": 403
+            }
+          }
+        },
+        "R3-R4": {
+          "parentage": {
+            "n_items": 56,
+            "discrete": {
+              "b": 2,
+              "c": 2,
+              "n_discordant": 4,
+              "p_exact_two_sided": 1.0,
+              "or": 1.0,
+              "or_ci_low": 0.140858420921045,
+              "or_ci_high": 7.099327065156633,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.05403940776309096,
+              "ci_low": 0.005548494569228761,
+              "ci_high": 0.11901666036812897,
+              "n": 33
+            }
+          },
+          "non_parentage": {
+            "n_items": 507,
+            "discrete": {
+              "b": 34,
+              "c": 7,
+              "n_discordant": 41,
+              "p_exact_two_sided": 2.532080361561384e-05,
+              "or": 4.857142857142857,
+              "or_ci_low": 2.1531818898000283,
+              "or_ci_high": 10.956731916821438,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.02178494502819082,
+              "ci_low": 0.00942015986290013,
+              "ci_high": 0.03386793990113522,
+              "n": 379
+            }
+          },
+          "pooled": {
+            "n_items": 563,
+            "discrete": {
+              "b": 36,
+              "c": 9,
+              "n_discordant": 45,
+              "p_exact_two_sided": 6.57466324582856e-05,
+              "or": 4.0,
+              "or_ci_low": 1.9267708914665882,
+              "or_ci_high": 8.304049054748477,
+              "haldane_anscombe": false
+            },
+            "continuous": {
+              "mean": 0.02436843354821923,
+              "ci_low": 0.012008139198252199,
+              "ci_high": 0.03698431079255403,
+              "n": 412
+            }
+          }
+        }
+      }
+    }
+  }
+}

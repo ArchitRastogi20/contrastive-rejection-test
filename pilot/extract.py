@@ -95,6 +95,57 @@ def _bare_letter_re(n_options: int) -> re.Pattern[str]:
     return re.compile(rf"(?:^|[^A-Za-z])([A-{last}])[).:\]]", re.MULTILINE)
 
 
+@functools.lru_cache(maxsize=None)
+def _first_line_re(n_options: int) -> re.Pattern[str]:
+    last = chr(ord("A") + n_options - 1)
+    return re.compile(rf"^\s*([A-{last}])[).:\]]\s*(.*)$")
+
+
+# The confirmed bug: a response that opens "A) King of the Zombies" and later writes "... so I
+# ruled out candidate C" was read as choosing C. It happened because the three-line head test
+# right below requires the chosen option's title to be the *only* one named in the head, and a
+# response that restates the rejected rival's own title in its second or third line (a common
+# phrasing: "I ruled out candidate C) Some Title") makes that test see two names and give up --
+# falling through to `_LETTER_PICK`, which then matches the rejection language itself.
+#
+# The fix checked here is the strongest possible evidence and is therefore checked first, ahead
+# of the three-line test: if line one, on its own, is "X) <title>" and <title> is option X's own
+# title, that is the model unambiguously declaring its choice before any rejection has even been
+# written. Nothing later in the response -- rejection language included -- can produce this
+# shape for the wrong letter, so it is safe to return immediately without even looking further.
+def _first_line_answer(text: str, item: Item) -> str | None:
+    lines = text.strip().splitlines()
+    if not lines:
+        return None
+    m = _first_line_re(len(item.options)).match(lines[0])
+    if not m:
+        return None
+    letter, rest = m.group(1).upper(), m.group(2)
+    opt = item.options[ord(letter) - ord("A")]
+    if _norm(opt.title) and _norm(opt.title) in _norm(rest):
+        return letter
+    return None
+
+
+# How far back from a `_LETTER_PICK` match to look for a rejection/negation cue before trusting
+# the match as the model's choice rather than a rival it named while ruling it out. Measured
+# against the confirmed cases ("... so I ruled out candidate C.", "I ruled out candidate B) Jim
+# Sterling") the cue sits 3-15 characters before the matched keyword -- "ruled out ",
+# "eliminated ", "excluded " and the rest of NEGATION_CUES are all under 12 characters, plus a
+# short lead-in word or two. 40 characters leaves roughly a 3x margin over the longest observed
+# gap. It is also short enough that it does not read into an earlier, unrelated sentence: a
+# distinct valid pick restated later in the same response ("... but the correct choice is option
+# A.") sits well past 40 characters from an earlier, unrelated negation, since the two are
+# separated by the connecting clause itself (empirically verified against this corpus -- see the
+# validation notes for this fix).
+_LEFT_CONTEXT_CHARS = 40
+
+
+def _preceded_by_rejection_cue(text: str, pos: int) -> bool:
+    window = text[max(0, pos - _LEFT_CONTEXT_CHARS) : pos].casefold()
+    return any(cue in window for cue in NEGATION_CUES)
+
+
 def split_sentences(text: str) -> list[str]:
     """Sentence split that does not break on the abbreviations this corpus is full of.
 
@@ -125,9 +176,28 @@ def split_sentences(text: str) -> list[str]:
 def parse_choice(text: str, item: Item) -> str | None:
     """Which option did the model pick? Returns a letter, or None if it cannot be read.
 
-    Title evidence beats letter evidence: a model that writes the name is unambiguous, while a
-    bare letter can be part of a list. Ties and disagreements return None rather than a guess.
+    Precedence, strongest evidence first:
+
+    1. Line one is exactly "X) <X's own title>" -- the model has declared its choice before it
+       has said anything else, rejection language included. See `_first_line_answer`.
+    2. Title evidence in the three-line head, if it names exactly one option: a model that
+       writes a name is unambiguous, while a bare letter can be part of a list.
+    3. A `_LETTER_PICK` match ("the answer is B", "option C is correct") anywhere in the
+       response, skipping any match whose immediate left context is a rejection/negation cue
+       (see `_preceded_by_rejection_cue`) -- otherwise this rule reads "I ruled out candidate C"
+       as choosing C. Kept over the whole response, not just the head, because a chosen letter
+       is routinely restated in a closing line ("Therefore, the answer is B.") well past the
+       first three lines, and the negation guard already removes the failure mode that scoping
+       to the head would otherwise be defending against.
+    4. A bare letter (`B)`, `C.`) in the head only -- riskier, so kept head-scoped as before.
+    5. A single option title named anywhere in the response.
+
+    Ties and disagreements return None rather than a guess.
     """
+    first_line = _first_line_answer(text, item)
+    if first_line is not None:
+        return first_line
+
     named = [
         chr(ord("A") + i)
         for i, opt in enumerate(item.options)
@@ -142,9 +212,9 @@ def parse_choice(text: str, item: Item) -> str | None:
     if len(named_head) == 1:
         return named_head[0]
 
-    m = _letter_pick_re(len(item.options)).search(text)
-    if m:
-        return m.group(1).upper()
+    for m in _letter_pick_re(len(item.options)).finditer(text):
+        if not _preceded_by_rejection_cue(text, m.start()):
+            return m.group(1).upper()
     m = _bare_letter_re(len(item.options)).search(head)
     if m:
         return m.group(1).upper()

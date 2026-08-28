@@ -1,0 +1,34 @@
+{
+  "generated_utc": "2026-08-26 12:43:58 UTC",
+  "seed": 20260822,
+  "n_resamples": 10000,
+  "parts": [
+    "A",
+    "B",
+    "C"
+  ],
+  "sections": [
+    "loo",
+    "heterogeneity",
+    "cluster",
+    "stratify",
+    "provenance"
+  ],
+  "models": {
+    "A": [
+      "Llama-3.1-8B-Instruct",
+      "Mistral-7B-Instruct-v0.3",
+      "Qwen2.5-7B-Instruct"
+    ],
+    "B": [
+      "DeepSeek-R1-Distill-Qwen-14B-AWQ",
+      "Qwen2.5-14B-Instruct-AWQ",
+      "Qwen2.5-3B-Instruct"
+    ],
+    "C": [
+      "Llama-3.1-8B-Instruct",
+      "Mistral-7B-Instruct-v0.3",
+      "Qwen2.5-7B-Instruct"
+    ]
+  }
+}

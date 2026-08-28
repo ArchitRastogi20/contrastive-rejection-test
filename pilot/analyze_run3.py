@@ -451,6 +451,23 @@ def discrete_diffs(outcomes: dict[str, dict[str, bool | None]], a: str, b: str) 
 # ------------------------------------------------------------------ the two stated-wrong figures
 
 
+def _recompute_choice_correct(row: dict) -> bool | None:
+    """Stage 1's ``choice_correct``, re-derived from the row's own raw ``response`` with the
+    fixed-precedence parser, rather than trusted as written at generation time.
+
+    The stage-1 rows carry the identical defect the stage-3 fix (``_recompute_choice_fields``)
+    addresses: a response that opens "A) The Mask of Fu Manchu" and later writes "I ruled out
+    candidate C) The Mysterious Dr. Fu Manchu" was read, at generation time, as choosing C --
+    the confirmed bug, present at stage 1 as well as stage 3. ``gate_eight_skew`` reports
+    stage-1 correctness, so it must not read that stale field.
+    """
+    item_stub = SimpleNamespace(
+        options=[Entity(title=t, sentences=[]) for t in row["option_titles"]]
+    )
+    choice = extract.parse_choice(row.get("response", ""), item_stub)
+    return None if choice is None else choice == row["gold_letter"]
+
+
 def gate_eight_skew(results: Path, part: str) -> dict:
     """Stage-one correctness among built items against the attempted pool, per part.
 
@@ -461,9 +478,10 @@ def gate_eight_skew(results: Path, part: str) -> dict:
     The join rule, stated explicitly because it is where an earlier version of this function
     disagreed with an independent audit: a stage-2 row enters the attempted pool only if (a) a
     stage-1 row exists for the same ``(model, item_id)``, and (b) that stage-1 row's
-    ``choice_correct`` is not ``None``. ``choice_correct`` is ``None`` exactly when stage 1's
-    free-text ``choice`` could not be parsed at all -- there is no correctness signal for that
-    item, not a negative one. An earlier version of this function read it with
+    ``choice_correct``, re-derived by ``_recompute_choice_correct`` rather than trusted as
+    written, is not ``None``. ``choice_correct`` is ``None`` exactly when stage 1's free-text
+    ``choice`` could not be parsed at all -- there is no correctness signal for that item, not a
+    negative one. An earlier version of this function read it with
     ``bool(row.get("choice_correct"))``, which silently coerces that ``None`` to ``False`` and
     counts an unreadable response as an *incorrect* one, inflating the attempted-pool
     denominator (and its incorrect count) with rows that were never judged. Both exclusion
@@ -477,7 +495,7 @@ def gate_eight_skew(results: Path, part: str) -> dict:
     for path in sorted(stage1_dir.glob("stage1_*.jsonl")):
         for row in _rows(path):
             key = (row["model"], row["item_id"])
-            cc = row.get("choice_correct")
+            cc = _recompute_choice_correct(row)
             if cc is None:
                 unparseable_at_stage1.add(key)
             else:

@@ -31,9 +31,12 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
-from .analyze_run3 import odds_ratio, short_model
+from . import extract
+from .analyze_run3 import _load_option_titles, odds_ratio, short_model
 from .config import REPO_ROOT
+from .data import Entity
 from .run_experiment import bootstrap_ci_mean_diff, mcnemar
 
 SEED = 20260822
@@ -67,16 +70,44 @@ def _rows(path: Path):
                 yield json.loads(line)
 
 
-def load_part(results: Path, directory: str) -> dict[str, dict[str, dict]]:
+def load_part(results: Path, directory: str, part_key: str) -> dict[str, dict[str, dict]]:
     """``{"model::item_id": {condition: row}}`` for one part's stage-3 output.
 
     Flat-keyed rather than nested by model first: every table in this report pools across
     models before splitting by stratum, so the pair key only needs to keep two items from
     different models from colliding.
+
+    ``choice``/``chosen_is_edited`` are overwritten in place, re-derived from each row's own raw
+    ``response`` with the fixed-precedence parser (``extract.parse_choice``) -- the same
+    correction ``analyze_run3.load_part`` applies to run 3's own nested loader, which this
+    module's own flat-keyed ``load_part`` does not share code with and previously trusted the
+    ``chosen_is_edited`` field as written at generation time (with the pre-fix parser). Option
+    titles come from stage 1, via ``analyze_run3._load_option_titles``, keyed by this part's
+    upper-case letter (``analyze_run3.PARTS`` uses "A"/"B"/"C"; this module uses "a"/"c").
     """
+    titles = _load_option_titles(results, part_key.upper())
     out: dict[str, dict[str, dict]] = {}
     for path in sorted((results / directory).glob("stage3_*.jsonl")):
         for row in _rows(path):
+            title_key = (row["model"], row["item_id"])
+            if title_key not in titles:
+                raise KeyError(
+                    f"part {part_key}: no stage-1 option_titles for (model={title_key[0]!r}, "
+                    f"item_id={title_key[1]!r})"
+                )
+            item_stub = SimpleNamespace(
+                options=[Entity(title=t, sentences=[]) for t in titles[title_key]]
+            )
+            choice = extract.parse_choice(row.get("response", ""), item_stub)
+            edited_letter = row.get("edited_letter")
+            row = {
+                **row,
+                "choice": choice,
+                "chosen_is_edited": (
+                    None if choice is None or edited_letter is None
+                    else choice == edited_letter
+                ),
+            }
             key = f"{row['model']}::{row['item_id']}"
             out.setdefault(key, {})[row["condition"]] = row
     return out
@@ -171,7 +202,7 @@ def _fmt_or(o: dict) -> str:
 
 def analyze_part(results: Path, part_key: str) -> dict:
     directory, label = PARTS[part_key]
-    items = load_part(results, directory)
+    items = load_part(results, directory, part_key)
     strata = split_by_stratum(items)
 
     out: dict = {

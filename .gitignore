@@ -1,3 +1,13 @@
+
+# Analysis reports are regenerated artifacts, not sources: never release them, and the anon
+# repo must carry no Markdown but its README.
+analysis_*_report.txt
+analysis_*_report.md
+analysis_*_report.json
+
+# Audit scripts write regenerated .txt reports to the repo root; same rule as the analysis
+# reports, never released and never committed.
+*_audit_report.txt
 # --- python -----------------------------------------------------------------
 __pycache__/
 *.py[cod]

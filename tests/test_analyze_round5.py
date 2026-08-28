@@ -26,6 +26,7 @@ from pilot.analyze_round5 import (
     heterogeneity,
     item_attribute,
     join_fluency_contrast,
+    load_fluency_choices,
     relation_buckets,
     resolve_control_provenance,
 )
@@ -464,6 +465,54 @@ def test_dedup_surprisal_rows_is_zero_when_every_key_is_unique():
     out, n_dropped = _dedup_surprisal_rows(rows)
     assert n_dropped == 0
     assert len(out) == 5
+
+
+def test_load_fluency_choices_recomputes_from_the_raw_response(tmp_path):
+    """``load_fluency_choices`` used to trust each stage-3 row's stored ``chosen_is_edited`` --
+    written at generation time with the pre-fix parser -- rather than re-deriving it, so it
+    stayed wrong for the fluency section even after ``analyze_run3.load_part`` was fixed. It
+    must now re-derive ``choice``/``chosen_is_edited`` from the raw ``response`` the same way,
+    via stage-1's own ``option_titles``."""
+    from pilot.analyze_run3 import PARTS
+
+    part_dir = tmp_path / "exp3z"
+    part_dir.mkdir()
+    PARTS["Z"] = ("exp3z", "test fixture")
+    try:
+        _write_jsonl(part_dir / "stage1_m1.jsonl",
+                     [{"model": "m1", "item_id": "i1", "option_titles": ["Anna", "Bruno"]}])
+        _write_jsonl(part_dir / "stage3_m1.jsonl", [
+            # stored chosen_is_edited is wrong (written by the old parser); the raw response
+            # plainly opens with "A) Anna", so the re-derived choice must be A, not B.
+            {"model": "m1", "item_id": "i1", "condition": "R1", "response": "A) Anna",
+             "edited_letter": "A", "chosen_is_edited": False},
+            {"model": "m1", "item_id": "i1", "condition": "R2", "response": "B) Bruno",
+             "edited_letter": "A", "chosen_is_edited": True},
+        ])
+        choices = load_fluency_choices(tmp_path, ["Z"])
+    finally:
+        del PARTS["Z"]
+
+    assert choices[("m1", "Z", "i1", "R1")] is True
+    assert choices[("m1", "Z", "i1", "R2")] is False
+
+
+def test_load_fluency_choices_raises_on_missing_titles(tmp_path):
+    from pilot.analyze_run3 import PARTS
+
+    part_dir = tmp_path / "exp3z2"
+    part_dir.mkdir()
+    PARTS["Z2"] = ("exp3z2", "test fixture")
+    try:
+        _write_jsonl(part_dir / "stage3_m1.jsonl",
+                     [{"model": "m1", "item_id": "i1", "condition": "R1", "response": "A"}])
+        try:
+            load_fluency_choices(tmp_path, ["Z2"])
+            assert False, "expected a KeyError for the missing stage-1 titles"
+        except KeyError:
+            pass
+    finally:
+        del PARTS["Z2"]
 
 
 def test_join_fluency_contrast_drops_rows_missing_either_condition_or_a_choice():

@@ -16,85 +16,115 @@ the rival the model named against a third option it never mentioned.
 
 ## Layout
 
+This is the flattened `code/` tree of the private working repository: everything below sits
+directly at this repository's root, so a path a script's own docstring writes as `code/results/…`
+or `code/requirements.txt` means `results/…` and `requirements.txt` here. Run every command below
+from this repository's root.
+
 ```
-code/
-├── pilot/                          the experiment harness — everything importable, no script runs on import
-│   ├── config.py                     paths, hardware profiles, UTC logging, pre-committed constants
-│   ├── data.py                       2WikiMultihopQA loading, multiple-choice item construction
-│   ├── prompts.py                    the two prompts: spontaneous arm vs. elicited arm
-│   ├── models.py                     vLLM / plain-transformers / stub backends, forced-choice logprob probe
-│   ├── extract.py                    deterministic extractor: rejections, named attributes, truth of the complaint
-│   ├── repair.py                     builds conditions R0–R4 from a rejection, runs the eight integrity gates
-│   ├── run_pilot.py                  entry point: spontaneous vs. elicited rejection rates
-│   ├── run_experiment.py             entry point: the three-stage repair experiment (S3)
-│   ├── r3_recency.py                 offline recheck of what condition R3 actually measured in run 1
-│   ├── rescore.py                    re-scores saved raw responses under a corrected extractor, no GPU
-│   ├── audit_probe_missingness.py    offline audit of letter-probe completion by model/part/condition
-│   ├── analyze_run3.py               offline analyses of run 3 → writes a report outside code/
-│   ├── reparse_partc.py              re-reads Part C's six-option choices under the corrected parser
-│   ├── analyze_round5.py             regenerates round 5's statistics from committed per-item records
-│   ├── surprisal.py                  token-level surprisal of the inserted sentence against its control
-│   ├── probe_variants.py             alternative forced-choice probe prompts, to test completion rate
-│   ├── gate8_variant.py              three target-selection strategies for the R3/R4 edit location
-│   ├── decoding_sweep.py             re-runs generation at non-zero temperature, N samples per item
-│   ├── run_necessity.py              entry point: E3, deletes the chosen option's own stated attribute
-│   │                                   (N1) against a length-matched control deletion (N2), N0 unedited
-│   ├── analyze_necessity.py          offline analysis of E3 from the committed `stage_necessity_*.jsonl`,
-│   │                                   no GPU
-│   ├── analyze_relation_stratum.py   splits the R1-R2/R3-R4 content contrasts by whether the model's
-│   │                                   named attribute is itself a parentage relation, to bound a
-│   │                                   template confound between relevance and relation type
-│   └── watchdog.py                   progress display, wall-clock budget, VRAM guard, GPU-second ledger
-├── tests/                          417 tests, no GPU, no network, seconds to run
-│   ├── conftest.py                    shared fixtures
-│   ├── fixtures/twowiki_sample.jsonl  a small offline slice of the corpus
-│   └── test_*.py                      test_logprob.py covers models.py's probe, test_pipeline_dryrun.py
-│                                       covers run_experiment.py's pipeline; test_round6_support.py covers
-│                                       shared round-6 helpers (selection/reconstruction) that
-│                                       run_necessity.py and probe_variants.py both depend on; the rest
-│                                       are named after the pilot module they test
-├── figures/
-│   └── make_figures.py               builds the paper's two figures from results/ and the run-3 analysis report
-├── scripts/
-│   ├── setup_env.sh                   builds the pinned venv
-│   ├── prefetch_models.sh             downloads model weights ahead of a run, so a GPU run isn't
-│   │                                   spent waiting on a download
-│   ├── prefetch_round6.sh             downloads round 6's four weight sets straight to the local
-│   │                                   directories run_necessity.py and probe_variants.py expect
-│   ├── monitor.sh                     external health-check loop for a running job: watches the PID,
-│   │                                   heartbeat.json, nvidia-smi and disk, since the in-process
-│   │                                   watchdog cannot report that its own process has died
-│   └── smoke.sh                       three fast checks (self-check, dry-run, pytest) to run before
-│                                       spending any GPU time
-├── results/                        run outputs only — JSON / JSONL / CSV / run logs, never prose
-│   ├── raw_*.jsonl                    pilot output, one row per (model, arm) pair
-│   ├── pilot_summary.json, rescored_summary.json, r3_recency_summary.json
-│   ├── gpu_ledger.csv, run.log, console.log, prefetch.log, heartbeat.json
-│   │                                   GPU-second accounting and run logs — committed by design, not
-│   │                                   clutter
-│   ├── exp/, exp2/                    two earlier full runs of the repair experiment, superseded but kept
-│   │                                   because the corrections below are only checkable against them
-│   ├── exp3a/, exp3b/, exp3c/         the three parts (A, B, C) of the final run this paper reports
-│   ├── exp_rebuild*/                  intermediate re-derivations kept for the audit trail
-│   ├── stage_necessity_*.jsonl, necessity_summary.json, run_necessity.log
-│   │                                   E3 (necessity), one row per item per N0-N2 condition, produced by
-│   │                                   `run_necessity.py --part A` on the original three-model roster
-│   ├── probe_variants___...DeepSeek-R1-Distill-Qwen-14B-AWQ.jsonl, probe_variants_summary.json,
-│   │   probe_variants.log            the probe-prefill test on the reasoning model, produced by
-│   │                                   `probe_variants.py --part B --models DeepSeek`
-│   └── e1/, e1_pooled/                the fourth-lineage generalisation check (Phi-3.5-mini-instruct,
-│                                       Granite-3.0-8B-Instruct): e1/ holds each model's own stage 1-3,
-│                                       e1_pooled/ the cross-model pooled summary from replaying both
-│                                       models' stage 1 together via `run_experiment.py --from-stage1`
-├── requirements.txt                the 3090 Ti / vLLM environment
-├── requirements-colab.txt          the T4 fallback environment (plain transformers, no vLLM)
-└── .env.example                    names of the environment variables the code reads; no values
+pilot/                             the experiment harness — everything importable, no script runs on import
+├── config.py                        paths, hardware profiles, UTC logging, pre-committed constants
+├── data.py                          2WikiMultihopQA loading, multiple-choice item construction
+├── prompts.py                       the two prompts: spontaneous arm vs. elicited arm
+├── models.py                        vLLM / plain-transformers / stub backends, forced-choice logprob probe
+├── extract.py                       deterministic extractor: rejections, named attributes, truth of the complaint
+├── repair.py                        builds conditions R0–R4 from a rejection, runs the eight integrity gates
+├── run_pilot.py                     entry point: spontaneous vs. elicited rejection rates
+├── run_experiment.py                entry point: the three-stage repair experiment (S3)
+├── r3_recency.py                    offline recheck of what condition R3 actually measured in run 1
+├── rescore.py                       re-scores saved raw responses under a corrected extractor, no GPU
+├── audit_probe_missingness.py       offline audit of letter-probe completion by model/part/condition
+├── audit_position_bias.py           offline audit of option-letter effects on R0 and on the primary outcome
+├── audit_location_confound.py       offline audit of whether the third-option content effect tracks that
+│                                      option's own pre-edit baseline rather than the inserted content
+├── audit_instrument_defects.py      recomputes five instrument-defect prevalence figures the paper's
+│                                      Limitations section reports, from committed JSONL alone
+├── analyze_run3.py                  offline analyses of run 3 → writes a report to this repository's root
+├── reparse_partc.py                 re-reads Part C's six-option choices under the corrected parser
+├── analyze_round5.py                regenerates round 5's statistics from committed per-item records
+├── question_relevance.py            counts built items whose question is itself about the attribute the
+│                                      repair inserts, a lexical rule over the question text
+├── surprisal.py                     token-level surprisal of the inserted sentence against its control
+├── probe_variants.py                alternative forced-choice probe prompts, to test completion rate
+├── gate8_variant.py                 three target-selection strategies for the R3/R4 edit location
+├── decoding_sweep.py                re-runs generation at non-zero temperature, N samples per item
+├── run_necessity.py                 entry point: E3, deletes the chosen option's own stated attribute
+│                                      (N1) against a length-matched control deletion (N2), N0 unedited
+├── analyze_necessity.py             offline analysis of E3 from the committed `stage_necessity_*.jsonl`,
+│                                      no GPU
+├── analyze_relation_stratum.py      splits the R1-R2/R3-R4 content contrasts by whether the model's
+│                                      named attribute is itself a parentage relation, to bound a
+│                                      template confound between relevance and relation type
+└── watchdog.py                      progress display, wall-clock budget, VRAM guard, GPU-second ledger
+
+tests/                             449 tests, no GPU, no network, seconds to run
+├── conftest.py                      shared fixtures
+├── fixtures/twowiki_sample.jsonl    a small offline slice of the corpus
+└── test_*.py                        test_logprob.py covers models.py's probe, test_pipeline_dryrun.py
+                                       covers run_experiment.py's pipeline; test_round6_support.py covers
+                                       shared round-6 helpers (selection/reconstruction) that
+                                       run_necessity.py and probe_variants.py both depend on; the rest
+                                       are named after the pilot module they test
+
+figures/
+└── make_figures.py                  builds the paper's two figures from results/ and the run-3 analysis report
+
+scripts/
+├── setup_env.sh                     builds the pinned venv
+├── prefetch_models.sh               downloads model weights ahead of a run, so a GPU run isn't
+│                                      spent waiting on a download
+├── prefetch_round6.sh               downloads round 6's four weight sets straight to the local
+│                                      directories run_necessity.py and probe_variants.py expect
+├── monitor.sh                       external health-check loop for a running job: watches the PID,
+│                                      heartbeat.json, nvidia-smi and disk, since the in-process
+│                                      watchdog cannot report that its own process has died
+└── smoke.sh                         three fast checks (self-check, dry-run, pytest) to run before
+                                       spending any GPU time
+
+results/                           run outputs only — JSON / JSONL / CSV / run logs, never prose
+├── raw_*.jsonl                      pilot output, one row per (model, arm) pair
+├── pilot_summary.json, rescored_summary.json, r3_recency_summary.json
+├── analyze_round5_summary.json, relation_stratum_summary.json, surprisal_summary.json
+├── gpu_ledger.csv, run.log, console.log, prefetch.log, heartbeat.json
+│                                      GPU-second accounting and run logs — committed by design, not
+│                                      clutter
+├── exp/, exp2/                      two earlier full runs of the repair experiment, superseded but kept
+│                                      because the corrections below are only checkable against them
+├── exp3a/, exp3b/, exp3c/           the three parts (A, B, C) of the final run this paper reports
+├── exp_rebuild*/                    intermediate re-derivations kept for the audit trail
+├── smoke/                           output of `scripts/smoke.sh`'s stub dry-run, committed as a worked
+│                                      example of what a run's own output tree looks like
+├── gate8_variant/                   the `--strategy random` re-ask, stage 2 and stage 3, plus its summary
+├── stage_necessity_*.jsonl, necessity_summary.json, run_necessity.log
+│                                      E3 (necessity), one row per item per N0-N2 condition, produced by
+│                                      `run_necessity.py --part A` on the original three-model roster
+├── surprisal___*.jsonl              per-item token-level surprisal for the three-model roster, produced by
+│                                      `surprisal.py`
+├── probe_variants___*.jsonl, probe_variants_summary.json, probe_variants.log
+│                                      the probe-prefill test, one file per model including
+│                                      DeepSeek-R1-Distill-Qwen-14B-AWQ, produced by `probe_variants.py`
+└── e1/, e1_pooled/                  the fourth-lineage generalisation check (Phi-3.5-mini-instruct,
+                                       Granite-3.0-8B-Instruct): e1/ holds each model's own stage 1-3,
+                                       e1_pooled/ the cross-model pooled summary from replaying both
+                                       models' stage 1 together via `run_experiment.py --from-stage1`
+
+requirements.txt                   the 3090 Ti / vLLM environment
+requirements-colab.txt             the T4 fallback environment (plain transformers, no vLLM)
+.env.example                       names of the environment variables the code reads; no values
 ```
 
 The narrative write-ups this code produces or was checked against, the experiment design, the
-environment notes, and the experiment ledger live outside this tree. Nothing under `code/` is
-prose about the results; `results/` holds only the machine-readable records those write-ups were
+environment notes, and the experiment ledger live outside this release. Nothing here is prose
+about the results; `results/` holds only the machine-readable records those write-ups were
 computed from.
+
+Several scripts' own `--results`/`--out`/`--out-dir` defaults resolve from `pilot/config.py`
+under the assumption that `pilot/` sits three levels under the repository root (as it does in the
+private working tree, at `code/pilot/`). In this flattened release `pilot/` sits two levels under
+the root, so those particular defaults resolve one directory above this repository and will not
+exist on a fresh clone. It costs nothing to sidestep: every command below passes `--results`,
+`--out` or `--out-dir` explicitly, and every one of them was run from a fresh clone's root to
+confirm it.
 
 ## Environment
 
@@ -136,7 +166,7 @@ information against duplicating existing information.
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests -q                       # 417 tests, no GPU
+python -m pytest tests -q                       # 449 tests, no GPU
 python -m pilot.run_experiment --self-check     # all eight gates on fixtures
 python -m pilot.run_experiment --dry-run --limit 6 --out-dir /tmp/smoke
 ```
@@ -144,6 +174,38 @@ python -m pilot.run_experiment --dry-run --limit 6 --out-dir /tmp/smoke
 The real runs need one 24 GB card. `--self-check` and `--dry-run` exercise everything except the
 weights, so a failure there is a code problem rather than an environment one. Decoding is greedy
 throughout with a fixed seed, both recorded in each run's summary.
+
+Everything below this point is offline: no GPU, no network (except where a command says
+otherwise), computed only from the committed `results/` JSONL. Each was run from a fresh clone's
+root to confirm the command as written works.
+
+```bash
+# Table 1: the paired-data audit table, the twelve-test Holm family, the interaction test
+python -m pilot.analyze_run3 --results results --out /tmp/analysis_run3_report.txt
+
+# leave-one-model-out (--section loo) and the fluency-conditioned re-check of the two content
+# contrasts (--section fluency); omit --section for all six round-5 analyses at once
+python -m pilot.analyze_round5 --results results --out /tmp/round5_loo.json \
+    --part A --section loo
+python -m pilot.analyze_round5 --results results --out /tmp/round5_fluency.json \
+    --section fluency
+
+# position-bias audit: R0 letter uniformity, per-letter outcome, log-odds vs. probability space
+python -m pilot.audit_position_bias --results results --out /tmp/position_bias_audit_report.txt
+
+# probe-missingness audit: forced letter-probe completion by model, part and condition
+python -m pilot.audit_probe_missingness --results results --out /tmp/probe_missingness_audit_report.txt
+
+# gate-8 random-target variant: does the location effect survive an R3/R4 target chosen without
+# regard to the named attribute? --dry-run uses the stub backend and needs no GPU or weights
+python -m pilot.gate8_variant --dry-run --strategy random --limit 4
+python -m pilot.gate8_variant --from-stage1 results/exp3c/stage1_<model>.jsonl \
+    --strategy random --out-dir results/gate8_variant_random   # the real run, needs a GPU
+
+# instrument-defect audit: the five prevalence figures the paper's Limitations section reports
+python -m pilot.audit_instrument_defects --self-check
+python -m pilot.audit_instrument_defects --results results   # figures 3-5, no corpus needed
+```
 
 ## The records
 
@@ -233,8 +295,50 @@ current claim.
 
 ## Additional checks
 
-Eight modules extend the analysis beyond the headline numbers above, each run separately from the
-main harness.
+The modules below extend the analysis beyond the headline numbers above, each run separately from
+the main harness (`python -m pilot.<module>`, or `pilot/<module>.py` in the layout above).
+
+**`audit_position_bias.py`** checks whether the model's choice favours one option letter
+regardless of content. R0 (unedited) choice distribution against a uniform expectation, per part
+and model, via a seeded permutation test on the chi-square statistic (scipy is not a dependency).
+It also reads the two content contrasts in log-odds space rather than probability space, as a
+check that the contested R2-R4 contrast isn't an artefact of the probability scale: pooled, R1-R2
+is +1.76 [+1.21, +2.34] log-odds in Part A and +1.03 [+0.62, +1.43] in Part C, R3-R4 is +1.42
+[+0.96, +1.88] and +1.00 [+0.68, +1.32] — both contrasts read the same direction in log-odds as in
+probability, in every part.
+
+**`audit_location_confound.py`** checks whether the third-option content effect (R3-R4) is a
+function of that option's own pre-edit (R0) starting probability rather than of the inserted
+content, by conditioning the location contrasts (R1-R3, R2-R4) on how close the rival and the
+third option start out, in a tight and a loose baseline-separation band. Most per-model, per-band
+cells fall under 5 discordant pairs and are reported but flagged `too small to read` rather than
+interpreted; the pooled Part C tight-band R2-R4 clears that floor at RD +0.118 [+0.029, +0.235].
+
+**`audit_probe_missingness.py`** tests whether the forced single-token letter-probe's completion
+rate itself varies by condition (R0-R4), which would make the continuous measure's coverage
+non-random rather than just incomplete. A within-item permutation test on the largest
+completion-rate spread flags two cells with evidence of condition-specific completion — Part A
+Mistral-7B-Instruct-v0.3 (spread 0.140, p=0.0036, n=143) and Part C Mistral-7B-Instruct-v0.3
+(spread 0.095, p=0.0078, n=200) — against one with none (Part C Qwen2.5-7B-Instruct, spread 0.012,
+p=0.6029, n=171). It reports coverage, not a fix: continuous results stay a complete-case,
+prompt-specific read with model- and condition-specific coverage stated alongside them.
+
+**`question_relevance.py`** counts how many built items ask a question whose own answer could
+change if the inserted fact happened to be false, since the repair sentence need only be
+*absent*, not *true*, from the target's profile. 937 of 1264 built items (74.1%) ask a date- or
+order-comparison question ("who was born first", "which film came out first"); of those, the
+repair inserts a date in 594, split 473 date-of-birth against 121 date-of-death. The
+classification is a plain, printed lexical rule over the question text, so it can be audited
+rather than trusted.
+
+**`audit_instrument_defects.py`** recomputes five instrument-defect prevalence figures the
+paper's Limitations section reports, each read straight off committed JSONL or (for the two gate
+figures, which need the actual inserted-sentence text) rebuilt with the same deterministic call
+`run_experiment.py`'s own stage 2 makes, verified byte-identical against the committed option
+titles before anything is trusted. Two of the five need no corpus at all: of 1264 built items,
+199 (15.7%) rest their rejection on a rank-only cue ("ruled out", "instead of") rather than an
+absence cue ("does not have"), and restricting the twelve-test Holm family to the absence-only
+subset produces no verdict flips against the full built-item set.
 
 **`surprisal.py`** measures token-level negative log-likelihood of the inserted sentence in its
 host paragraph. The relevant insertion is about 1.2 nats/token less surprising than its

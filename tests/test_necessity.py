@@ -16,6 +16,9 @@ from pilot.extract import Rejection, attribute_in_profile
 from pilot.run_necessity import (
     NecessityUnavailable,
     SelectedItem,
+    budget_check,
+    estimate_gpu_seconds,
+    necessity_contrasts,
     _select_n2_index,
     _token_len,
     build_necessity_conditions,
@@ -514,3 +517,68 @@ def test_dry_run_respects_limit(tmp_path):
     assert rc == 0
     summary = json.loads((tmp_path / "necessity_summary.json").read_text(encoding="utf-8"))
     assert summary["n_items"] == 1
+
+
+# ------------------------------------------------------- the degenerate secondary contrast
+
+
+def test_n1_vs_n0_reports_no_p_value_because_it_is_degenerate():
+    """N1 vs N0 is restricted to N0-reproducing items, so N0 is True by construction, b is
+    structurally 0, and McNemar's exact p collapses to 2^(1-n): a function of the sample size and
+    nothing else. The contrast keeps its counts and reports no p-value."""
+    outcomes = {
+        f"item{i}": {"N0": True, "N1": False, "N2": True} for i in range(12)
+    }
+    outcomes["excluded"] = {"N0": False, "N1": False, "N2": True}
+
+    out = necessity_contrasts(outcomes)
+
+    assert out["n_items_interpretable"] == 12
+    assert out["n_items_excluded_n0_uninterpretable"] == 1
+
+    n0 = out["mcnemar_n1_vs_n0"]
+    assert n0["b_a_only"] == 0, "b can only be 0 once N0 is fixed True by the restriction"
+    assert n0["c_b_only"] == 12
+    assert n0["p_exact_two_sided"] is None, "a p-value here would be 2^(1-n), not a test"
+    assert n0["degenerate"] is True
+    assert "structurally" in n0["degenerate_reason"]
+
+
+def test_n1_vs_n2_still_reports_a_real_p_value():
+    """The primary contrast compares two edited conditions, neither fixed by the restriction, so
+    both discordant cells are free to vary and the test is meaningful."""
+    outcomes = {f"a{i}": {"N0": True, "N1": False, "N2": True} for i in range(9)}
+    outcomes.update({f"b{i}": {"N0": True, "N1": True, "N2": False} for i in range(2)})
+
+    n2 = necessity_contrasts(outcomes)["mcnemar_n1_vs_n2"]
+
+    assert n2["b_a_only"] > 0 and n2["c_b_only"] > 0
+    assert n2["p_exact_two_sided"] is not None
+    assert 0.0 < n2["p_exact_two_sided"] <= 1.0
+    assert "degenerate" not in n2
+
+
+# ------------------------------------------------------------- the pre-flight budget refusal
+
+
+def test_estimate_scales_with_items_and_conditions():
+    """Three conditions per item at the documented per-condition cost."""
+    one = estimate_gpu_seconds(1)
+    assert one == pytest.approx(3 * 2.4)
+    assert estimate_gpu_seconds(100) == pytest.approx(100 * one)
+    assert estimate_gpu_seconds(0) == 0
+
+
+def test_budget_check_passes_refuses_and_is_exact_at_the_boundary():
+    """The guard exists to stop a run the budget cannot finish on a pod metered from start."""
+    est = estimate_gpu_seconds(100)
+
+    exactly_enough = budget_check(100, spent=1000.0, allowance=1000.0 + est)
+    assert exactly_enough["ok"] is True, "an estimate equal to what remains must be allowed"
+
+    one_short = budget_check(100, spent=1000.0, allowance=1000.0 + est - 0.001)
+    assert one_short["ok"] is False
+
+    assert one_short["estimate_s"] == pytest.approx(est)
+    assert one_short["remaining_s"] == pytest.approx(est - 0.001)
+    assert one_short["n_items"] == 100

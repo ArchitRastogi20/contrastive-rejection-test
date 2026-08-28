@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # Download round 6's four weight sets in parallel, straight to the literal local directories
-# `pilot.run_necessity`/`pilot.probe_variants` expect (see docs/VM_RUNBOOK_ROUND6.md section 3):
-# committed stage-1 records name a `model` field that is a local directory path, not a hub repo
-# id, so the weights must land at exactly `<MODEL_ROOT>/<Name>` or the matching model is silently
-# skipped by the run, not substituted.
+# `pilot.run_necessity`/`pilot.probe_variants` expect: committed stage-1 records name a `model`
+# field that is a local directory path, not a hub repo id, so the weights must land at exactly
+# `<MODEL_ROOT>/<Name>` or the matching model is silently skipped by the run, not substituted.
 #
 #   bash scripts/prefetch_round6.sh > results/prefetch_round6.log 2>&1 &
 #
@@ -67,8 +66,8 @@ PYEOF
 MIRROR_LLAMA=$(mirror_for "meta-llama/Llama-3.1-8B-Instruct")
 MIRROR_MISTRAL=$(mirror_for "mistralai/Mistral-7B-Instruct-v0.3")
 # Documented fallback if pilot.config could not be imported at all (e.g. no python found) --
-# the same two mirror repos the task and docs/VM_RUNBOOK_ROUND6.md both name, so a broken import
-# still lands weights in the right place rather than skipping the gated repo's fallback entirely.
+# the same two mirror repos the rest of this project names, so a broken import still lands
+# weights in the right place rather than skipping the gated repo's fallback entirely.
 [ "$MIRROR_LLAMA" != "-" ] || MIRROR_LLAMA="NousResearch/Meta-Llama-3.1-8B-Instruct"
 [ "$MIRROR_MISTRAL" != "-" ] || MIRROR_MISTRAL="unsloth/mistral-7b-instruct-v0.3"
 

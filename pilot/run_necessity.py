@@ -692,13 +692,30 @@ def necessity_contrasts(outcomes: dict[str, dict[str, bool | None]]) -> dict:
     """The paired contrasts the task calls for: N1 vs N2 (primary), N1 vs N0 (secondary), both
     restricted to N0-reproducing items and reusing `run_experiment.mcnemar` unchanged so the
     paired discordant counts (b, c) and the exact two-sided p are legible without extra tooling.
+
+    N1 vs N0 is reported without a p-value, deliberately. The restriction to N0-reproducing items
+    is the right integrity rule, but it fixes N0 to True, so the discordant cell counting "N1 kept
+    the original choice and N0 did not" is structurally 0 and McNemar's exact p collapses to
+    2^(1-n), a function of the sample size and nothing else. Every value it produced on the round-6
+    run matched its power of two to the last significant figure. Reporting it as a test would be
+    the degenerate measurement hard rule 6 warns about, so `c` is kept, since "45 of 45 items moved
+    off the original choice under N1" is a real descriptive fact, and the p-value is dropped.
+    Testing N1 against N0 properly means computing it on the unrestricted item set and reporting
+    the N0 flips separately.
     """
     interpretable = _interpretable(outcomes)
+    n1_vs_n0 = dict(mcnemar(interpretable, "N1", "N0"))
+    n1_vs_n0["p_exact_two_sided"] = None
+    n1_vs_n0["degenerate"] = True
+    n1_vs_n0["degenerate_reason"] = (
+        "restricted to N0-reproducing items, so N0 is True by construction and b is structurally "
+        "0; the exact p would be 2^(1-n), determined by sample size alone"
+    )
     return {
         "n_items_total": len(outcomes), "n_items_interpretable": len(interpretable),
         "n_items_excluded_n0_uninterpretable": len(outcomes) - len(interpretable),
         "mcnemar_n1_vs_n2": mcnemar(interpretable, "N1", "N2"),
-        "mcnemar_n1_vs_n0": mcnemar(interpretable, "N1", "N0"),
+        "mcnemar_n1_vs_n0": n1_vs_n0,
     }
 
 

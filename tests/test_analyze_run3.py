@@ -291,10 +291,16 @@ def test_gate_eight_skew_excludes_unparseable_stage1_choices_from_the_denominato
     from pilot.analyze_run3 import PARTS
     PARTS["Z"] = ("exp3z", "test fixture")
     try:
+        # choice_correct is no longer trusted as written -- gate_eight_skew re-derives it from
+        # each row's own response/option_titles/gold_letter with the fixed parser, so the
+        # fixture supplies those instead of the stale field directly.
         stage1 = [
-            {"model": "m1", "item_id": "ok-correct", "choice_correct": True},
-            {"model": "m1", "item_id": "ok-wrong", "choice_correct": False},
-            {"model": "m1", "item_id": "unparseable", "choice_correct": None},
+            {"model": "m1", "item_id": "ok-correct", "gold_letter": "A",
+             "option_titles": ["Foo", "Bar"], "response": "A) Foo"},
+            {"model": "m1", "item_id": "ok-wrong", "gold_letter": "A",
+             "option_titles": ["Foo", "Bar"], "response": "B) Bar"},
+            {"model": "m1", "item_id": "unparseable", "gold_letter": "A",
+             "option_titles": ["Foo", "Bar"], "response": "I have no idea which one."},
         ]
         stage2 = [
             {"model": "m1", "item_id": "ok-correct", "built": True},

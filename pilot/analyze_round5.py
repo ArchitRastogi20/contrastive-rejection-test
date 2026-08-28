@@ -35,11 +35,14 @@ import random
 import statistics
 from collections.abc import Iterable
 from pathlib import Path
+from types import SimpleNamespace
 
 from . import config as C
 from . import repair
+from . import extract
 from .analyze_run3 import (
     PARTS,
+    _load_option_titles,
     _rows,
     discrete_contrast,
     discrete_outcomes,
@@ -47,7 +50,7 @@ from .analyze_run3 import (
     paired_mean,
     short_model,
 )
-from .data import build_items, load_records
+from .data import Entity, build_items, load_records
 from .extract import Rejection
 from .run_experiment import bootstrap_ci_mean_diff, mcnemar  # noqa: F401 -- reused via analyze_run3
 
@@ -569,14 +572,35 @@ def load_fluency_choices(
 ) -> dict[tuple[str, str, str, str], bool | None]:
     """``chosen_is_edited`` keyed exactly like ``load_surprisal``'s rows, read from each part's
     own committed ``stage3_*.jsonl`` -- stage 2 never carries the discrete choice outcome, only
-    whether repair built cleanly."""
+    whether repair built cleanly.
+
+    Re-derived from each row's own raw ``response`` with the fixed-precedence parser
+    (``extract.parse_choice``), the same correction ``analyze_run3.load_part`` applies -- this
+    loader is independent code (it does not call ``load_part``, since it needs a different key
+    shape) and previously trusted ``chosen_is_edited`` as written at generation time.
+    """
     out: dict[tuple[str, str, str, str], bool | None] = {}
     for part in parts:
         directory, _ = PARTS[part]
+        titles = _load_option_titles(results, part)
         for path in sorted((results / directory).glob("stage3_*.jsonl")):
             for row in _rows(path):
+                title_key = (row["model"], row["item_id"])
+                if title_key not in titles:
+                    raise KeyError(
+                        f"part {part}: no stage-1 option_titles for (model={title_key[0]!r}, "
+                        f"item_id={title_key[1]!r})"
+                    )
+                item_stub = SimpleNamespace(
+                    options=[Entity(title=t, sentences=[]) for t in titles[title_key]]
+                )
+                choice = extract.parse_choice(row.get("response", ""), item_stub)
+                edited_letter = row.get("edited_letter")
+                chosen_is_edited = (
+                    None if choice is None or edited_letter is None else choice == edited_letter
+                )
                 key = (row["model"], part, row["item_id"], row["condition"])
-                out[key] = row.get("chosen_is_edited")
+                out[key] = chosen_is_edited
     return out
 
 

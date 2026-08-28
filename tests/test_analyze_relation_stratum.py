@@ -197,22 +197,66 @@ def _write_jsonl(path, rows):
 
 
 def test_load_part_keys_by_model_and_item_id_and_reads_the_condition(tmp_path):
+    # load_part now needs option_titles from this part's own stage 1 (read through
+    # analyze_run3._load_option_titles, keyed by the upper-cased part letter) for every
+    # (model, item_id) it loads, so it can re-derive choice/chosen_is_edited from each row's
+    # raw response with the fixed parser -- see test_load_part_raises_on_missing_titles below
+    # for what happens without this.
+    from pilot.analyze_run3 import PARTS as RUN3_PARTS
+
     part_dir = tmp_path / "exp3z"
     part_dir.mkdir()
-    rows = [
-        {"model": "m1", "item_id": "i1", "condition": "R0", "attribute": "father"},
-        {"model": "m1", "item_id": "i1", "condition": "R1", "attribute": "father"},
-        {"model": "m2", "item_id": "i1", "condition": "R0", "attribute": "director"},
-    ]
-    _write_jsonl(part_dir / "stage3_m1.jsonl", [r for r in rows if r["model"] == "m1"])
-    _write_jsonl(part_dir / "stage3_m2.jsonl", [r for r in rows if r["model"] == "m2"])
+    RUN3_PARTS["Z"] = ("exp3z", "test fixture")
+    try:
+        _write_jsonl(part_dir / "stage1_m1.jsonl",
+                     [{"model": "m1", "item_id": "i1", "option_titles": ["Anna", "Bruno"]}])
+        _write_jsonl(part_dir / "stage1_m2.jsonl",
+                     [{"model": "m2", "item_id": "i1", "option_titles": ["Anna", "Bruno"]}])
+        rows = [
+            {"model": "m1", "item_id": "i1", "condition": "R0", "attribute": "father",
+             "response": "A) Anna", "edited_letter": "A"},
+            {"model": "m1", "item_id": "i1", "condition": "R1", "attribute": "father",
+             "response": "A) Anna", "edited_letter": "A"},
+            {"model": "m2", "item_id": "i1", "condition": "R0", "attribute": "director",
+             "response": "B) Bruno", "edited_letter": "A"},
+        ]
+        _write_jsonl(part_dir / "stage3_m1.jsonl", [r for r in rows if r["model"] == "m1"])
+        _write_jsonl(part_dir / "stage3_m2.jsonl", [r for r in rows if r["model"] == "m2"])
 
-    loaded = load_part(tmp_path, "exp3z")
-    assert set(loaded) == {"m1::i1", "m2::i1"}
-    assert loaded["m1::i1"]["R0"]["attribute"] == "father"
-    assert loaded["m1::i1"]["R1"]["attribute"] == "father"
-    # same item_id under a different model must not collide with m1's record.
-    assert loaded["m2::i1"]["R0"]["attribute"] == "director"
+        loaded = load_part(tmp_path, "exp3z", "z")
+        assert set(loaded) == {"m1::i1", "m2::i1"}
+        assert loaded["m1::i1"]["R0"]["attribute"] == "father"
+        assert loaded["m1::i1"]["R1"]["attribute"] == "father"
+        # same item_id under a different model must not collide with m1's record.
+        assert loaded["m2::i1"]["R0"]["attribute"] == "director"
+        # choice/chosen_is_edited are re-derived from the raw response, not trusted as written.
+        assert loaded["m1::i1"]["R0"]["choice"] == "A"
+        assert loaded["m1::i1"]["R0"]["chosen_is_edited"] is True
+        assert loaded["m2::i1"]["R0"]["choice"] == "B"
+        assert loaded["m2::i1"]["R0"]["chosen_is_edited"] is False
+    finally:
+        del RUN3_PARTS["Z"]
+
+
+def test_load_part_raises_on_missing_titles(tmp_path):
+    """A stage-3 row whose (model, item_id) has no stage-1 titles is a coverage hole and must
+    raise, not be silently trusted -- mirrors analyze_run3's identical guard."""
+    from pilot.analyze_run3 import PARTS as RUN3_PARTS
+
+    part_dir = tmp_path / "exp3z2"
+    part_dir.mkdir()
+    RUN3_PARTS["Z2"] = ("exp3z2", "test fixture")
+    try:
+        # no stage1_*.jsonl written at all -- titles map is empty.
+        _write_jsonl(part_dir / "stage3_m1.jsonl",
+                     [{"model": "m1", "item_id": "i1", "condition": "R0", "response": "A"}])
+        try:
+            load_part(tmp_path, "exp3z2", "z2")
+            assert False, "expected a KeyError for the missing stage-1 titles"
+        except KeyError:
+            pass
+    finally:
+        del RUN3_PARTS["Z2"]
 
 
 # --------------------------------------------------------------- no stray control characters

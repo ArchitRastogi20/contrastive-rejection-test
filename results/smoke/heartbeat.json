@@ -1,0 +1,12 @@
+{
+  "label": "stub/elicited",
+  "done": 4,
+  "total": 4,
+  "elapsed_min": 0.0,
+  "seconds_per_item": 0.0,
+  "vram_peak_pct": 1.1,
+  "vram_strikes": 0,
+  "eta_utc": "2026-08-20 14:25:25 UTC (in 0.0 min)",
+  "updated_utc": "2026-08-20 14:25:25 UTC",
+  "abort_reason": null
+}

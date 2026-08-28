@@ -101,6 +101,76 @@ def test_choice_does_not_match_a_spurious_letter_past_the_item_own_option_count(
     assert parse_choice("The answer is D.\nIt matches.", item) == "D"
 
 
+# ---------------------------------------- regression: rejection language is not a choice
+
+
+def test_first_line_answer_beats_a_later_named_rejection():
+    # This is the confirmed production bug, reproduced with make_item()'s roster: the response
+    # opens by naming its choice, then restates the rejected rival's own title while ruling it
+    # out ("Bruno Kowalski's profile ... I ruled out candidate B"). That second name is what
+    # made the old three-line-head test see two names and fall through to `_LETTER_PICK`, which
+    # then matched "candidate B" -- the rival, not the pick. The first-line rule short-circuits
+    # before that fallback is ever reached.
+    item = make_item()
+    text = (
+        "A) Anna Kowalska\n\n"
+        "I chose Anna Kowalska because her profile states she directed the film. "
+        "Bruno Kowalski's profile never mentions directing, so I ruled out candidate B."
+    )
+    assert parse_choice(text, item) == "A"
+
+
+def test_first_line_answer_respects_the_item_option_count():
+    item = make_six_option_item()
+    text = "F) Film F\n\nI ruled out candidate B because it lacks the detail."
+    assert parse_choice(text, item) == "F"
+
+
+def test_letter_pick_skips_a_match_preceded_by_a_rejection_cue():
+    # Without the negation guard, the *first* whole-response match of `_LETTER_PICK` is
+    # "candidate B" -- right after "ruled out" -- so a bare `.search()` would return B even
+    # though the model's actual pick, stated afterwards, is A.
+    item = make_item()
+    text = (
+        "I ruled out candidate B because nothing in the profile confirms he ever directed "
+        "a film. Based on the profiles, the correct choice is A."
+    )
+    assert parse_choice(text, item) == "A"
+
+
+def test_letter_pick_guard_does_not_reach_into_an_unrelated_earlier_clause():
+    # The guard's left-context window must not be so wide that an earlier, unrelated negation
+    # -- well clear of the matched keyword -- suppresses a later, genuine pick.
+    item = make_item()
+    text = (
+        "I want to note that the profile for Bruno does not mention anything about "
+        "directing at all, which is a shame given how promising his other work looked. "
+        "Setting all of that aside, the correct option is A."
+    )
+    assert parse_choice(text, item) == "A"
+
+
+def test_rejection_still_extracted_when_first_line_rule_fixes_the_choice():
+    # Before the fix, this exact text parsed to choice "B" (the rejected rival, via the same
+    # mechanism as the confirmed bug), and `analyse` then silently dropped the only rejection in
+    # the text -- its loop skips a rejection of whichever letter equals `choice`. Fixing the
+    # choice also restores the rejection: it was never a broken rejection regex, only a wrong
+    # `choice` making a genuine rejection look like "the model rejected its own pick".
+    item = make_item()
+    text = (
+        "A) Anna Kowalska\n\n"
+        "I chose Anna Kowalska because her profile states she directed the film. "
+        "Bruno Kowalski's profile never mentions directing, so I ruled out option B for this one."
+    )
+    a = analyse(text, item)
+    assert a.choice == "A"
+    assert len(a.rejections) == 1
+    rej = a.rejections[0]
+    assert rej.letter == "B"
+    assert rej.title == "Bruno Kowalski"
+    assert rej.attribute == "director"
+
+
 # ------------------------------------------------------------------------- attributes
 
 
