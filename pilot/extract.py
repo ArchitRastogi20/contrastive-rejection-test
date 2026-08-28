@@ -113,6 +113,22 @@ def _first_line_re(n_options: int) -> re.Pattern[str]:
 # title, that is the model unambiguously declaring its choice before any rejection has even been
 # written. Nothing later in the response -- rejection language included -- can produce this
 # shape for the wrong letter, so it is safe to return immediately without even looking further.
+# A trailing "(...)" disambiguator, the pattern this corpus's option titles carry: "Foo
+# (director)", "Bar (1958 film)", "Baz (actress)". Only a single *trailing* group is stripped --
+# a model that restates a chosen title without its disambiguator drops exactly this, and nothing
+# more; a title with a parenthetical elsewhere ("(Romance) in the Digital Age") is left alone.
+_TRAILING_PAREN = re.compile(r"\s*\([^()]*\)\s*$")
+
+
+def _base_title(title: str) -> str | None:
+    """The title with a single trailing parenthetical removed, or None if it carries none."""
+    stripped = _TRAILING_PAREN.sub("", title)
+    if stripped == title:
+        return None
+    stripped = stripped.strip()
+    return stripped or None
+
+
 def _first_line_answer(text: str, item: Item) -> str | None:
     lines = text.strip().splitlines()
     if not lines:
@@ -122,7 +138,17 @@ def _first_line_answer(text: str, item: Item) -> str | None:
         return None
     letter, rest = m.group(1).upper(), m.group(2)
     opt = item.options[ord(letter) - ord("A")]
-    if _norm(opt.title) and _norm(opt.title) in _norm(rest):
+    norm_rest = _norm(rest)
+    if _norm(opt.title) and _norm(opt.title) in norm_rest:
+        return letter
+    # The chosen option's title may carry a trailing disambiguator ("(director)", "(1958
+    # film)") that the model drops when restating its choice on line one. Falling straight
+    # through to the three-line `named_head` test below is what let a rejected rival's
+    # unqualified title win instead.
+    # The letter is still the model's own -- this only widens what counts as a match for the
+    # option it already named, it never searches across options.
+    base = _base_title(opt.title)
+    if base and _norm(base) in norm_rest:
         return letter
     return None
 
