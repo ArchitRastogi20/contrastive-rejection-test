@@ -1,6 +1,5 @@
-
-# Analysis reports are regenerated artifacts, not sources: never release them, and the anon
-# repo must carry no Markdown but its README.
+# Analysis reports are regenerated artifacts, not sources: never release them, and this
+# repo carries no Markdown but its README.
 analysis_*_report.txt
 analysis_*_report.md
 analysis_*_report.json

@@ -1,22 +1,57 @@
 # Does a model's stated reason for rejecting a candidate do any work?
 
-Code and per-item records for the experiments in the accompanying paper. A model choosing
-between candidates often rejects a rival by naming a fact its profile lacks. We insert a
-sentence supplying that fact, borrowed verbatim from a sibling profile elsewhere in the same
-corpus, and ask again under greedy decoding. Every measurement is a deterministic rule over
-strings, a re-ask, or a forced single-token read: no model or person judges any output.
+Code, per-item records and every raw model response behind the paper of the same title
+(Archit Rastogi, 2026).
 
-**Every number this release claims to reproduce regenerates on CPU alone, offline, from the
-committed per-item records in `results/`: no GPU, no weights, no network.** Only the original
-generation runs needed a GPU. The one exception is the rebuilt-sentence audits --
-`audit_instrument_defects.py`'s figures 1 and 2, and `audit_date_correctness.py`'s
-correctness-direction check (section 2) -- which additionally need a local JSONL dump of the
-`framolfese/2WikiMultihopQA` validation split passed as `--data-file`; nothing else in this
-release, including the headline result, needs it.
+## The question
 
-To build that dump once (needs network, one time only), load the split with the `datasets`
-library -- or read the parquet file the Hugging Face cache already holds locally -- and write
-one JSON object per line, one line per row, keeping the split's original fields as they are:
+Asked to choose between candidates and explain itself, a language model often rejects a rival
+by naming a fact its profile lacks: *"It is Bruno. It is not Anna, because Anna's profile never
+says she directed anything."* That second sentence is a claim about the text in front of the
+model, so it can be tested mechanically. We insert a sentence stating the named fact into the
+rival's profile, borrowed verbatim from a sibling profile elsewhere in the same corpus, and ask
+again under greedy decoding. If the choice moves toward the rival, the stated reason was doing
+work; if it does not, it was decoration that read like a reason.
+
+Two controls separate *what* the edit says from *where* it lands: a length-matched irrelevant
+sentence at the same profile, and the same two sentences at a third option the model never
+mentioned. **No model or person judges any output**: every measurement is a deterministic rule
+over strings, a re-ask, or a forced single-token read.
+
+## Results at a glance
+
+- **Content at the named rival moves the choice.** Supplying the named fact beats the irrelevant
+  control, OR 3.57 [1.54, 8.26], Holm p = 0.0210, and survives dropping any single model.
+- **The contrast the design was built to detect does not clear correction.** The same fact at the
+  option nobody named: Holm p = 0.2428.
+- **Placement matters at least as much as content.** The strongest result carries no content
+  claim at all: the identical irrelevant sentence moves the choice more at the named rival than
+  at the third option, Holm p = 0.0008.
+- **The chosen option's own reason is necessary.** Deleting it moves the model off its choice far
+  more than a matched control deletion, OR 0.21 [0.09, 0.48].
+- **The pipeline audited itself and found eight defects.** Three are fixed, five are quantified;
+  the largest, a choice parser that returned the option a model had just rejected in 17.1% of
+  responses, changes which contrasts survive once fixed.
+
+Details, tables and every caveat are below.
+
+## Quick start
+
+Every number this repository claims to reproduce regenerates **on CPU alone, offline**, from the
+committed per-item records in `results/`: no GPU, no weights, no network.
+
+```bash
+git clone https://github.com/ArchitRastogi20/contrastive-rejection-test.git
+cd contrastive-rejection-test
+pip install -r requirements.txt
+python -m pytest tests -q                                          # 458 tests, seconds
+python -m harness.analyze_run3 --results results --out table1.txt  # the paper's Table 1
+```
+
+Only the original generation runs needed a GPU. The one exception to "offline" is the
+rebuilt-sentence audits (`audit_instrument_defects.py`'s figures 1 and 2, and
+`audit_date_correctness.py`'s correctness-direction check), which also need a local JSONL dump of
+the `framolfese/2WikiMultihopQA` validation split passed as `--data-file`. To build it once:
 
 ```python
 from datasets import load_dataset
@@ -30,8 +65,7 @@ with open("dump.jsonl", "w", encoding="utf-8") as f:
 
 ## Layout
 
-Flattened `code/` tree of the private working repository: everything below sits directly at
-this repository's root.
+Everything sits at the repository root:
 
 ```
 harness/                       the experiment harness
@@ -67,11 +101,9 @@ requirements-colab.txt        the T4 fallback (plain transformers, no vLLM)
 .env.example                  names of environment variables the code reads, no values
 ```
 
-`harness/config.py` resolves its paths relative to wherever `harness/` itself sits, so the same
-commands work whether `harness/` is under a `code/` directory (the private working tree) or
-directly at the repository root (this release). The commands below still pass `--results`/`--out`
-explicitly, since naming the path makes each example self-contained; every one was run from a
-fresh clone to confirm it.
+`harness/config.py` resolves its paths relative to `harness/` itself, so the commands below
+work from any checkout. Each one passes `--results`/`--out` explicitly so it stands alone, and
+each was run from a fresh clone.
 
 ## Environment
 
@@ -150,7 +182,7 @@ Granite-3.0-8B-Instruct) reproduces the content effect only on the continuous me
 
 An adversarial audit of the pipeline, run against itself, found eight defects. Three were
 corrected and are reflected in every number above; five are quantified but not fixed, since
-fixing them needs fresh generation this submission does not have.
+fixing them needs fresh generation runs.
 
 **Corrected:**
 1. The choice parser returned the option a model had just rejected as its chosen one, in 17.1%
@@ -224,6 +256,17 @@ rejection tested is elicited, not spontaneous. The probability probe's coverage 
 condition-dependent (above), so continuous results are complete-case under a non-random
 missingness pattern for at least one model.
 
+## Citation
+
+```bibtex
+@misc{rastogi2026rejection,
+  author = {Rastogi, Archit},
+  title  = {Does a model's stated reason for rejecting a candidate do any work?},
+  year   = {2026},
+  url    = {https://github.com/ArchitRastogi20/contrastive-rejection-test}
+}
+```
+
 ## License
 
-MIT.
+MIT, see `LICENSE`.
