@@ -44,7 +44,7 @@ committed per-item records in `results/`: no GPU, no weights, no network.
 git clone https://github.com/ArchitRastogi20/contrastive-rejection-test.git
 cd contrastive-rejection-test
 pip install -r requirements.txt
-python -m pytest tests -q                                          # 458 tests, seconds
+python -m pytest tests -q                                          # 460 tests, seconds
 python -m harness.analyze_run3 --results results --out table1.txt  # the paper's Table 1
 ```
 
@@ -82,12 +82,13 @@ harness/                       the experiment harness
 ├── audit_instrument_defects.py  -> the four quantified-not-fixed defect prevalences below
 ├── question_relevance.py        -> share of built items whose question is about the inserted attribute
 ├── audit_date_correctness.py    -> content contrasts inside/outside the date-repair stratum; does a switch land on the option the inserted date makes correct
+├── audit_confound_bounds.py     -> content contrasts on rebuilt items matched on co-candidate mention, relation template, date cue
 ├── analyze_relation_stratum.py  -> content contrasts split by whether the named attribute is parentage
 ├── analyze_necessity.py         offline analysis of the necessity run
 └── surprisal.py, probe_variants.py, gate8_variant.py, decoding_sweep.py, reparse_partc.py,
     r3_recency.py, rescore.py, run_pilot.py    additional checks, see below
 
-tests/                        458 tests, no GPU, no network, seconds to run
+tests/                        460 tests, no GPU, no network, seconds to run
 figures/make_figures.py       builds the paper's two figures from results/ (needs matplotlib, numpy)
 scripts/                      setup_env.sh, prefetch scripts, monitor.sh, smoke.sh
 results/                      run outputs only, one JSON/JSONL record per item per condition
@@ -117,7 +118,7 @@ roster); none of the analysis below needs either environment.
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests -q                       # 458 tests, no GPU, no network
+python -m pytest tests -q                       # 460 tests, no GPU, no network
 
 python -m harness.analyze_run3 --results results --out /tmp/analysis_run3_report.txt   # Table 1
 python -m harness.analyze_round5 --results results --out /tmp/round5.json --section loo            # leave-one-model-out
@@ -129,6 +130,7 @@ python -m harness.audit_instrument_defects --self-check
 python -m harness.audit_instrument_defects --results results   # the four quantified defects, no corpus needed
 python -m harness.question_relevance --results results          # share of questions about the inserted attribute
 python -m harness.audit_date_correctness --results results      # stratified content contrasts; add --data-file <2Wiki dump> for the correctness-direction check
+python -m harness.audit_confound_bounds --data-file <2Wiki dump> # confound-matched content contrasts (needs the corpus dump)
 ```
 
 Real generation needs one 24 GB card. `python -m harness.run_experiment --self-check` exercises
@@ -236,9 +238,14 @@ dump described above. 1 and 2 are in `harness/extract.py`'s own `parse_choice`/`
   option correct under the question, and separately counts date-repair sentences whose
   attribute cue is only embedded in a longer word (defect 8 above). Every rule is a printed
   regular expression with a sample.
-- **`analyze_relation_stratum.py`**: the length-matched irrelevant control usually states a
-  parentage relation regardless of what the model named, confounding relevance with relation
-  type except where the model's own named attribute is itself parentage.
+- **`audit_confound_bounds.py`**: given a local corpus dump, recomputes R1-R2 and R3-R4 on the
+  rebuilt items where repair and control agree on each unfixed confound. Where neither sentence
+  names a co-candidate, all four Part A and Part C content effects grow; where both agree on a
+  whole-word parentage relation (controls 20-30% of items, repairs 3-4%), Part C's grow and
+  Part A's weaken without reversing. Output: `results/confound_bounds_summary.json`.
+- **`analyze_relation_stratum.py`**: the length-matched irrelevant control states a parentage
+  relation far more often than the repair, confounding relevance with relation type except where
+  the model's own named attribute is itself parentage.
 - **`run_necessity.py` / `analyze_necessity.py`**: deleting the chosen option's own stated
   attribute moves the model off its choice far more than a length-matched control deletion,
   McNemar b=7, c=33, OR 0.21 [0.09, 0.48], holding in all three models individually.

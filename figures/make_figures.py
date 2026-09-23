@@ -254,10 +254,15 @@ def make_forest_plot(rows: list[dict], out_path: Path):
 # and profiles, and because R1's own sentence is visibly borrowed from a sibling option in the
 # very same item (asserted below, not just eyeballed). Both fields belong in the figure's own
 # provenance comment wherever it is captioned, exactly like every number in the paper.
-EXAMPLE_ITEM_ID = "f8aa0d06086311ebbd5eac1f6bf848b6"
-EXAMPLE_MODEL_DIR_TAG = "Qwen2_5-7B-Instruct"   # matches the stage1/2/3 file name suffix
-EXAMPLE_PART_DIR = "exp3a"                      # Part A: 4 options, the original 3-model roster
-EXAMPLE_STAGE1_SOURCE_DIR = "exp2"              # Part A replays stage 1 from here (main.tex Sec. 3)
+# Part C, so the figure shows the six-option setting in full (Reviewer 3 asked for it); the
+# rejection is a literal-absence claim and only R1 moves the choice.
+EXAMPLE_ITEM_ID = "2abfd9ee08c111ebbd8bac1f6bf848b6"
+EXAMPLE_MODEL_DIR_TAG = "Llama-3_1-8B-Instruct"   # matches the stage1/2/3 file name suffix
+EXAMPLE_PART = "C"
+EXAMPLE_PART_DIR = "exp3c"                        # Part C: 6 options, the original 3-model roster
+EXAMPLE_STAGE1_SOURCE_DIR = "exp3c"               # Part C ran its own stage 1
+EXAMPLE_CORPUS_N_ITEMS = 1800                     # exp3c/experiment_summary.json: built 1800 items
+EXAMPLE_N_OPTIONS = 6
 
 
 def _read_jsonl(path: Path) -> list[dict]:
@@ -266,7 +271,7 @@ def _read_jsonl(path: Path) -> list[dict]:
         return [json.loads(line) for line in fh if line.strip()]
 
 
-def load_worked_example(results_dir: Path) -> dict:
+def load_worked_example(results_dir: Path, data_file: Path | None = None) -> dict:
     """Reconstruct one real item end to end, for Figure 2's worked example.
 
     See the module docstring for why this is the only part of this file that touches the
@@ -276,7 +281,8 @@ def load_worked_example(results_dir: Path) -> dict:
     to a plausible-looking guess.
     """
     _load_harness()  # puts code/ on sys.path
-    from harness.data import load_records, build_items
+    from harness.data import load_records, load_records_from_file, build_items
+    from harness.analyze_run3 import load_part
     from harness import repair as repair_mod
     from harness.extract import Rejection
     from harness import config as C
@@ -305,8 +311,10 @@ def load_worked_example(results_dir: Path) -> dict:
     # records" / "built 400 items from 12576 records"), and the same corpus_index built from
     # it -- which is what actually supplies R2's cross-item irrelevant sentence in that run,
     # regardless of which larger per-model item pool is being scored that run.
-    records = load_records(C.DATASET_ID, C.DATASET_SPLIT, 16000)
-    items = build_items(records, n_items=400, n_options=4, seed=C.SEED)
+    records = (load_records_from_file(data_file) if data_file is not None
+               else load_records(C.DATASET_ID, C.DATASET_SPLIT, 16000))
+    items = build_items(records, n_items=EXAMPLE_CORPUS_N_ITEMS, n_options=EXAMPLE_N_OPTIONS,
+                        seed=C.SEED)
     by_id = {it.item_id: it for it in items}
     item = by_id[EXAMPLE_ITEM_ID]
     assert item.question == s1_row["question"], "reconstructed question does not match the run"
@@ -329,7 +337,7 @@ def load_worked_example(results_dir: Path) -> dict:
         cue=rej_match.get("cue"), negation_cue=rej_match.get("negation_cue"),
     )
     conditions, diag = repair_mod.build_conditions_with_diagnostics(
-        item, rejection, corpus_index, choice_letter=s1_row["choice"], n_options=4,
+        item, rejection, corpus_index, choice_letter=s1_row["choice"], n_options=EXAMPLE_N_OPTIONS,
     )
 
     # Prove it: four independent checks against the committed record, not a recomputation of
@@ -350,6 +358,14 @@ def load_worked_example(results_dir: Path) -> dict:
         assert edited_profile.startswith(original_profile), f"{cond} {option_letter}: not a simple append"
         return edited_profile[len(original_profile):].strip()
 
+    # Choices as the analysis reads them: re-derived from each raw response by the corrected
+    # parser (analyze_run3.load_part), never the stored `choice` field.
+    part_rows = load_part(results_dir, EXAMPLE_PART)
+    model_key = next(m for m in part_rows if m.rstrip("/").split("/")[-1].replace(".", "_")
+                     == EXAMPLE_MODEL_DIR_TAG)
+    choices = {c: row["choice"] for c, row in part_rows[model_key][EXAMPLE_ITEM_ID].items()}
+    assert choices["R0"] == s1_row["choice"], "R0 does not reproduce the stage-1 choice"
+
     rival_idx = ord(rival_letter) - ord("A")
     third_letter = diag.r3_picked_letter
     third_idx = ord(third_letter) - ord("A")
@@ -360,6 +376,10 @@ def load_worked_example(results_dir: Path) -> dict:
         "question": item.question,
         "gold_letter": item.gold_letter,
         "gold_title": item.gold_title,
+        "option_titles": [o.title for o in item.options],
+        "choice_letter": s1_row["choice"],
+        "choice_title": item.options[ord(s1_row["choice"]) - ord("A")].title,
+        "choices": choices,
         "attribute": s2_row["attribute"],
         "rejection_sentence": rej_match["sentence"],
         "rival_letter": rival_letter,
@@ -440,14 +460,16 @@ def make_design_schematic(example: dict, out_path: Path):
     # Each column's two sections are drawn in the same order (relevant, then irrelevant), so the
     # relevant/irrelevant tag lands in the same relative slot in both columns even though the two
     # columns' profiles differ in length (the rival's runs three lines, the third option's one).
-    riv_sections = [("R1  (the repair)", "relevant sentence", r1_added, "0.78"),
-                     ("R2  (control)", "irrelevant sentence", r2_added, "0.92")]
-    third_sections = [("R3", "relevant sentence", r3_added, "0.78"),
-                       ("R4", "irrelevant sentence", r4_added, "0.92")]
+    ch = example["choices"]
+    riv_sections = [("R1  (the repair)", f"relevant sentence; re-ask picks {ch['R1']}", r1_added, "0.78"),
+                     ("R2  (control)", f"irrelevant sentence; re-ask picks {ch['R2']}", r2_added, "0.92")]
+    third_sections = [("R3", f"relevant sentence; re-ask picks {ch['R3']}", r3_added, "0.78"),
+                       ("R4", f"irrelevant sentence; re-ask picks {ch['R4']}", r4_added, "0.92")]
 
     q_wrapped = wrap(f"“{example['question']}”", 92)
-    rej_wrapped = wrap(
-        f"model chose {example['gold_letter']}) {example['gold_title']}, and said of "
+    options_line = "   ".join(f"{chr(65 + i)}) {t}" for i, t in enumerate(example["option_titles"]))
+    rej_wrapped = wrap(options_line, 110) + "\n" + wrap(
+        f"model chose {example['choice_letter']}) {example['choice_title']}, and said of "
         f"{example['rival_letter']}: “{example['rejection_sentence']}”", 100
     )
     n_q_lines = q_wrapped.count("\n") + 1
@@ -559,7 +581,8 @@ def make_design_schematic(example: dict, out_path: Path):
     ax.text(riv_x + 0.14, r0_y + r0_h / 2, "R0", ha="left", va="center", fontsize=7.6,
             fontweight="bold", zorder=3)
     ax.text(riv_x + 0.62, r0_y + r0_h / 2,
-            "nothing edited. integrity check: the model must repeat its original choice exactly.",
+            f"nothing edited; re-ask picks {ch['R0']}. integrity check: the model must repeat its "
+            f"original choice exactly.",
             ha="left", va="center", fontsize=6.6, style="italic", zorder=3)
 
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
@@ -581,6 +604,8 @@ def main(argv=None) -> int:
     repo_root = code_root.parent if code_root.name == "code" else code_root
     ap.add_argument("--results", type=Path, default=code_root / "results",
                      help="results tree holding exp3a/exp3b/exp3c (default: code/results)")
+    ap.add_argument("--data-file", type=Path, default=None,
+                     help="local 2WikiMultihopQA validation dump; default pulls it from the Hub")
     ap.add_argument("--out", type=Path, default=repo_root / "paper_full" / "figures",
                      help="output directory for the rendered PDFs (default: paper_full/figures)")
     args = ap.parse_args(argv)
@@ -591,7 +616,7 @@ def main(argv=None) -> int:
     make_forest_plot(rows, forest_path)
     print(f"wrote {forest_path}")
 
-    example = load_worked_example(args.results)
+    example = load_worked_example(args.results, args.data_file)
     print(f"\nworked example for Figure 2: item {example['item_id']} / {example['model']} "
           f"(rival {example['rival_letter']}={example['rival_title']!r}, "
           f"third {example['third_letter']}={example['third_title']!r}, "

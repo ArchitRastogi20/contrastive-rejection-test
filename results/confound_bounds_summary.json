@@ -1,0 +1,308 @@
+{
+  "n_rebuilt": 1070,
+  "parts": {
+    "A": {
+      "n_rebuilt": 295,
+      "states_parentage": {
+        "R1": 10,
+        "R2": 89,
+        "R3": 10,
+        "R4": 90
+      },
+      "R1-R2": {
+        "all_built": {
+          "b": 25,
+          "c": 7
+        },
+        "rebuilt": {
+          "n_items": 295,
+          "b": 22,
+          "c": 7,
+          "or": 3.142857142857143,
+          "haldane_anscombe": false,
+          "p_exact": 0.008130058646202087
+        },
+        "no_co_candidate": {
+          "n_items": 231,
+          "b": 19,
+          "c": 4,
+          "or": 4.75,
+          "haldane_anscombe": false,
+          "p_exact": 0.002599477767944336
+        },
+        "template_matched": {
+          "n_items": 204,
+          "b": 14,
+          "c": 6,
+          "or": 2.3333333333333335,
+          "haldane_anscombe": false,
+          "p_exact": 0.11531829833984375
+        },
+        "date_cue_clean": {
+          "n_items": 291,
+          "b": 22,
+          "c": 7,
+          "or": 3.142857142857143,
+          "haldane_anscombe": false,
+          "p_exact": 0.008130058646202087
+        },
+        "all_three": {
+          "n_items": 152,
+          "b": 13,
+          "c": 3,
+          "or": 4.333333333333333,
+          "haldane_anscombe": false,
+          "p_exact": 0.021270751953125
+        }
+      },
+      "R3-R4": {
+        "all_built": {
+          "b": 17,
+          "c": 6
+        },
+        "rebuilt": {
+          "n_items": 295,
+          "b": 17,
+          "c": 5,
+          "or": 3.4,
+          "haldane_anscombe": false,
+          "p_exact": 0.01690053939819336
+        },
+        "no_co_candidate": {
+          "n_items": 223,
+          "b": 14,
+          "c": 2,
+          "or": 7.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.004180908203125
+        },
+        "template_matched": {
+          "n_items": 203,
+          "b": 12,
+          "c": 4,
+          "or": 3.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.076812744140625
+        },
+        "date_cue_clean": {
+          "n_items": 291,
+          "b": 16,
+          "c": 5,
+          "or": 3.2,
+          "haldane_anscombe": false,
+          "p_exact": 0.02660369873046875
+        },
+        "all_three": {
+          "n_items": 148,
+          "b": 8,
+          "c": 1,
+          "or": 8.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.0390625
+        }
+      }
+    },
+    "B": {
+      "n_rebuilt": 212,
+      "states_parentage": {
+        "R1": 9,
+        "R2": 63,
+        "R3": 10,
+        "R4": 64
+      },
+      "R1-R2": {
+        "all_built": {
+          "b": 10,
+          "c": 6
+        },
+        "rebuilt": {
+          "n_items": 212,
+          "b": 8,
+          "c": 2,
+          "or": 4.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.109375
+        },
+        "no_co_candidate": {
+          "n_items": 169,
+          "b": 8,
+          "c": 2,
+          "or": 4.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.109375
+        },
+        "template_matched": {
+          "n_items": 148,
+          "b": 8,
+          "c": 1,
+          "or": 8.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.0390625
+        },
+        "date_cue_clean": {
+          "n_items": 211,
+          "b": 8,
+          "c": 2,
+          "or": 4.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.109375
+        },
+        "all_three": {
+          "n_items": 120,
+          "b": 8,
+          "c": 1,
+          "or": 8.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.0390625
+        }
+      },
+      "R3-R4": {
+        "all_built": {
+          "b": 13,
+          "c": 4
+        },
+        "rebuilt": {
+          "n_items": 212,
+          "b": 10,
+          "c": 2,
+          "or": 5.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.03857421875
+        },
+        "no_co_candidate": {
+          "n_items": 162,
+          "b": 6,
+          "c": 2,
+          "or": 3.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.2890625
+        },
+        "template_matched": {
+          "n_items": 148,
+          "b": 8,
+          "c": 2,
+          "or": 4.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.109375
+        },
+        "date_cue_clean": {
+          "n_items": 211,
+          "b": 10,
+          "c": 2,
+          "or": 5.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.03857421875
+        },
+        "all_three": {
+          "n_items": 115,
+          "b": 6,
+          "c": 2,
+          "or": 3.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.2890625
+        }
+      }
+    },
+    "C": {
+      "n_rebuilt": 563,
+      "states_parentage": {
+        "R1": 24,
+        "R2": 114,
+        "R3": 24,
+        "R4": 113
+      },
+      "R1-R2": {
+        "all_built": {
+          "b": 32,
+          "c": 15
+        },
+        "rebuilt": {
+          "n_items": 563,
+          "b": 32,
+          "c": 15,
+          "or": 2.1333333333333333,
+          "haldane_anscombe": false,
+          "p_exact": 0.01862383661500644
+        },
+        "no_co_candidate": {
+          "n_items": 365,
+          "b": 21,
+          "c": 6,
+          "or": 3.5,
+          "haldane_anscombe": false,
+          "p_exact": 0.005924612283706665
+        },
+        "template_matched": {
+          "n_items": 435,
+          "b": 31,
+          "c": 10,
+          "or": 3.1,
+          "haldane_anscombe": false,
+          "p_exact": 0.0014504910141113214
+        },
+        "date_cue_clean": {
+          "n_items": 562,
+          "b": 32,
+          "c": 15,
+          "or": 2.1333333333333333,
+          "haldane_anscombe": false,
+          "p_exact": 0.01862383661500644
+        },
+        "all_three": {
+          "n_items": 281,
+          "b": 20,
+          "c": 3,
+          "or": 6.666666666666667,
+          "haldane_anscombe": false,
+          "p_exact": 0.00048828125
+        }
+      },
+      "R3-R4": {
+        "all_built": {
+          "b": 22,
+          "c": 5
+        },
+        "rebuilt": {
+          "n_items": 563,
+          "b": 22,
+          "c": 5,
+          "or": 4.4,
+          "haldane_anscombe": false,
+          "p_exact": 0.0015137195587158203
+        },
+        "no_co_candidate": {
+          "n_items": 354,
+          "b": 18,
+          "c": 2,
+          "or": 9.0,
+          "haldane_anscombe": false,
+          "p_exact": 0.0004024505615234375
+        },
+        "template_matched": {
+          "n_items": 436,
+          "b": 21,
+          "c": 2,
+          "or": 10.5,
+          "haldane_anscombe": false,
+          "p_exact": 6.604194641113281e-05
+        },
+        "date_cue_clean": {
+          "n_items": 562,
+          "b": 22,
+          "c": 5,
+          "or": 4.4,
+          "haldane_anscombe": false,
+          "p_exact": 0.0015137195587158203
+        },
+        "all_three": {
+          "n_items": 274,
+          "b": 17,
+          "c": 2,
+          "or": 8.5,
+          "haldane_anscombe": false,
+          "p_exact": 0.000728607177734375
+        }
+      }
+    }
+  }
+}
