@@ -8,7 +8,25 @@ strings, a re-ask, or a forced single-token read: no model or person judges any 
 
 **Every number this release claims to reproduce regenerates on CPU alone, offline, from the
 committed per-item records in `results/`: no GPU, no weights, no network.** Only the original
-generation runs needed a GPU.
+generation runs needed a GPU. The one exception is the rebuilt-sentence audits --
+`audit_instrument_defects.py`'s figures 1 and 2, and `audit_date_correctness.py`'s
+correctness-direction check (section 2) -- which additionally need a local JSONL dump of the
+`framolfese/2WikiMultihopQA` validation split passed as `--data-file`; nothing else in this
+release, including the headline result, needs it.
+
+To build that dump once (needs network, one time only), load the split with the `datasets`
+library -- or read the parquet file the Hugging Face cache already holds locally -- and write
+one JSON object per line, one line per row, keeping the split's original fields as they are:
+
+```python
+from datasets import load_dataset
+import json
+
+ds = load_dataset("framolfese/2WikiMultihopQA", split="validation")
+with open("dump.jsonl", "w", encoding="utf-8") as f:
+    for row in ds:
+        f.write(json.dumps(dict(row)) + "\n")
+```
 
 ## Layout
 
@@ -35,7 +53,7 @@ harness/                       the experiment harness
 └── surprisal.py, probe_variants.py, gate8_variant.py, decoding_sweep.py, reparse_partc.py,
     r3_recency.py, rescore.py, run_pilot.py    additional checks, see below
 
-tests/                        449 tests, no GPU, no network, seconds to run
+tests/                        458 tests, no GPU, no network, seconds to run
 figures/make_figures.py       builds the paper's two figures from results/ (needs matplotlib, numpy)
 scripts/                      setup_env.sh, prefetch scripts, monitor.sh, smoke.sh
 results/                      run outputs only, one JSON/JSONL record per item per condition
@@ -67,7 +85,7 @@ roster); none of the analysis below needs either environment.
 
 ```bash
 pip install -r requirements.txt
-python -m pytest tests -q                       # 449 tests, no GPU, no network
+python -m pytest tests -q                       # 458 tests, no GPU, no network
 
 python -m harness.analyze_run3 --results results --out /tmp/analysis_run3_report.txt   # Table 1
 python -m harness.analyze_round5 --results results --out /tmp/round5.json --section loo            # leave-one-model-out
@@ -130,8 +148,8 @@ Granite-3.0-8B-Instruct) reproduces the content effect only on the continuous me
 
 ## Known defects
 
-An adversarial audit of the pipeline, run against itself, found seven defects. Three were
-corrected and are reflected in every number above; four are quantified but not fixed, since
+An adversarial audit of the pipeline, run against itself, found eight defects. Three were
+corrected and are reflected in every number above; five are quantified but not fixed, since
 fixing them needs fresh generation this submission does not have.
 
 **Corrected:**
@@ -157,11 +175,16 @@ fixing them needs fresh generation this submission does not have.
 7. 15.7% (199/1,264) of built items rest a rejection on ranking a rival below the choice rather
    than asserting an absence. Excluding them and recomputing the twelve-test Holm ladder flips
    one verdict: Part C's R1-R3 no longer clears correction (Holm 0.0345 to 0.3524).
+8. `extract.attribute_in_profile` matches its cue as an unbounded substring, so a sentence like
+   "studied ... 1934" passes as a date of death: 6 of 648 date-repair sentences (R1 and R3, over
+   the 1,070 rebuildable built items) carry the cue only that way.
 
 `harness/audit_instrument_defects.py` recomputes 4-7 from committed JSONL alone (4 and 5 also
 replay `repair.py`'s own condition-building call, verified byte-identical against the committed
-option titles first). 1 and 2 are in `harness/extract.py`'s own `parse_choice`/`_letter_pick_re`;
-3 is `_base_title`/`_TRAILING_PAREN` in the same file.
+option titles first). `harness/audit_date_correctness.py` recomputes 8, given the local corpus
+dump described above. 1 and 2 are in `harness/extract.py`'s own `parse_choice`/`_letter_pick_re`;
+3 is `_base_title`/`_TRAILING_PAREN` in the same file; 8 is `attribute_in_profile`'s unbounded
+`cue in text` test, also in `extract.py`.
 
 ## Other checks in `harness/`
 
@@ -178,7 +201,9 @@ option titles first). 1 and 2 are in `harness/extract.py`'s own `parse_choice`/`
 - **`audit_date_correctness.py`**: recomputes the content contrasts inside and outside the
   stratum of order questions with a date repair (594 built items), and, given a local corpus
   dump, rebuilds each inserted sentence and asks whether the inserted year makes the edited
-  option correct under the question. Every rule is a printed regular expression with a sample.
+  option correct under the question, and separately counts date-repair sentences whose
+  attribute cue is only embedded in a longer word (defect 8 above). Every rule is a printed
+  regular expression with a sample.
 - **`analyze_relation_stratum.py`**: the length-matched irrelevant control usually states a
   parentage relation regardless of what the model named, confounding relevance with relation
   type except where the model's own named attribute is itself parentage.

@@ -14,7 +14,7 @@ item's stage-1/stage-2 records (``code/results/exp2``, ``code/results/exp3a``) u
 record. This step needs network access once, to pull the source dataset
 (``framolfese/2WikiMultihopQA``) from the Hugging Face Hub.
 
-Output: vector PDF, sized to CEUR-ART's single-column body text width (452.9679pt = 6.2679in).
+Output: vector PDF, sized to the paper template's single-column body text width (452.9679pt = 6.2679in).
 
 Dependencies: matplotlib, numpy, and (for Figure 2's worked example only) ``datasets``.
 """
@@ -33,7 +33,7 @@ from matplotlib.lines import Line2D
 import numpy as np
 
 # ---------------------------------------------------------------------- typography
-# CEUR-ART's body font is Libertinus, not available in this environment's font
+# The paper template's body font is Libertinus, not available in this environment's font
 # cache; STIXGeneral is the closest metrics-compatible serif actually installed
 # (it was built as a Times-metric-compatible math/text face), with DejaVu Serif
 # and the system serif fallback behind it so the script degrades gracefully
