@@ -29,6 +29,7 @@ harness/                       the experiment harness
 ├── audit_location_confound.py   -> R3-R4 effect vs. the third option's own R0 baseline
 ├── audit_instrument_defects.py  -> the four quantified-not-fixed defect prevalences below
 ├── question_relevance.py        -> share of built items whose question is about the inserted attribute
+├── audit_date_correctness.py    -> content contrasts inside/outside the date-repair stratum; does a switch land on the option the inserted date makes correct
 ├── analyze_relation_stratum.py  -> content contrasts split by whether the named attribute is parentage
 ├── analyze_necessity.py         offline analysis of the necessity run
 └── surprisal.py, probe_variants.py, gate8_variant.py, decoding_sweep.py, reparse_partc.py,
@@ -77,6 +78,7 @@ python -m harness.audit_probe_missingness --results results --out /tmp/probe_mis
 python -m harness.audit_instrument_defects --self-check
 python -m harness.audit_instrument_defects --results results   # the four quantified defects, no corpus needed
 python -m harness.question_relevance --results results          # share of questions about the inserted attribute
+python -m harness.audit_date_correctness --results results      # stratified content contrasts; add --data-file <2Wiki dump> for the correctness-direction check
 ```
 
 Real generation needs one 24 GB card. `python -m harness.run_experiment --self-check` exercises
@@ -154,7 +156,7 @@ fixing them needs fresh generation this submission does not have.
    grandmother).
 7. 15.7% (199/1,264) of built items rest a rejection on ranking a rival below the choice rather
    than asserting an absence. Excluding them and recomputing the twelve-test Holm ladder flips
-   no verdict.
+   one verdict: Part C's R1-R3 no longer clears correction (Holm 0.0345 to 0.3524).
 
 `harness/audit_instrument_defects.py` recomputes 4-7 from committed JSONL alone (4 and 5 also
 replay `repair.py`'s own condition-building call, verified byte-identical against the committed
@@ -173,6 +175,10 @@ option titles first). 1 and 2 are in `harness/extract.py`'s own `parse_choice`/`
   non-randomly by condition in two model-part cells.
 - **`question_relevance.py`**: 937/1,264 built items (74.1%) ask a date- or order-comparison
   question, so the inserted fact's absence, not its truth, is usually what the question turns on.
+- **`audit_date_correctness.py`**: recomputes the content contrasts inside and outside the
+  stratum of order questions with a date repair (594 built items), and, given a local corpus
+  dump, rebuilds each inserted sentence and asks whether the inserted year makes the edited
+  option correct under the question. Every rule is a printed regular expression with a sample.
 - **`analyze_relation_stratum.py`**: the length-matched irrelevant control usually states a
   parentage relation regardless of what the model named, confounding relevance with relation
   type except where the model's own named attribute is itself parentage.

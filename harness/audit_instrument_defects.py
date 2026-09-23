@@ -530,7 +530,11 @@ def _reconstruct_part(
                     continue
 
                 entry = {"part": part, "model": rec["model"], "item_id": rec["item_id"],
-                          "reconstructed": True, "option_titles": [o.title for o in item.options]}
+                          "reconstructed": True, "option_titles": [o.title for o in item.options],
+                          # Consumed by `audit_date_correctness`, which needs the question, the
+                          # gold letter and each option's unedited profile alongside the sentences.
+                          "question": item.question, "gold_letter": item.gold_letter,
+                          "profiles": [o.profile for o in item.options]}
                 rival_letter = item.letter_of(rejection.title)
                 rival_idx = ord(rival_letter) - ord("A")
                 r3_idx = ord(diag.r3_picked_letter) - ord("A")
