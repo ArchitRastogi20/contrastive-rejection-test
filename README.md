@@ -266,11 +266,14 @@ missingness pattern for at least one model.
 ## Citation
 
 ```bibtex
-@misc{rastogi2026rejection,
-  author = {Rastogi, Archit},
-  title  = {Does a model's stated reason for rejecting a candidate do any work?},
-  year   = {2026},
-  url    = {https://github.com/ArchitRastogi20/contrastive-rejection-test}
+@misc{rastogi2026doesmodelsstatedreason,
+      title={Does a model's stated reason for rejecting a candidate do any work?}, 
+      author={Archit Rastogi},
+      year={2026},
+      eprint={2609.30151},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2609.30151}, 
 }
 ```
 
